@@ -10,10 +10,6 @@ var expect = require('expect.js')
 
 // Our Modules
 /////////////////////////
-var helpers = require('../shared/util/helpers')
-
-var describe = helpers.getGlobal('describe')
-var it = helpers.getGlobal('it')
 
 describe('cOS', function() {
 
@@ -22,7 +18,7 @@ describe('cOS', function() {
 
 
 	it('should load', function() {
-		cOS = require('../server/cOS')
+		cOS = require('../cOS/cOS')
 	})
 
 
@@ -79,7 +75,7 @@ describe('cOS', function() {
 	it('should collectFiles', function(done) {
 		searchPaths = ['test/test-cOS']
 		extension = '.mustache'
-		var cb = function (err, files)
+		function cb(err, files)
 		{
 			if (err) throw err
 			expect(files).to.be.a('object')
@@ -94,7 +90,7 @@ describe('cOS', function() {
 	it('should collectFiles with exclusions', function(done) {
 		searchPaths = ['test/test-cOS']
 		extension = '.mustache'
-		var cb = function (err, files)
+		function cb(err, files)
 		{
 			if (err) throw err
 
@@ -110,7 +106,7 @@ describe('cOS', function() {
 	it('should collectFiles searchPaths and extensions', function(done) {
 		searchPaths = ['test/test-cOS/one/two/','test/test-cOS/three']
 		extension = ['.mustache','.styl']
-		var cb = function (err, files)
+		function cb(err, files)
 		{
 			if (err) throw err
 			expect(files).to.be.a('object')
@@ -135,22 +131,17 @@ describe('cOS', function() {
 		expect(upDir).to.be('etc/')
 	})
 
-	it('should collectFilenames', function(done) {
-		var searchPath = cOS.join(__dirname, 'test-cOS')
-		cOS.collectFilenames(searchPath, function(err, result)
-		{
-			if (err)
-				throw err
-			console.log(result)
-			done()
-		})
+	it('should collectFilenamesSync', function(done) {
+		var searchPath = cOS.join(__dirname, 'test/test-cOS')
+		cOS.collectFilenamesSync(searchPath)
+		done()
 	})
 
 	it ('should runCommand', function(done){
 		cOS.runCommand('ls', function(out, err, exitCode)
 		{
 			console.log(out)
-			expect(out).to.contain('shared\ntest')
+			expect(out).to.contain('LICENSE\nREADME.md')
 			expect(err).to.be('')
 			expect(exitCode).to.be(0)
 			done()

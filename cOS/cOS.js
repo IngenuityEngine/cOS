@@ -6,7 +6,6 @@ var fs = require('fs')
 var os = require('os')
 var path = require('path')
 var glob = require('glob')
-var debug = require('debug')('cOS')
 var child_process = require('child_process')
 var copysync = require('copysync')
 var async = require('async')
@@ -14,7 +13,7 @@ var mkdirp = require('mkdirp')
 
 // Our Modules
 /////////////////////////
-var helpers = require('coren/shared/util/helpers')
+// var helpers = require('coren/shared/util/helpers')
 
 // cOS
 /////////////////////////
@@ -45,6 +44,11 @@ ensureEndingSlash: function(path)
 		return path + lastChar + '/'
 },
 
+/*
+	Method: removeStartingSlash
+
+	Removes backslashes and forward slashes from the beginning of directory names.
+*/
 removeStartingSlash: function(dir)
 {
 	if (dir[0] == '\\' || dir[0] == '/')
@@ -53,6 +57,11 @@ removeStartingSlash: function(dir)
 },
 
 // dirs are always forward slashes and always have a trailing slash
+/*
+	Method: normalizeDir
+
+	Dirs always use forward slashses, don't have a leading slash, and have a trailing slash.
+*/
 normalizeDir: function(dir)
 {
 	dir = dir.replace(/\\/g,'/')
@@ -60,6 +69,11 @@ normalizeDir: function(dir)
 	return cOS.ensureEndingSlash(dir)
 },
 
+/*
+	Method: isDirSync
+
+	Checks if a method is a directory.
+*/
 isDirSync: function(path)
 {
 	try {
@@ -69,6 +83,12 @@ isDirSync: function(path)
 		return false
 	}
 },
+
+/*
+	Method: makeDirsSync
+
+	Makes a directory.
+*/
 makeDirsSync: function(path)
 {
 	try {
@@ -77,6 +97,12 @@ makeDirsSync: function(path)
 		return err
 	}
 },
+
+/*
+	Method: upADir
+
+	Returns the path, up a single directory.
+*/
 upADir: function(path)
 {
 	path = cOS.normalizeDir(path)
@@ -85,6 +111,12 @@ upADir: function(path)
 		return path
 	return parts.slice(0, -2).join('/') + '/'
 },
+
+/*
+	Method: validEmptyDirSync
+
+	Returns an object describing whether a directory is valid, and if it contains files.
+*/
 validEmptyDirSync: function(dir)
 {
 	var exists = fs.existsSync(dir)
@@ -121,6 +153,11 @@ validEmptyDirSync: function(dir)
 },
 // paths are always forward slashes
 // fix: consider not removing starting slash for linux paths
+/*
+	Method: normalizePath
+
+	Paths are always forward slashes.
+*/
 normalizePath: function(path)
 {
 	path = cOS.removeStartingSlash(path)
@@ -129,17 +166,34 @@ normalizePath: function(path)
 
 // cOS.join that always joins with forward slash
 // fix: should accept a bunch of paths
+/*
+	Method: join
+
+	Concatenates a directory with a file path using forward slashes.
+*/
 join: function(a, b)
 {
 	return cOS.normalizeDir(a) + cOS.normalizePath(b)
 },
 
 // wrap cOS.dirname w/ normalize
-dirname: function(file)
+/*
+	Method: dirName
+
+	Returns normalized directory name of a file.
+*/
+dirName: function(file)
 {
 	return cOS.normalizeDir(path.dirname(file))
 },
 
+/*
+	Method: getFileInfo
+
+	Returns object with file's basename, extension, dirname and path.
+	With options, can also return root, relative dirname, and relative path, and
+	make all fields lowercase.
+*/
 getFileInfo: function(file, options)
 {
 	var fileInfo = {}
@@ -171,16 +225,31 @@ getFileInfo: function(file, options)
 	return fileInfo
 },
 
+/*
+	Method: absolutePath
+
+	Returns absolute path of a given path.
+*/
 absolutePath: function(path)
 {
 	return cOS.join(cOS.cwd(), path)
 },
 
+/*
+	Method: realPathSync
+
+	Returns the normalized real path.
+*/
 realPathSync: function(path)
 {
 	return cOS.normalizePath(fs.realpathSync(path))
 },
 
+/*
+	Method: getFilesSync
+
+	Lists files in a given path.
+*/
 getFilesSync: function(path)
 {
 	path = cOS.normalizePath(path)
@@ -190,6 +259,11 @@ getFilesSync: function(path)
 },
 
 // wrap cOS.readFile so we don't have to specify utf8 all the time
+/*
+	Method: readFile
+
+	Wrapper of fs.readFile so that utf8 doesn't need to be specified always.
+*/
 readFile: function(path, options, callback)
 {
 	if (_.isFunction(options))
@@ -206,6 +280,11 @@ readFile: function(path, options, callback)
 	fs.readFile(path, options, callback)
 },
 
+/*
+	Method: unlinkSync
+
+	Removes a file.
+*/
 unlinkSync: function(path)
 {
 	if (fs.existsSync(path))
@@ -213,6 +292,11 @@ unlinkSync: function(path)
 	return false
 },
 
+/*
+	Method: removeDirSync
+
+	Wrapper of fs.rmdir.
+*/
 removeDirSync: function(path)
 {
 	path = cOS.normalizePath(path)
@@ -230,6 +314,11 @@ removeDirSync: function(path)
 	fs.rmdirSync(path)
 },
 
+/*
+	Method: emptyDirSync
+
+	Removes all files and subdirectories from a directory.
+*/
 emptyDirSync: function(path)
 {
 	path = cOS.normalizePath(path)
@@ -244,11 +333,21 @@ emptyDirSync: function(path)
 	})
 },
 
+/*
+	Method: cwd
+
+	Returns the current working directory.
+*/
 cwd: function()
 {
 	return cOS.normalizeDir(process.cwd())
 },
 
+/*
+	Method: getFileContents
+
+	Uses readFile to get the contents of a file.
+*/
 getFileContents: function(fileInfos, options, callback)
 {
 	if (_.isFunction(options))
@@ -257,7 +356,7 @@ getFileContents: function(fileInfos, options, callback)
 		options = {}
 	}
 
-	fileInfos = helpers.ensureArray(fileInfos)
+	fileInfos = cOS.ensureArray(fileInfos)
 	var contentsFuncs = _.collect(fileInfos, function(fileInfo)
 	{
 		return function(cb)
@@ -311,7 +410,45 @@ getFileContents: function(fileInfos, options, callback)
 // 		], callback)
 // },
 
+// fix: remove eventually
+/*
+	Method: ensureArray
 
+	If input is an array, return input.  If not, makes it an array.  If undefied, returns [].
+*/
+ensureArray: function(val)
+{
+	if (_.isArray(val))
+		return val
+	if (_.isUndefined(val))
+		return []
+	return [val]
+},
+/*
+	Method: normalizeExtension
+
+	Makes extensions lowercase, and begin with a '.'
+*/
+normalizeExtension: function(extension)
+{
+	extension = extension.toLowerCase().trim()
+	if (extension[0] != '.')
+		return '.' + extension
+	return extension
+},
+
+/*
+	Method: collectFiles
+
+	Gets all files in the searchPaths with given extensions.
+
+	Parameters:
+
+		searchPaths - list of paths to search
+		extensions - list of extensions for which to look
+		options - object specifying root or exclusions
+		callback - a callback function
+*/
 collectFiles: function(searchPaths, extensions, options, callback)
 {
 	// if they didnt' pass options
@@ -326,8 +463,8 @@ collectFiles: function(searchPaths, extensions, options, callback)
 	})
 
 	// allow for multiple search paths and extensions
-	searchPaths = helpers.ensureArray(searchPaths)
-	extensions = helpers.ensureArray(extensions)
+	searchPaths = cOS.ensureArray(searchPaths)
+	extensions = cOS.ensureArray(extensions)
 
 	function globFiles(searchPath, extension, options, callback)
 	{
@@ -345,7 +482,7 @@ collectFiles: function(searchPaths, extensions, options, callback)
 			var files = []
 			_.each(matchingFiles, function infoAndExclude(file)
 			{
-				// debug(file)
+				// console.log(file)
 				if (cOS.shouldExclude(options.exclude, file))
 					return
 				fileInfo = cOS.getFileInfo(file, options)
@@ -363,7 +500,7 @@ collectFiles: function(searchPaths, extensions, options, callback)
 			searchPath = cOS.normalizeDir(searchPath)
 			_.each(extensions, function getForExtensions(extension)
 			{
-				extension = '*' + helpers.normalizeExtension(extension)
+				extension = '*' + cOS.normalizeExtension(extension)
 
 				// add a new search func, called later by async
 				searchFuncs.push(function(done)
@@ -399,6 +536,11 @@ collectFiles: function(searchPaths, extensions, options, callback)
 	)
 },
 
+/*
+	Method: collectAllFiles
+
+	Returns all files within a specified searchDir.
+*/
 collectAllFiles: function(searchDir, callback)
 {
 	searchDir = cOS.normalizeDir(searchDir)
@@ -443,6 +585,11 @@ collectAllFiles: function(searchDir, callback)
 
 // fix: should fail gracefully
 // fix: should be async
+/*
+	Method: collectFilesSync
+
+	Synchronous version of collectFiles.
+*/
 collectFilesSync: function(searchPath, extension, files, options)
 {
 	if (!_.isArray(files))
@@ -492,7 +639,7 @@ collectFilesSync: function(searchPath, extension, files, options)
 		var matchingFiles = rootMatches.concat(extendedMatches)
 
 
-		debug('Searching:', searchPath, 'Filter:', filter)
+		console.log('Searching:', searchPath, 'Filter:', filter)
 		var fileInfo
 		options.root = searchPath
 		_.each(matchingFiles, function infoAndExclude(file)
@@ -513,6 +660,11 @@ collectFilesSync: function(searchPath, extension, files, options)
 	return files
 },
 
+/*
+	Method: shouldExclude
+
+	Returns whether or not to exclude a given path, given an iterable of paths to exclude.
+*/
 shouldExclude: function(excludes, path)
 {
 	var exclude = false
@@ -524,6 +676,18 @@ shouldExclude: function(excludes, path)
 	return exclude
 },
 
+/*
+	Method: compileFiles
+
+	Compiles files given a compileFunction and options
+
+	Parameters:
+
+		files - List of files to be compiled
+		compileFunction - function used to compile files
+		options - options to be forwarded to the compileFunction
+		callback - a callback function
+*/
 compileFiles: function(files, compileFunction, options, callback)
 {
 	if (_.isFunction(options))
@@ -537,7 +701,7 @@ compileFiles: function(files, compileFunction, options, callback)
 	{
 		return function(done)
 		{
-			// debug('Compiling:', fileInfo.path)
+			// console.log('Compiling:', fileInfo.path)
 			try
 			{
 				fileInfo.contents = compileFunction(fileInfo.contents, fileInfo, options)
@@ -560,11 +724,28 @@ compileFiles: function(files, compileFunction, options, callback)
 	)
 },
 
+/*
+	Method: collectFilenamesSync
+
+	Synchronous wrapper for glob.sync.
+*/
 collectFilenamesSync: function(search)
 {
 	return glob.sync(search)
 },
 
+/*
+	Method: runCommand
+
+	Executes a given command with the arguments specified.
+
+	Parameters:
+
+		cmd - Command to be executed
+		args - List of arguments to that function
+		options - options forwarded to child_process.spawn
+		callback - callback function
+*/
 runCommand: function(cmd, args, options, callback)
 {
 	if (_.isFunction(args))
@@ -617,11 +798,21 @@ runCommand: function(cmd, args, options, callback)
 		})
 },
 
+/*
+	Method: isWindows
+
+	Returns whether or not the machine running the command is Windows.
+*/
 isWindows: function()
 {
 	return _.contains(os.platform().toLowerCase(), 'win')
 },
 
+/*
+	Method: getGlobalModulesDir
+
+	Returns the directory of the global modules.
+*/
 getGlobalModulesDir: function(callback)
 {
 	var cmd = 'npm'
@@ -636,6 +827,11 @@ getGlobalModulesDir: function(callback)
 	})
 },
 
+/*
+	Method: copySync
+
+	Wrapper of copysync.
+*/
 copySync: function(src, dst)
 {
 	return copysync(src, dst)

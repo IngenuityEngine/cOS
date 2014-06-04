@@ -35,8 +35,9 @@ import re
 
 # ieGlobals
 #-----------------------------------------------------------------------------
-import arkInit
-arkInit.init()
+
+import ieInit
+ieInit.init()
 import ieGlobals
 import ieCommon
 try:
@@ -44,19 +45,42 @@ try:
 except:
 	pass
 
+'''
+	Method: setEnvironmentVariable
 
+	Sets a given environment variable for the OS.
+
+	Parameters:
+		key - environment variable
+		val - value for the environment variable
+'''
 def setEnvironmentVariable(key, val):
 	val = str(val)
 	os.environ[key] = val
 	return os.system('setx %s "%s"' % (key, val))
 
+'''
+	Method: fileExtention
+
+	Returns file extension of a file (without the '.').
+'''
 def fileExtension(filename):
 	return os.path.splitext(filename)[1][1:].lower()
 
+'''
+	Method: mkdir
+
+	Wrapper for os.mkdir.
+'''
 def mkdir(dirname):
 	if not os.path.isdir(dirname):
 		os.mkdir(dirname)
 
+'''
+	Method: getVersion
+
+	Returns version number of a given filename.
+'''
 def getVersion(filename):
 	match = re.findall('[vV]([0-9]+)', filename)
 	if (match):
@@ -64,20 +88,45 @@ def getVersion(filename):
 	return 0
 
 # fix: currently increments all versions, should it?
+'''
+	Method: incrementVersion
+
+	Returns file with version incremented in all locations in the name.
+'''
 def incrementVersion(filename):
 	version = getVersion(filename) + 1
 	return re.sub('[vV][0-9]+', 'v%03d' % version, filename)
 
+'''
+	Method: getDir
+
+	Returns directory name of a file with a trailing '/'.
+'''
 def getDir(filename):
 	return os.path.dirname(filename) + '/'
 
+'''
+	Method: checkTempDir
+
+	Checks if ieGlobals.IETEMP exists, and if not, creates it.
+'''
 def checkTempDir():
 	if not os.path.exists(ieGlobals.IETEMP):
 		os.makedirs(ieGlobals.IETEMP)
 
+'''
+	Method: getParentPID
+
+	Returns the process ID of the parent process.
+'''
 def getParentPID():
 	return psutil.Process(os.getpid()).ppid
 
+'''
+	Method: getFrameRange
+
+	Returns the frame range of a given file.
+'''
 def getFrameRange(file):
 	baseInFile, ext = os.path.splitext(file)
 	# fix: this is done terribly, should be far more generic
@@ -104,6 +153,12 @@ def getFrameRange(file):
 			'base': baseInFile,
 			'ext': ext}
 
+
+'''
+	Method: killJobProcesses
+
+	Kills all other processes currently on the render node.
+'''
 def killJobProcesses(nodesOnly=True):
 	"""Ruthlessly kills off all other processes on the render node"""
 	if not psutil:
@@ -125,6 +180,16 @@ def killJobProcesses(nodesOnly=True):
 				pass
 
 # Creates a glob of files then removes them
+'''
+	Method: emptyFolder
+
+	Removes all files and folders from a directory.
+
+	Parameters:
+		folder - directory from which to delete
+		onlyFiles - False by default, if only files should be deleted
+		waitTime - 5 by default, how many seconds to wait.
+'''
 def emptyFolder(folder,onlyFiles=False, waitTime=5):
 	if onlyFiles:
 		print 'Deleting all files in: %s' % folder
@@ -151,6 +216,11 @@ def emptyFolder(folder,onlyFiles=False, waitTime=5):
 				except:
 					pass
 
+'''
+	Method: pathInfo
+
+	Returns a dictionary of the path's dirname, basename, extension, filename and filebase.
+'''
 def pathInfo(path):
 	pathInfo = {}
 	path = path.replace('\\','/')
@@ -163,6 +233,11 @@ def pathInfo(path):
 
 	return pathInfo
 
+'''
+	Method: makeDirs
+
+	Wrapper for os.makedirs.
+'''
 def makeDirs(path):
 	dirName = pathInfo(path)['dirname']
 	try:
@@ -170,20 +245,40 @@ def makeDirs(path):
 	except Exception as err:
 		return err
 
+'''
+	Method: stripExtension
+
+	Removes the extension from a path.  If there is no extension, returns ''
+'''
 def stripExtension(path):
-	if 'str' in ieCommon.varType(path):
+	if '.' in path:
 		return '.'.join(path.split('.')[:-1])
 	return path
 
+'''
+	Method: filePrep
+
+	Replaces backslashes with forward slashes in path names.
+'''
 def filePrep(path):
 	return ieCommon.defaultStringReplace(path).replace('\\','/')
 
+'''
+	Method: unixPath
 
+	Changes backslashes to forward slashes and removes successive slashes, ex \\ or \/
+
+'''
 def unixPath(path):
 	"""changes backslashes to forward slashes.
 	also removes any successive slashes, ex: \\ or \/"""
 	return re.sub(r'[\\/]+', '/', path)
 
+'''
+	Method: universalPath
+
+	Swaps Universal Root (Q:/) with unix root ($root).
+'''
 def universalPath(path):
 	"""swaps Q:/ with $root/
 		intent is that paths are translated on Windows, Mac, and Linux"""
@@ -191,6 +286,11 @@ def universalPath(path):
 	path = path.lower()
 	return re.sub('[Qq]:/',ieGlobals.UNIVERSAL_ROOT, unixPath(path))
 
+'''
+	Method: osPath
+
+	Swaps unix root ($root) with Universal Root (Q:/)
+'''
 def osPath(path):
 	"""swaps $root/ with Q:/
 		intent is that paths are translated on Windows, Mac, and Linux"""
@@ -201,34 +301,30 @@ def osPath(path):
 # def join():
 # 	pass
 
+'''
+	Method: normalizeDir
 
+	Appends a / to the end of a path if it's not there yet.
+'''
 def normalizeDir(path):
 	path = unixPath(path)
 	if path[-1] != '/':
 		path = path + '/'
 	return path
 
-def copyTree(src, dst, symlinks=False, ignore=None):
-	# for item in os.listdir(src):
-	# 	s = os.path.join(src, item)
-	# 	d = os.path.join(dst, item)
-	# 	if os.path.isdir(s):
-	# 		shutil.copytree(s, d, symlinks, ignore)
-	# 	else:
-	# 		shutil.copy2(s, d)
-	dir_util.copy_tree(src, dst)
-	# srcFiles = src + '/*'
-	# for filename in glob.glob(srcFiles):
-	#     if os.path.isdir(filename):
-	#         copyTree()
-	#     try:
-	#         shutil.copy2(filename,filename.replace(src,dst))
-	#         if verbose:
-	#             print 'Copied %s to %s' % (filename,dst)
-	#     except:
-	#         if verbose:
-	#             print 'Could not copy %s to %s' % (filename,dst)
+'''
+	Method: copyTree
 
+	Copies the src directory tree to the destination.
+'''
+def copyTree(src, dst, symlinks=False, ignore=None):
+	dir_util.copy_tree(src, dst)
+
+'''
+	Method: duplicateDir
+
+	Duplicates a directory, copying files that don't already exist.
+'''
 def duplicateDir(src, dest):
 	"""Duplicates a directory, copying files that don't already exist
  and deleting files not present in src"""
@@ -276,9 +372,19 @@ def duplicateDir(src, dest):
 	# 			print 'delete:', dest + root + '/' + n
 	# 		# 	shutil.copy(src + root + n, filename)
 
+'''
+	Method: runPython
+
+	Executes a given python file.
+'''
 def runPython(pythonFile):
 	return os.system(ieGlobals.IEPYTHON + ' ' + pythonFile)
 
+'''
+	Method: startSubprocess
+
+	Executes a program using psutil.Popen, disabling Windows error dialogues.
+'''
 def startSubprocess(processArgs,env=None):
 	"""Runs a program through psutil.Popen, disabling Windows error dialogs"""
 
@@ -286,9 +392,6 @@ def startSubprocess(processArgs,env=None):
 		env = dict(os.environ.items() + env.items())
 	else:
 		env = os.environ
-
-	# for arg in processArgs:
-	# 	print arg
 
 	if sys.platform.startswith('win'):
 		# Don't display the Windows GPF dialog if the invoked program dies.
@@ -300,11 +403,6 @@ def startSubprocess(processArgs,env=None):
 		SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
 		ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
 
-		# if creationFlags != None:
-		#     subprocess_flags = creationFlags
-		# else:
-		#     subprocess_flags = 0x8000000 # hex constant equivalent to win32con.CREATE_NO_WINDOW
-
 		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
 		try:
 			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, ieGlobals.KEY_ALL_ACCESS)
@@ -312,8 +410,6 @@ def startSubprocess(processArgs,env=None):
 			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
 		# 1 (True) is the value
 		_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
-	# else:
-	#     subprocess_flags = 0
 
 	# fix: use this everywhere
 	command = ''
@@ -326,19 +422,34 @@ def startSubprocess(processArgs,env=None):
 	else:
 		print 'command:\n', processArgs
 
-	# return subprocess.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
 	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,env=env)
 
+'''
+	Method: getConvertFile
+
+	Creates convert file by removing file extension, and appending '_convert.nk'.
+'''
 def getConvertFile(outFile):
 	pi = pathInfo(outFile)
 	return pi['dirname'] + pi['filebase'] + '_convert.nk'
 
+'''
+	Method: getArgs
+
+	Generates a string of flag arguments from an iterable of tuples k, v tuples.
+	Arguments are of the form -k1 v1 -k2 v2...etc.
+'''
 def genArgs(argData):
 	args = ''
 	for k,v in argData.iteritems():
 		args += '-%s %s ' % (k,v)
 	return args[:-1]
 
+'''
+	Method: updateTools
+
+	Updates tools from the git repo if available.
+'''
 def updateTools(toolsDir=None):
 	if not toolsDir:
 		toolsDir = ieGlobals.IETOOLS
