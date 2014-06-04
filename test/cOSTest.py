@@ -25,6 +25,10 @@ class cOSTest(unittest.TestCase):
 		os.system('touch sandbox/testdir1/file2')
 		os.system('touch sandbox/testdir1/file3')
 		os.system('touch sandbox/testdir2/file1')
+		os.mkdir('sandbox/seq')
+		for i in range(10):
+			os.system('touch sandbox/seq/frame.%04d.exr' % (i + 1510))
+
 
 	def tearDown(self):
 		os.system('rm -rf sandbox')
@@ -114,6 +118,11 @@ class cOSTest(unittest.TestCase):
 	def test_genArgs(self):
 		args = cOS.genArgs({'k1': 'v1', 'k2' : 'v2', 'k3' : 'v3'})
 		self.assertEqual(args, '-k3 v3 -k2 v2 -k1 v1')
+
+	def test_getFrameRange(self):
+		info = cOS.getFrameRange('sandbox/seq/frame.%04d.exr')
+		self.assertEqual(info['min'], 1510)
+		self.assertEqual(info['max'], 1519)
 
 if __name__ == '__main__':
 	unittest.main()
