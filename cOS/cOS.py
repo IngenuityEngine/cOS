@@ -125,15 +125,18 @@ def getParentPID():
 '''
 	Method: getFrameRange
 
-	Returns the frame range of a given file.
+	Returns a dictionary with 'min' (minFrame), 'max' (maxFrame), 'base' (fileName), and 'ext' (ext).
+
+	Parameters:
+		file - Generic file in sequence. Ex. text/frame.%04d.exr
 '''
-def getFrameRange(file):
-	baseInFile, ext = os.path.splitext(file)
+def getFrameRange(path):
+	baseInFile, ext = os.path.splitext(path)
 	# fix: this is done terribly, should be far more generic
 	percentLoc = baseInFile.find('%')
 
 	if percentLoc == -1:
-		raise Exception('Frame padding not found in: ' + file)
+		raise Exception('Frame padding not found in: ' + path)
 
 	# second character after the %
 	# ex: %04d returns 4
