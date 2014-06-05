@@ -26,6 +26,7 @@ class cOSTest(unittest.TestCase):
 		os.system('touch sandbox/testdir1/file3')
 		os.system('touch sandbox/testdir2/file1')
 		os.mkdir('sandbox/seq')
+		os.mkdir('sandbox/emptyDir')
 		for i in range(10):
 			os.system('touch sandbox/seq/frame.%04d.exr' % (i + 1510))
 
@@ -63,12 +64,12 @@ class cOSTest(unittest.TestCase):
 		cOS.checkTempDir()
 		self.assertTrue(os.path.isdir(ieGlobals.IETEMP))
 
-	def test_emptyFolder(self):
-		cOS.emptyFolder('sandbox/')
+	def test_emptyDir(self):
+		cOS.emptyDir('sandbox/')
 		self.assertTrue(not subprocess.check_output(['ls', 'sandbox']).split())
 
-	def test_pathInfo(self):
-		info = cOS.pathInfo('sandbox/file_v001.mb')
+	def test_getFileInfo(self):
+		info = cOS.getFileInfo('sandbox/file_v001.mb')
 		self.assertEqual(info['extension'], 'mb')
 		self.assertEqual(info['dirname'], 'sandbox/')
 		self.assertEqual(info['basename'], 'file_v001.mb')
@@ -99,8 +100,8 @@ class cOSTest(unittest.TestCase):
 		os = cOS.osPath('$root/test_file')
 		self.assertEqual(os, ieGlobals.ROOT + 'test_file')
 
-	def test_normalizeDir(self):
-		normalized = cOS.normalizeDir('path/to/dir')
+	def test_ensureEndingSlash(self):
+		normalized = cOS.ensureEndingSlash('path/to/dir')
 		self.assertEqual(normalized, 'path/to/dir/')
 
 	def test_duplicateDir(self):
@@ -123,6 +124,83 @@ class cOSTest(unittest.TestCase):
 		info = cOS.getFrameRange('sandbox/seq/frame.%04d.exr')
 		self.assertEqual(info['min'], 1510)
 		self.assertEqual(info['max'], 1519)
+
+	def test_removeStartingSlash(self):
+		res = cOS.removeStartingSlash('/path/to/file')
+		self.assertEqual(res, 'path/to/file')
+
+	def test_normalizeDir(self):
+		res = cOS.normalizeDir('/path\\to/file')
+		self.assertEqual(res, 'path/to/file/')
+
+	def test_normalizeExtension(self):
+		norm = cOS.normalizeExtension('Mb')
+		self.assertEqual(norm, '.mb')
+		norm = cOS.normalizeExtension('.mb')
+		self.assertEqual(norm, '.mb')
+
+	def test_upADir(self):
+		parent = cOS.upADir('path/to/a/file/')
+		self.assertEqual(parent, 'path/to/a/')
+		parent = cOS.upADir('path/to/a/file.txt')
+		self.assertEqual(parent, 'path/to/')
+
+	def test_isDir(self):
+		isDir = cOS.isDir('sandbox')
+		self.assertTrue(isDir)
+		isDir = cOS.isDir('DOESNTEXIST')
+		self.assertTrue(not isDir)
+
+	def test_join(self):
+		joined = cOS.join('/path/to/a/directory', '/path/to/a/file.txt')
+		self.assertEqual(joined, 'path/to/a/directory/path/to/a/file.txt')
+
+	def test_absolutePath(self):
+		absPath = cOS.absolutePath('sandbox')
+		self.assertEqual(absPath, 'c:/ie/cOS/test/sandbox/')
+
+	def test_getFiles(self):
+		files = cOS.getFiles('sandbox')
+		self.assertEqual(set(files), set(['emptyDir', 'seq', 'file_v001.mb', 'file.mb', 'testdir1', 'testdir2', 'sandboxSubdir']))
+
+	def test_removePath(self):
+		self.assertTrue(os.path.isfile('sandbox/file.mb'))
+		cOS.removePath('sandbox/file.mb')
+		self.assertTrue(not os.path.isfile('sandbox/file.mb'))
+		ret = cOS.removePath('sandbox/file.mb')
+		self.assertTrue(not ret)
+
+	def test_removeDir(self):
+		self.assertTrue(os.path.isdir('sandbox/emptyDir'))
+		cOS.removeDir('sandbox/emptyDir')
+		self.assertTrue(not os.path.isdir('sandbox/emptyDir'))
+		ret = cOS.removeDir('sandbox/emptyDir')
+		self.assertTrue(not ret)
+
+	def test_cwd(self):
+		cwd = cOS.cwd()
+		self.assertEqual(cwd, 'c:/ie/cOS/test/')
+
+	def test_ensureArray(self):
+		self.assertEqual(cOS.ensureArray([1,2,3]), [1,2,3])
+		self.assertEqual(cOS.ensureArray('abc'), ['abc'])
+		self.assertEqual(cOS.ensureArray(None), [])
+		self.assertEqual(cOS.ensureArray((1,2,3)), [1,2,3])
+
+	def test_collectFiles(self):
+		os.system('rm -rf seq')
+		files = cOS.collectFiles('sandbox', 'mb', '')
+		self.assertEqual(sorted(files), sorted([cOS.getFileInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb']]))
+		#self.assertEqual(set(files), set([cOS.getFileInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb', 'sandbox/testdir1/file1', 'sandbox/testdir1/file2', 'sandbox/testdir1/file3', 'sandbox/testdir2/file1']]))
+		files = cOS.collectFiles('sandbox', 'mb', 'sandbox/file_v001.mb')
+		self.assertEqual(sorted(files), sorted([cOS.getFileInfo(f) for f in ['sandbox/file.mb']]))
+
+	def test_collectAllFiles(self):
+		files = cOS.collectAllFiles('sandbox/testdir2')
+		self.assertEqual(sorted(files), sorted([cOS.getFileInfo(f) for f in ['sandbox/testdir2/file1']]))
+
+	def test_isWindows(self):
+		self.assertTrue(cOS.isWindows())
 
 if __name__ == '__main__':
 	unittest.main()

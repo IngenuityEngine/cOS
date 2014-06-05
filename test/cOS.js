@@ -16,11 +16,9 @@ describe('cOS', function() {
 	var cOS
 	var searchPaths, extension
 
-
 	it('should load', function() {
 		cOS = require('../cOS/cOS')
 	})
-
 
 	it ('should getFileInfo', function() {
 		var options = {
@@ -124,7 +122,7 @@ describe('cOS', function() {
 
 	it ('should upADir', function(){
 		var upDir = cOS.upADir('c:/test/sub')
-		expect(upDir).to.be('c:/test/')
+		expect(upDir).to.be('c:/')
 		upDir = cOS.upADir('c:/')
 		expect(upDir).to.be('c:/')
 		upDir = cOS.upADir('etc/')
@@ -156,5 +154,80 @@ describe('cOS', function() {
 			expect(err).to.be(false)
 			done()
 		})
+	})
+
+	it ('should filePrep', function(done) {
+		expect(cOS.filePrep('\\path\\to\\file')).to.be('/path/to/file')
+		expect(cOS.filePrep('\\\\\\\\//path\\to///\\/\\\\file')).to.be('//////path/to///////file')
+		done()
+
+	})
+
+	it ('should unixPath', function(done) {
+		expect(cOS.unixPath('\\path//to\\\\file')).to.be('/path/to/file')
+		expect(cOS.unixPath('//\\path//to\\\\file\\\\\\')).to.be('/path/to/file/')
+		expect(cOS.unixPath('\\\\\\\\//path\\to///\\/\\\\file\\/\\/\\\\//\\\\//')).to.be('/path/to/file/')
+		done()
+	})
+
+	it ('should universalPath', function(done) {
+		univ = cOS.universalPath('Q:/path/to/file/')
+		expect(univ).to.be('$root/path/to/file/')
+		done()
+	})
+
+	it ('should fileExtension', function(done) {
+		expect(cOS.fileExtension('test.txt')).to.be('txt')
+		expect(cOS.fileExtension('/path/to/file.html')).to.be('html')
+		expect(cOS.fileExtension('/path/to/file/with/no/extension')).to.be('')
+		done()
+	})
+
+	it ('should stripExtension', function(done) {
+		expect(cOS.stripExtension('text.txt')).to.be('text')
+		expect(cOS.stripExtension('/path/to/file.html')).to.be('/path/to/file')
+		expect(cOS.stripExtension('/path/to/file/with/no/extension')).to.be('/path/to/file/with/no/extension')
+		done()
+	})
+
+	it ('should getConvertFile', function(done) {
+		expect(cOS.getConvertFile('test.txt')).to.be('test_convert.nk')
+		expect(cOS.getConvertFile('/path/to/file.html')).to.be('/path/to/file_convert.nk')
+		expect(cOS.getConvertFile('/path/to/file/with/no/extension')).to.be('/path/to/file/with/no/extension_convert.nk')
+		done()
+	})
+
+	it ('should getVersion', function(done) {
+		expect(cOS.getVersion('test_v001.txt')).to.be(1)
+		expect(cOS.getVersion('test_v100')).to.be(100)
+		expect(cOS.getVersion('test_v0421894.txt')).to.be(421894)
+		expect(cOS.getVersion('test_v001.txt')).to.be(1)
+		expect(cOS.getVersion('test/v012/filev012')).to.be(12)
+		done()
+	})
+
+	it ('should incrementVersion', function(done) {
+		expect(cOS.incrementVersion('filev002')).to.be('filev003')
+		expect(cOS.incrementVersion('filev009')).to.be('filev010')
+		expect(cOS.incrementVersion('/path/v002/filev002')).to.be('/path/v003/filev003')
+		done()
+	})
+
+	it ('should padLeft', function(done) {
+		expect(cOS.padLeft('16', '0', 4)).to.be('0016')
+		expect(cOS.padLeft('142', '0', 3)).to.be('142')
+		expect(cOS.padLeft('1717', '0', 2)).to.be('1717')
+		done()
+	})
+
+	it ('should getFrameRange', function(done) {
+		cOS.mkdir('seq')
+		for (i = 0; i < 10; i++)
+			cOS.runCommand('touch', 'seq/filev' + cOS.padLeft(String(i + 1510), '0', 4))
+		info = cOS.getFrameRange('seq/filev%04d')
+		expect(info['min']).to.be(1510)
+		expect(info['max']).to.be(1519)
+		cOS.runCommand('rm', ['-rf, seq'])
+		done()
 	})
 })
