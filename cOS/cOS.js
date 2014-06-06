@@ -22,7 +22,7 @@ var cOS = module.exports = {
 // Methods
 /////////////////////////
 
-
+///////////////////// Normalization Operations \\\\\\\\\\\\\\\\\\\\\\\\
 
 /*
 	Method: ensureEndingSlash
@@ -56,6 +56,16 @@ removeStartingSlash: function(dir)
 	return dir
 },
 
+/*
+	Method: filePrep
+
+	Replaces backslashes with forward slashes in path names.
+*/
+filePrep: function(dir)
+{
+	return dir.replace(/\\/g,'/')
+},
+
 // dirs are always forward slashes and always have a trailing slash
 /*
 	Method: normalizeDir
@@ -64,48 +74,162 @@ removeStartingSlash: function(dir)
 */
 normalizeDir: function(dir)
 {
-	dir = dir.replace(/\\/g,'/')
+	dir = cOS.filePrep(dir)
 	dir = cOS.removeStartingSlash(dir)
 	return cOS.ensureEndingSlash(dir)
 },
 
+// paths are always forward slashes
+// fix: consider not removing starting slash for linux paths
 /*
-	Method: isDirSync
+	Method: normalizePath
 
-	Checks if a method is a directory.
+	Removes starting slash, and replaces all backslashes with forward slashses.
 */
-isDirSync: function(path)
+normalizePath: function(path)
 {
-	try {
-		var stats = fs.statSync(path)
-		return stats.isDirectory()
-	} catch (err) {
-		return false
-	}
+	path = cOS.removeStartingSlash(path)
+	return cOS.filePrep(path)
 },
 
 /*
-	Method: makeDirsSync
+	Method: unixPath
 
-	Makes a directory.
+	Changes backslashes to forward slashes and removes successive slashes, ex \\ or \/
 */
-makeDirsSync: function(path)
+unixPath: function(dir)
 {
-	try {
-		return mkdirp.sync(cOS.normalizeDir(path))
-	} catch (err) {
-		return err
-	}
+	return dir.replace(/[\\/]+/g, '/')
+},
+
+/*
+	Method: universalPath
+
+	Swaps Universal Root (Q:/) with unix root ($root).
+	fix: CURRENTLY HARD CODED UNIVERSAL_ROOT TO BE $root.
+*/
+universalPath: function(dir)
+{
+	dir = dir.toLowerCase()
+	return cOS.unixPath(dir).replace('q:', '$root')
+},
+
+/*
+	Method: osPath
+
+	Swaps unix root ($root) with Universal Root (Q:/)
+*/
+osPath: function(dir)
+{
+	return dir.replace('$root', 'Q:/')
+},
+
+
+///////////////////////////// Extension Operations ////////////////////////////////
+
+/*
+	Method: normalizeExtension
+
+	Takes in an extension, and makes is lowercase, and precedes it with a '.'
+*/
+normalizeExtension: function(extension)
+{
+	extension = extension.toLowerCase().trim()
+	if (extension[0] != '.')
+		return '.' + extension
+	return extension
+},
+
+/*
+	Method: stripExtension
+
+	Removes the extension from a path.  If there is no extension, returns ''
+*/
+stripExtension: function(path) {
+	return path.replace(/\.[^/.]+$/, '')
+},
+
+/*
+	Method: fileExtention
+
+	Returns file extension of a file (without the '.').
+*/
+fileExtension: function(path)
+{
+	path = path.split('.')
+	if (path.length > 1) return path.pop()
+	else return ''
+},
+
+/*
+	Method: getConvertFile
+
+	Creates convert file by removing file extension, and appending '_convert.nk'.
+*/
+getConvertFile: function(path)
+{
+	return cOS.stripExtension(path) + '_convert.nk'
+},
+
+//////////////////////// Versioning Operations ///////////////////////////
+
+/*
+	Method: padLeft
+
+	Pads a given string <str> to the left with <padString> to create a string of length <length>.
+	This exists because javasript does not support string formatting to use %03d.
+*/
+padLeft: function(str, padString, length)
+{
+	while (str.length < length)
+		str = padString + str;
+	return str
+},
+
+/*
+	Method: getVersion
+
+	Returns version number of a given filename.
+*/
+getVersion: function(filename)
+{
+	match = filename.match(/[vV][0-9]+/g)
+	if (match.length > 0) return parseInt(match[0].substring(1))
+	return 0
+
+},
+
+/*
+	Method: incrementVersion
+
+	Returns file with version incremented in all locations in the name.
+*/
+incrementVersion: function(filename)
+{
+	version = cOS.getVersion(filename) + 1
+	return filename.replace(/[vV][0-9]+/g, 'v' + cOS.padLeft(String(version), '0', 3))
+},
+
+////////////////////////// Information Retrieval /////////////////////////////
+
+/*
+	Method: getDir
+
+	Returns directory name of a file with a trailing '/'.
+*/
+getDir: function(filename)
+{
+	return cOS.normalizeDir(path.dirname(filename))
 },
 
 /*
 	Method: upADir
 
 	Returns the path, up a single directory.
+	If being called on a directory, be sure the directory is normalized before calling.
 */
 upADir: function(path)
 {
-	path = cOS.normalizeDir(path)
 	var parts = path.split('/')
 	if (parts.length < 3)
 		return path
@@ -113,84 +237,9 @@ upADir: function(path)
 },
 
 /*
-	Method: validEmptyDirSync
-
-	Returns an object describing whether a directory is valid, and if it contains files.
-*/
-validEmptyDirSync: function(dir)
-{
-	var exists = fs.existsSync(dir)
-	if (exists)
-	{
-		if (cOS.isDirSync(dir))
-		{
-			var files = fs.readdirSync(dir)
-			if (files.length)
-			{
-				return {valid: true, hasFiles: true}
-			}
-			return {valid: true}
-		}
-		else
-		{
-			return {
-					valid: false,
-					error: 'Dir: ' + dir + ' exists but is not a directory'
-				}
-		}
-	}
-	else
-	{
-		var rootDir = cOS.upADir(dir)
-		if (!cOS.isDirSync(rootDir))
-			return {
-					valid: false,
-					error:'Root dir: ' + rootDir + ' does not exists'
-				}
-		fs.mkdirSync(dir)
-		return {valid: true}
-	}
-},
-// paths are always forward slashes
-// fix: consider not removing starting slash for linux paths
-/*
-	Method: normalizePath
-
-	Paths are always forward slashes.
-*/
-normalizePath: function(path)
-{
-	path = cOS.removeStartingSlash(path)
-	return path.replace(/\\/g,'/')
-},
-
-// cOS.join that always joins with forward slash
-// fix: should accept a bunch of paths
-/*
-	Method: join
-
-	Concatenates a directory with a file path using forward slashes.
-*/
-join: function(a, b)
-{
-	return cOS.normalizeDir(a) + cOS.normalizePath(b)
-},
-
-// wrap cOS.dirname w/ normalize
-/*
-	Method: dirName
-
-	Returns normalized directory name of a file.
-*/
-dirName: function(file)
-{
-	return cOS.normalizeDir(path.dirname(file))
-},
-
-/*
 	Method: getFileInfo
 
-	Returns object with file's basename, extension, dirname and path.
+	Returns object with file's basename, extension, name, dirname and path.
 	With options, can also return root, relative dirname, and relative path, and
 	make all fields lowercase.
 */
@@ -226,6 +275,170 @@ getFileInfo: function(file, options)
 },
 
 /*
+	Method: getFrameRange
+
+	Returns an object with 'min' (minFrame), 'max' (maxFrame), 'base' (fileName), and 'ext' (ext).
+
+	Parameters:
+		path - Generic file in sequence. Ex. text/frame.%04d.exr
+*/
+getFrameRange: function(path)
+{
+	baseInFile = cOS.getFileInfo(path)['basename']
+	ext = '.' + cOS.fileExtension(path)
+
+	percentLoc = baseInFile.indexOf('%')
+
+	if (percentLoc == -1) throw "Frame padding not found in " + path
+
+	padding = parseInt(baseInFile.charAt(percentLoc + 2))
+
+	minFrame = 9999999
+	maxFrame = -9999999
+
+	_.each(fs.readdirSync(cOS.getDir(path)), function(x)
+	{
+		frame = +(x.substr(percentLoc, padding))
+		console.log(frame)
+		if (!isNaN(frame))
+		{
+			maxFrame = Math.max(maxFrame, frame)
+			minFrame = Math.min(minFrame, frame)
+		}
+	})
+
+	return {
+		'min' : minFrame,
+		'max' : maxFrame,
+		'base' : baseInFile,
+		'ext': ext}
+},
+
+///////////////////////////// System Operations //////////////////////////////
+
+/*
+	Method: setEnvironmentVariable
+
+	Sets a given environment variable for the OS.
+
+	Parameters:
+		key - environment variable
+		val - value for the environment variable
+
+*/
+setEnvironmentVariable: function(key, val)
+{
+	val = String(val)
+	process.env[key] = val
+	exec('setx ' + key + '"' + val + '"')
+},
+
+
+/*
+	Method: mkdir
+
+	Wrapper for fs.mkdir.
+*/
+mkdir: function(dirname) {
+	if (! cOS.isDirSync(dirname)) {
+		fs.mkdir(dirname)
+	}
+},
+
+/*
+	Method: makeDirsSync
+
+	Makes a directory. (Synchronous)
+*/
+makeDirsSync: function(path)
+{
+	try {
+		return mkdirp.sync(cOS.normalizeDir(path))
+	} catch (err) {
+		return err
+	}
+},
+
+/*
+	Method: isDirSync
+
+	Checks if a path is a directory. (Synchronous)
+*/
+isDirSync: function(path)
+{
+	try {
+		var stats = fs.statSync(path)
+		return stats.isDirectory()
+	} catch (err) {
+		return false
+	}
+},
+
+/*
+	Method: validEmptyDirSync
+
+	Returns an object describing whether a directory is an existing directory (valid), and if it contains files (hasFiles).
+*/
+validEmptyDirSync: function(dir)
+{
+	var exists = fs.existsSync(dir)
+	if (exists)
+	{
+		if (cOS.isDirSync(dir))
+		{
+			var files = fs.readdirSync(dir)
+			if (files.length)
+			{
+				return {valid: true, hasFiles: true}
+			}
+			return {valid: true}
+		}
+		else
+		{
+			return {
+					valid: false,
+					error: 'Dir: ' + dir + ' exists but is not a directory'
+				}
+		}
+	}
+	else
+	{
+		var rootDir = cOS.upADir(dir)
+		if (!cOS.isDirSync(rootDir))
+			return {
+					valid: false,
+					error:'Root dir: ' + rootDir + ' does not exists'
+				}
+		fs.mkdirSync(dir)
+		return {valid: true}
+	}
+},
+
+/*
+	Method: checkTempDir
+
+	Checks if ieGlobals.IETEMP exists, and if not, creates it.
+	fix: ieGlobals.IETEMP is currently hardcoded.
+*/
+checkTempDir: function()
+{
+	IETEMP = 'C:/ie/temp/'
+	if (!fs.existsSync(IETEMP)) makeDirs(IETEMP)
+},
+
+// cOS.join that always joins with forward slash
+// fix: should accept a bunch of paths
+/*
+	Method: join
+
+	Concatenates a directory with a file path using forward slashes.
+*/
+join: function(a, b)
+{
+	return cOS.normalizeDir(a) + cOS.normalizePath(b)
+},
+
+/*
 	Method: absolutePath
 
 	Returns absolute path of a given path.
@@ -238,7 +451,7 @@ absolutePath: function(path)
 /*
 	Method: realPathSync
 
-	Returns the normalized real path.
+	Returns the normalized real path. (Synchronous)
 */
 realPathSync: function(path)
 {
@@ -248,7 +461,7 @@ realPathSync: function(path)
 /*
 	Method: getFilesSync
 
-	Lists files in a given path.
+	Lists files in a given path. (Synchronous)
 */
 getFilesSync: function(path)
 {
@@ -281,11 +494,11 @@ readFile: function(path, options, callback)
 },
 
 /*
-	Method: unlinkSync
+	Method: removePathSync
 
-	Removes a file.
+	Removes a file. (Synchronous)
 */
-unlinkSync: function(path)
+removePathSync: function(path)
 {
 	if (fs.existsSync(path))
 		return fs.unlinkSync(path)
@@ -309,7 +522,7 @@ removeDirSync: function(path)
 			cOS.removeDirSync(curPath)
 		// delete file
 		else
-			fs.unlinkSync(curPath)
+			cOS.removePath(curPath)
 	})
 	fs.rmdirSync(path)
 },
@@ -341,6 +554,16 @@ emptyDirSync: function(path)
 cwd: function()
 {
 	return cOS.normalizeDir(process.cwd())
+},
+
+/*
+	Method: copyTreeSync
+
+	Wrapper of copysync.
+*/
+copyTreeSync: function(src, dst)
+{
+	return copysync(src, dst)
 },
 
 /*
@@ -376,6 +599,7 @@ getFileContents: function(fileInfos, options, callback)
 			callback(err, fileInfos)
 		})
 },
+
 
 // fix: should fail gracefully
 // build: function(options, callback)
@@ -424,18 +648,6 @@ ensureArray: function(val)
 		return []
 	return [val]
 },
-/*
-	Method: normalizeExtension
-
-	Makes extensions lowercase, and begin with a '.'
-*/
-normalizeExtension: function(extension)
-{
-	extension = extension.toLowerCase().trim()
-	if (extension[0] != '.')
-		return '.' + extension
-	return extension
-},
 
 /*
 	Method: collectFiles
@@ -483,7 +695,7 @@ collectFiles: function(searchPaths, extensions, options, callback)
 			_.each(matchingFiles, function infoAndExclude(file)
 			{
 				// console.log(file)
-				if (cOS.shouldExclude(options.exclude, file))
+				if (cOS.contains(options.exclude, file))
 					return
 				fileInfo = cOS.getFileInfo(file, options)
 				files.push(fileInfo)
@@ -645,7 +857,7 @@ collectFilesSync: function(searchPath, extension, files, options)
 		_.each(matchingFiles, function infoAndExclude(file)
 		{
 			// bail if any of the excludes is found in the list
-			if (cOS.shouldExclude(options.exclude, file))
+			if (cOS.contains(options.exclude, file))
 				return
 
 			fileInfo = cOS.getFileInfo(file, options)
@@ -661,11 +873,11 @@ collectFilesSync: function(searchPath, extension, files, options)
 },
 
 /*
-	Method: shouldExclude
+	Method: contains
 
 	Returns whether or not to exclude a given path, given an iterable of paths to exclude.
 */
-shouldExclude: function(excludes, path)
+contains: function(excludes, path)
 {
 	var exclude = false
 	_.each(excludes, function(str)
@@ -675,6 +887,18 @@ shouldExclude: function(excludes, path)
 	})
 	return exclude
 },
+
+/*
+	Method: runPython
+
+	Executes a given python file.
+	fix: ieGlobals.IEPYTHON currently hardcoded.
+*
+/runPython: function(pythonFile)
+{
+	IEPYTHON = 'C:/Python27/python.exe'
+	return runCommand(IEPYTHON, [pythonFile])
+}
 
 /*
 	Method: compileFiles
@@ -825,16 +1049,6 @@ getGlobalModulesDir: function(callback)
 		// slice removes the \n
 		callback(false, out.slice(0, -1))
 	})
-},
-
-/*
-	Method: copySync
-
-	Wrapper of copysync.
-*/
-copySync: function(src, dst)
-{
-	return copysync(src, dst)
 },
 
 // end of module
