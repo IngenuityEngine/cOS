@@ -647,7 +647,7 @@ def runPython(pythonFile):
 '''
 def updateTools(toolsDir=None):
 	if not toolsDir:
-		toolsDir = ieGlobals.IETOOLS
+		toolsDir = ieGlobals.ARK_ROOT
 
 	# if the tools haven't been installed to the root, copy them now
 	try:
