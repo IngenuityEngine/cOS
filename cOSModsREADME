@@ -6,9 +6,6 @@ Python - stripExtension: Previous returned an empty string on a file that had no
 
 Modifications to names of functions:
 Python normalizeDir >> ensureEndingSlash
-Python pathInfo >> getFileInfo
-Javascript makeDirs >> makeDirs
-Javascript isDirSync >> isDir
 Javascript dirName >> getDir
 Javascript unlinkSync >> removePathSync
 Python emptyFolder >> emptyDir
