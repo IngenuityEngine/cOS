@@ -36,8 +36,8 @@ import re
 # ieGlobals
 #-----------------------------------------------------------------------------
 
-import ieInit
-ieInit.init()
+import arkInit
+arkInit.init()
 import ieGlobals
 # import ieCommon
 import ieUtil
