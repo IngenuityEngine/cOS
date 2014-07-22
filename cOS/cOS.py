@@ -36,10 +36,11 @@ import re
 # ieGlobals
 #-----------------------------------------------------------------------------
 
-import ieInit
-ieInit.init()
+import arkInit
+arkInit.init()
 import ieGlobals
-import ieCommon
+# import ieCommon
+import ieUtil
 try:
 	import psutil
 except:
@@ -75,7 +76,7 @@ def removeStartingSlash(path):
 	Replaces backslashes with forward slashes in path names.
 '''
 def filePrep(path):
-	return ieCommon.defaultStringReplace(path).replace('\\','/')
+	return ieUtil.defaultStringReplace(path).replace('\\','/')
 
 '''
 	Method: normalizeDir
@@ -220,7 +221,7 @@ def upADir(path):
 
 	Returns a dictionary of the path's dirname, basename, extension, filename and filebase.
 '''
-def getFileInfo(path):
+def pathInfo(path):
 	pathInfo = {}
 	path = path.replace('\\','/')
 	pathParts = path.split('/')
@@ -232,6 +233,17 @@ def getFileInfo(path):
 
 	return pathInfo
 
+def getFileInfo(path):
+	pathInfo = {}
+	path = path.replace('\\','/')
+	pathParts = path.split('/')
+	pathInfo['dirname'] = '/'.join(pathParts[:-1]) + '/'
+	pathInfo['basename'] = pathParts[-1]
+	pathInfo['extension'] = pathParts[-1].split('.')[-1].strip().lower()
+	pathInfo['filename'] = path
+	pathInfo['filebase'] = '.'.join(pathParts[-1].split('.')[:-1])
+
+	return pathInfo
 '''
 	Method: getFrameRange
 
@@ -606,7 +618,7 @@ def runCommand(processArgs,env=None):
 
 	# fix: use this everywhere
 	command = ''
-	if ieCommon.varType(processArgs) == 'list':
+	if ieUtil.varType(processArgs) == 'list':
 		command = '"' + processArgs[0] + '" '
 		for i in range(1, len(processArgs)):
 			processArgs[i] = str(processArgs[i])
@@ -635,7 +647,7 @@ def runPython(pythonFile):
 '''
 def updateTools(toolsDir=None):
 	if not toolsDir:
-		toolsDir = ieGlobals.IETOOLS
+		toolsDir = ieGlobals.TOOLS_ROOT
 
 	# if the tools haven't been installed to the root, copy them now
 	try:
@@ -682,3 +694,53 @@ def genArgs(argData):
 	for k,v in argData.iteritems():
 		args += '-%s %s ' % (k,v)
 	return args[:-1]
+
+def startSubprocess(processArgs,env=None):
+	"""Runs a program through psutil.Popen, disabling Windows error dialogs"""
+
+	if env:
+		env = dict(os.environ.items() + env.items())
+	else:
+		env = os.environ
+
+	# for arg in processArgs:
+	# 	print arg
+
+	if sys.platform.startswith('win'):
+		# Don't display the Windows GPF dialog if the invoked program dies.
+		# See comp.os.ms-windows.programmer.win32
+		# How to suppress crash notification dialog?, Jan 14,2004 -
+		# Raymond Chen's response [1]
+		import ctypes, _winreg
+
+		SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
+		ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
+
+		# if creationFlags != None:
+		#     subprocess_flags = creationFlags
+		# else:
+		#     subprocess_flags = 0x8000000 # hex constant equivalent to win32con.CREATE_NO_WINDOW
+
+		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
+		try:
+			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, ieGlobals.KEY_ALL_ACCESS)
+		except:
+			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
+		# 1 (True) is the value
+		_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
+	# else:
+	#     subprocess_flags = 0
+
+	# fix: use this everywhere
+	command = ''
+	if ieUtil.varType(processArgs) == 'list':
+		command = '"' + processArgs[0] + '" '
+		for i in range(1, len(processArgs)):
+			processArgs[i] = str(processArgs[i])
+			command += str(processArgs[i]) + ' '
+		print 'command:\n', command
+	else:
+		print 'command:\n', processArgs
+
+	# return subprocess.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
+	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
