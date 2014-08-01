@@ -36,8 +36,8 @@ import re
 # ieGlobals
 #-----------------------------------------------------------------------------
 
-import ieInit
-ieInit.init()
+import arkInit
+arkInit.init()
 import ieGlobals
 # import ieCommon
 import ieUtil
@@ -647,7 +647,7 @@ def runPython(pythonFile):
 '''
 def updateTools(toolsDir=None):
 	if not toolsDir:
-		toolsDir = ieGlobals.ARK_ROOT
+		toolsDir = ieGlobals.TOOLS_ROOT
 
 	# if the tools haven't been installed to the root, copy them now
 	try:
