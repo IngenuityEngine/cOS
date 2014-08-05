@@ -36,8 +36,8 @@ import re
 # ieGlobals
 #-----------------------------------------------------------------------------
 
-import ieInit
-ieInit.init()
+import arkInit
+arkInit.init()
 import ieGlobals
 # import ieCommon
 import ieUtil
@@ -728,10 +728,10 @@ def startSubprocess(processArgs,env=None):
 			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
 		# 1 (True) is the value
 		_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
+
 	# else:
 	#     subprocess_flags = 0
 
-	# fix: use this everywhere
 	command = ''
 	if ieUtil.varType(processArgs) == 'list':
 		command = '"' + processArgs[0] + '" '
