@@ -567,7 +567,7 @@ def getParentPID():
 '''
 def killJobProcesses(nodesOnly=True):
 	"""Ruthlessly kills off all other processes on the render node"""
-	if not psutil:
+	if 'psutil' in globals():
 		print 'No psutil module found'
 	if not nodesOnly or 'RENDER' in os.environ['COMPUTERNAME']:
 		currentProcess = os.getpid()
@@ -647,7 +647,7 @@ def runPython(pythonFile):
 '''
 def updateTools(toolsDir=None):
 	if not toolsDir:
-		toolsDir = ieGlobals.ARK_ROOT
+		toolsDir = ieGlobals.TOOLS_ROOT
 
 	# if the tools haven't been installed to the root, copy them now
 	try:
