@@ -567,7 +567,7 @@ def getParentPID():
 '''
 def killJobProcesses(nodesOnly=True):
 	"""Ruthlessly kills off all other processes on the render node"""
-	if not psutil:
+	if 'psutil' in globals():
 		print 'No psutil module found'
 	if not nodesOnly or 'RENDER' in os.environ['COMPUTERNAME']:
 		currentProcess = os.getpid()
