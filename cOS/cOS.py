@@ -301,8 +301,10 @@ def setEnvironmentVariable(key, val):
 	Wrapper for os.mkdir.
 '''
 def mkdir(dirname):
-	if not isDir(dirname):
+	try:
 		os.mkdir(dirname)
+	except Exception as err:
+		return err
 
 '''
 	Method: makeDirs
