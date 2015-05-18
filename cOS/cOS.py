@@ -2,9 +2,8 @@
 # ieOS.py
 # By Grant Miller (blented@gmail.com)
 # v 1.00
-# Created On: 02/06/2012
-# Modified On: 02/06/2012
-# tested using Nuke X 6.3v4 & 3dsMax 2012
+# Created On: 2012/02/06
+# Modified On: 2014/05/20
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -15,13 +14,6 @@
 #-----------------------------------------------------------------------------
 # Description:
 # Various file system helper functions
-#-----------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------
-# Revision History:
-#
-# v 1.00 Initial version
-#
 #-----------------------------------------------------------------------------
 
 import os
@@ -578,6 +570,7 @@ def killJobProcesses(nodesOnly=True):
 			try:
 				if '3dsmax' in p.name or \
 					'Nuke' in p.name or \
+					'modo' in p.name or \
 					'ffmpeg' in p.name or \
 					('cmd.exe' in p.name and p.pid != processParent) or \
 					('python.exe' in p.name and p.pid != currentProcess) or \
