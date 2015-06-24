@@ -9,7 +9,7 @@ def getSequenceName(filename):
 def getFrameNumber(filename):
 	regex_FrameNumber = re.compile('.+[_\.]([0-9]+)\.[a-z]+$')
 	try:
-		frame = regex_FrameNumber.search(filename).group(1) #int(nameParsed[-2])
+		frame = regex_FrameNumber.search(filename).group(1)
 		return frame
 	except:
 		raise IndexError('The filename given does not have the format <name>_<frameNumber>.<extension> or <name>.<frameNumber>.<extension>: %s' % filename)
