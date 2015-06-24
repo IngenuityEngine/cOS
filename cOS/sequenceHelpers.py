@@ -1,3 +1,5 @@
+import re
+
 def getSequenceName(filename):
 	regex_baseName = re.compile('(.+)[_\.][0-9]+\.[a-z]+$')
 	try:
