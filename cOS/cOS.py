@@ -204,6 +204,7 @@ def getDir(filename):
 	If being called on a directory, be sure the directory is normalized before calling.
 '''
 def upADir(path):
+	path = unixPath(path)
 	parts = path.split('/')
 	if (len(parts) < 3): return path
 	return '/'.join(parts[:-2]) + '/'
