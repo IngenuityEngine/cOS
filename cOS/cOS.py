@@ -32,7 +32,7 @@ import arkInit
 arkInit.init()
 import ieGlobals
 # import ieCommon
-import ieUtil
+import arkHelpers
 try:
 	import psutil
 except:
@@ -68,7 +68,7 @@ def removeStartingSlash(path):
 	Replaces backslashes with forward slashes in path names.
 '''
 def filePrep(path):
-	return ieUtil.defaultStringReplace(path).replace('\\','/')
+	return arkHelpers.defaultStringReplace(path).replace('\\','/')
 
 '''
 	Method: normalizeDir
@@ -614,7 +614,7 @@ def runCommand(processArgs,env=None):
 
 	# fix: use this everywhere
 	command = ''
-	if ieUtil.varType(processArgs) == 'list':
+	if arkHelpers.varType(processArgs) == 'list':
 		command = '"' + processArgs[0] + '" '
 		for i in range(1, len(processArgs)):
 			processArgs[i] = str(processArgs[i])
@@ -729,7 +729,7 @@ def startSubprocess(processArgs,env=None):
 	#     subprocess_flags = 0
 
 	command = ''
-	if ieUtil.varType(processArgs) == 'list':
+	if arkHelpers.varType(processArgs) == 'list':
 		command = '"' + processArgs[0] + '" '
 		for i in range(1, len(processArgs)):
 			processArgs[i] = str(processArgs[i])
