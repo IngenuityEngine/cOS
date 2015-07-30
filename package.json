@@ -1,14 +1,12 @@
 {
   "name": "cOS",
   "description": "Unified file library for nodeJS and Python",
-  "version": "0.0.1",
-  "private": false,
+  "version": "0.0.4",
   "author": {
     "name": "Grant Miller",
     "email": "blented@gmail.com"
   },
-  "scripts": {
-  },
+  "main": "./cOS/cOS.js",
   "dependencies": {
     "async": "^0.8.0",
     "copysync": "^0.0.1",
@@ -22,8 +20,6 @@
   "bin": {
   },
   "keywords": [
-    "files",
-    "os"
   ],
   "repository": {
     "type": "git",
@@ -34,8 +30,8 @@
     "email": "blented@gmail.com"
   },
   "engines": {
-    "node": "0.10.x",
-    "npm": "1.1.x"
+    "node": "*",
+    "npm": "*"
   },
   "readmeFilename": "README.md"
 }
