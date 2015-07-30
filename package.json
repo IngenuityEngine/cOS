@@ -1,6 +1,6 @@
 {
-  "name": "cOS",
-  "description": "Unified file library for nodeJS and Python",
+  "name": "commonos",
+  "description": "CommonOS, a unified file library for nodeJS and Python",
   "version": "0.0.4",
   "author": {
     "name": "Grant Miller",
