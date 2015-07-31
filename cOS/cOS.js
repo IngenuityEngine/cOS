@@ -1075,7 +1075,7 @@ contains: function(excludes, path)
 	Method: runPython
 
 	Executes a given python file.
-	fix: ieGlobals.IEPYTHON currently hardcoded.
+	fix: globalSettings.IEPYTHON currently hardcoded.
 */
 // runPython: function(pythonFile)
 // {

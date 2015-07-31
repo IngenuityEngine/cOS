@@ -8,7 +8,7 @@
 
 #-----------------------------------------------------------------------------
 # Required Files:
-# ieCommon, ieGlobals
+# ieCommon, globalSettings
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -25,12 +25,13 @@ import shutil
 from distutils import dir_util
 import re
 
-# ieGlobals
+# globalSettings
 #-----------------------------------------------------------------------------
 
 import arkInit
 arkInit.init()
-import ieGlobals
+import settingsManager
+globalSettings = settingsManager.globalSettings()
 # import ieCommon
 import arkUtil
 try:
@@ -109,7 +110,7 @@ def universalPath(path):
 		intent is that paths are translated on Windows, Mac, and Linux"""
 	# fix: should get the root drive from somewhere, case insensitive regex
 	path = path.lower()
-	return re.sub('[Qq]:/',ieGlobals.UNIVERSAL_ROOT, unixPath(path))
+	return re.sub('[Qq]:/',globalSettings.UNIVERSAL_ROOT, unixPath(path))
 
 '''
 	Method: osPath
@@ -120,7 +121,7 @@ def osPath(path):
 	"""swaps $root/ with Q:/
 		intent is that paths are translated on Windows, Mac, and Linux"""
 	# fix: should get the root drive from somewhere, case insensitive regex
-	return path.replace(ieGlobals.UNIVERSAL_ROOT, ieGlobals.ROOT)
+	return path.replace(globalSettings.UNIVERSAL_ROOT, globalSettings.ROOT)
 
 
 ###################### Extension Operations ##########################
@@ -322,11 +323,11 @@ def isDir(path):
 '''
 	Method: checkTempDir
 
-	Checks if ieGlobals.IETEMP exists, and if not, creates it.
+	Checks if globalSettings.IETEMP exists, and if not, creates it.
 '''
 def checkTempDir():
-	if not os.path.exists(ieGlobals.IETEMP):
-		makeDirs(ieGlobals.IETEMP)
+	if not os.path.exists(globalSettings.IETEMP):
+		makeDirs(globalSettings.IETEMP)
 
 '''
 	Method: join
@@ -606,7 +607,7 @@ def runCommand(processArgs,env=None):
 
 		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
 		try:
-			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, ieGlobals.KEY_ALL_ACCESS)
+			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, globalSettings.KEY_ALL_ACCESS)
 		except:
 			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
 		# 1 (True) is the value
@@ -631,7 +632,7 @@ def runCommand(processArgs,env=None):
 	Executes a given python file.
 '''
 def runPython(pythonFile):
-	return os.system(ieGlobals.IEPYTHON + ' ' + pythonFile)
+	return os.system(globalSettings.IEPYTHON + ' ' + pythonFile)
 
 
 ####################### Update Operations #######################
@@ -643,7 +644,7 @@ def runPython(pythonFile):
 '''
 def updateTools(toolsDir=None):
 	if not toolsDir:
-		toolsDir = ieGlobals.TOOLS_ROOT
+		toolsDir = globalSettings.TOOLS_ROOT
 
 	# if the tools haven't been installed to the root, copy them now
 	try:
@@ -663,7 +664,7 @@ def updateTools(toolsDir=None):
 		print '\nTools installed: %s, updating with git command line' % toolsDir
 		os.system(toolsDir.split(':')[0] + ': && \
 					cd ' + toolsDir + ' && ' +
-					'"' + ieGlobals.GIT_EXE + '"' + ' pull')
+					'"' + globalSettings.GIT_EXE + '"' + ' pull')
 		return True
 
 	return False
@@ -719,7 +720,7 @@ def startSubprocess(processArgs,env=None):
 
 		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
 		try:
-			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, ieGlobals.KEY_ALL_ACCESS)
+			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, globalSettings.KEY_ALL_ACCESS)
 		except:
 			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
 		# 1 (True) is the value
