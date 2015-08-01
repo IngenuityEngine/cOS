@@ -7,7 +7,8 @@ import cOS
 import ieInit
 ieInit.init()
 
-import ieGlobals
+import settingsManager
+globalSettings = settingsManager.globalSettings()
 
 import unittest
 
@@ -62,7 +63,7 @@ class cOSTest(unittest.TestCase):
 
 	def test_checkTempDir(self):
 		cOS.checkTempDir()
-		self.assertTrue(os.path.isdir(ieGlobals.IETEMP))
+		self.assertTrue(os.path.isdir(globalSettings.IETEMP))
 
 	def test_emptyDir(self):
 		cOS.emptyDir('sandbox/')
@@ -94,11 +95,11 @@ class cOSTest(unittest.TestCase):
 
 	def test_universalPath(self):
 		uni = cOS.universalPath('Q:/test_file')
-		self.assertEqual(uni, ieGlobals.UNIVERSAL_ROOT + 'test_file')
+		self.assertEqual(uni, globalSettings.UNIVERSAL_ROOT + 'test_file')
 
 	def test_osPath(self):
 		os = cOS.osPath('$root/test_file')
-		self.assertEqual(os, ieGlobals.ROOT + 'test_file')
+		self.assertEqual(os, globalSettings.ROOT + 'test_file')
 
 	def test_ensureEndingSlash(self):
 		normalized = cOS.ensureEndingSlash('path/to/dir')
