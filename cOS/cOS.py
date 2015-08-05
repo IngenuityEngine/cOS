@@ -140,8 +140,6 @@ def unicodeToString(partialJSON):
 	else:
 		return partialJSON
 
-
-
 ###################### Extension Operations ##########################
 
 '''
