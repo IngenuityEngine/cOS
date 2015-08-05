@@ -132,11 +132,11 @@ def osPath(path):
 def unicodeToString(partialJSON):
 	inputType = type(partialJSON)
 	if isinstance(partialJSON, StringTypes):
-		return str(dictionary)
+		return str(partialJSON)
 	elif inputType == ListType:
 		return [unicodeToString(x) for x in partialJSON]
 	elif inputType == DictType:
-		return {unicodeToString(x) for x in partialJSON}
+		return {unicodeToString(x): unicodeToString(partialJSON[x]) for x in partialJSON}
 	else:
 		return partialJSON
 
