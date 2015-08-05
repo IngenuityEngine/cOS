@@ -24,6 +24,7 @@ import glob
 import shutil
 from distutils import dir_util
 import re
+from types import *
 
 # globalSettings
 #-----------------------------------------------------------------------------
@@ -122,6 +123,23 @@ def osPath(path):
 		intent is that paths are translated on Windows, Mac, and Linux"""
 	# fix: should get the root drive from somewhere, case insensitive regex
 	return path.replace(globalSettings.UNIVERSAL_ROOT, globalSettings.ROOT)
+
+'''
+	Method: unicodeDictToString
+	Converts the output of a json.loads operation (returning unicode encoding)
+	to byte strings.
+'''
+def unicodeToString(partialJSON):
+	inputType = type(partialJSON)
+	if isinstance(partialJSON, StringTypes):
+		return str(dictionary)
+	elif inputType == ListType:
+		return [unicodeToString(x) for x in partialJSON]
+	elif inputType == DictType:
+		return {unicodeToString(x) for x in partialJSON}
+	else:
+		return partialJSON
+
 
 
 ###################### Extension Operations ##########################
