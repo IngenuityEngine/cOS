@@ -411,10 +411,10 @@ def removeDir(path):
 		waitTime - 5 by default, how many seconds to wait.
 '''
 def emptyDir(folder,onlyFiles=False, waitTime=5):
-	if onlyFiles:
-		print 'Deleting all files in: %s' % folder
-	else:
-		print 'Deleting all files and folders in: %s' % folder
+	# if onlyFiles:
+	# 	print 'Deleting all files in: %s' % folder
+	# else:
+	# 	print 'Deleting all files and folders in: %s' % folder
 
 	startTime = time.time()
 	for root, dirs, files in os.walk(folder):
