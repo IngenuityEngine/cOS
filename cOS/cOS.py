@@ -23,6 +23,7 @@ import subprocess
 import glob
 import shutil
 from distutils import dir_util
+from types import *
 import re
 
 # globalSettings
