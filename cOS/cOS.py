@@ -98,6 +98,9 @@ def normalizePath(path):
 def unixPath(path):
 	"""changes backslashes to forward slashes.
 	also removes any successive slashes, ex: \\ or \/"""
+	url = path.split('://')
+	if len(url) > 1:
+		return url[0] + '://' + re.sub(r'[\\/]+', '/', url[1])
 	return re.sub(r'[\\/]+', '/', path)
 
 '''
