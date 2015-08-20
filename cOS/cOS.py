@@ -282,6 +282,7 @@ def getFrameRange(path):
 
 	minFrame = 9999999
 	maxFrame = -9999999
+	print baseInFile[0:percentLoc] + '*'
 	for f in glob.iglob(baseInFile[0:percentLoc] + '*'):
 		print 'file:', f
 		frame = f[percentLoc:(percentLoc + padding)]
@@ -289,6 +290,9 @@ def getFrameRange(path):
 			frame = int(frame)
 			maxFrame = max(maxFrame,frame)
 			minFrame = min(minFrame,frame)
+
+	if minFrame == 9999999 or maxFrame == -9999999:
+		return False
 
 	return {'min': minFrame,
 			'max': maxFrame,
