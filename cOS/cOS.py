@@ -23,7 +23,7 @@ import subprocess
 import glob
 import shutil
 from distutils import dir_util
-from types import *
+import types
 import re
 from types import *
 
@@ -127,7 +127,7 @@ def osPath(path):
 		intent is that paths are translated on Windows, Mac, and Linux"""
 	# fix: should get the root drive from somewhere, case insensitive regex
 	return path.replace(globalSettings.UNIVERSAL_ROOT, globalSettings.ROOT)
-	
+
 '''
 	Method: unicodeDictToString
 	Converts the output of a json.loads operation (returning unicode encoding)
@@ -135,12 +135,14 @@ def osPath(path):
 '''
 def unicodeToString(partialJSON):
 	inputType = type(partialJSON)
-	if isinstance(partialJSON, StringTypes):
+	if isinstance(partialJSON, types.StringTypes):
 		return str(partialJSON)
-	elif inputType == ListType:
+	elif inputType == types.ListType:
 		return [unicodeToString(x) for x in partialJSON]
-	elif inputType == DictType:
-		return {unicodeToString(x): unicodeToString(partialJSON[x]) for x in partialJSON}
+	elif inputType == types.DictType:
+		# uncomment in Sublime 3
+		# return {unicodeToString(x): unicodeToString(partialJSON[x]) for x in partialJSON}
+		return dict([(unicodeToString(x), unicodeToString(partialJSON[x])) for x in partialJSON])
 	else:
 		return partialJSON
 
@@ -296,12 +298,17 @@ def getFrameRange(path):
 
 	minFrame = 9999999
 	maxFrame = -9999999
+	print baseInFile[0:percentLoc] + '*'
 	for f in glob.iglob(baseInFile[0:percentLoc] + '*'):
+		print 'file:', f
 		frame = f[percentLoc:(percentLoc + padding)]
 		if frame.isdigit():
 			frame = int(frame)
 			maxFrame = max(maxFrame,frame)
 			minFrame = min(minFrame,frame)
+
+	if minFrame == 9999999 or maxFrame == -9999999:
+		return False
 
 	return {'min': minFrame,
 			'max': maxFrame,
@@ -601,19 +608,22 @@ def killJobProcesses(nodesOnly=True):
 	"""Ruthlessly kills off all other processes on the render node"""
 	if 'psutil' in globals():
 		print 'No psutil module found'
+		return False
 	if not nodesOnly or 'RENDER' in os.environ['COMPUTERNAME']:
 		currentProcess = os.getpid()
 		processParent = getParentPID()
 		for p in psutil.process_iter():
 			try:
-				if '3dsmax' in p.name or \
-					'Nuke' in p.name or \
-					'modo' in p.name or \
-					'ffmpeg' in p.name or \
-					('cmd.exe' in p.name and p.pid != processParent) or \
-					('python.exe' in p.name and p.pid != currentProcess) or \
-					'maxwell' in p.name:
-					print 'Terminating %s' % p.name
+				name = p.name.lower()
+				if '3dsmax' in name or \
+					'quicktimehelper' in name or \
+					'nuke' in name or \
+					'modo' in name or \
+					'ffmpeg' in name or \
+					('cmd.exe' in name and p.pid != processParent) or \
+					('python.exe' in name and p.pid != currentProcess) or \
+					'maxwell' in name:
+					print 'Terminating %s' % name
 					p.terminate()
 			except:
 				pass
