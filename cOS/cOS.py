@@ -592,19 +592,22 @@ def killJobProcesses(nodesOnly=True):
 	"""Ruthlessly kills off all other processes on the render node"""
 	if 'psutil' in globals():
 		print 'No psutil module found'
+		return False
 	if not nodesOnly or 'RENDER' in os.environ['COMPUTERNAME']:
 		currentProcess = os.getpid()
 		processParent = getParentPID()
 		for p in psutil.process_iter():
 			try:
-				if '3dsmax' in p.name or \
-					'Nuke' in p.name or \
-					'modo' in p.name or \
-					'ffmpeg' in p.name or \
-					('cmd.exe' in p.name and p.pid != processParent) or \
-					('python.exe' in p.name and p.pid != currentProcess) or \
-					'maxwell' in p.name:
-					print 'Terminating %s' % p.name
+				name = p.name.lower()
+				if '3dsmax' in name or \
+					'quicktimehelper' in name or \
+					'nuke' in name or \
+					'modo' in name or \
+					'ffmpeg' in name or \
+					('cmd.exe' in name and p.pid != processParent) or \
+					('python.exe' in name and p.pid != currentProcess) or \
+					'maxwell' in name:
+					print 'Terminating %s' % name
 					p.terminate()
 			except:
 				pass
