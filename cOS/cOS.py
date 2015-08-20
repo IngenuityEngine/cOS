@@ -23,7 +23,7 @@ import subprocess
 import glob
 import shutil
 from distutils import dir_util
-from types import *
+import types
 import re
 
 # globalSettings
@@ -126,7 +126,7 @@ def osPath(path):
 		intent is that paths are translated on Windows, Mac, and Linux"""
 	# fix: should get the root drive from somewhere, case insensitive regex
 	return path.replace(globalSettings.UNIVERSAL_ROOT, globalSettings.ROOT)
-	
+
 '''
 	Method: unicodeDictToString
 	Converts the output of a json.loads operation (returning unicode encoding)
@@ -134,12 +134,14 @@ def osPath(path):
 '''
 def unicodeToString(partialJSON):
 	inputType = type(partialJSON)
-	if isinstance(partialJSON, StringTypes):
+	if isinstance(partialJSON, types.StringTypes):
 		return str(partialJSON)
-	elif inputType == ListType:
+	elif inputType == types.ListType:
 		return [unicodeToString(x) for x in partialJSON]
-	elif inputType == DictType:
-		return {unicodeToString(x): unicodeToString(partialJSON[x]) for x in partialJSON}
+	elif inputType == types.DictType:
+		# uncomment in Sublime 3
+		# return {unicodeToString(x): unicodeToString(partialJSON[x]) for x in partialJSON}
+		return dict([(unicodeToString(x), unicodeToString(partialJSON[x])) for x in partialJSON])
 	else:
 		return partialJSON
 
