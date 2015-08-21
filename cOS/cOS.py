@@ -758,8 +758,6 @@ def startSubprocess(processArgs,env=None):
 	#     subprocess_flags = 0
 	command = ''
 	if arkUtil.varType(processArgs) == 'list':
-		print '\n\n\n\n\n\n\n\nprocessArgs[0]'
-		print processArgs[0]
 		if processArgs[0][0] != '"':
 			processArgs[0] = '"' + processArgs[0] + '"'
 
@@ -770,5 +768,4 @@ def startSubprocess(processArgs,env=None):
 	else:
 		print 'command:\n', processArgs
 
-	# return subprocess.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
 	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
