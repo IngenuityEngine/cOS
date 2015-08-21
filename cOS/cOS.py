@@ -758,6 +758,7 @@ def startSubprocess(processArgs,env=None):
 	#     subprocess_flags = 0
 	command = ''
 	if arkUtil.varType(processArgs) == 'list':
+		print processArgs[0]
 		if processArgs[0][0] != '"':
 			processArgs[0] = '"' + processArgs[0] + '"'
 
