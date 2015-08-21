@@ -284,7 +284,6 @@ def getFrameRange(path):
 	maxFrame = -9999999
 	print baseInFile[0:percentLoc] + '*'
 	for f in glob.iglob(baseInFile[0:percentLoc] + '*'):
-		print 'file:', f
 		frame = f[percentLoc:(percentLoc + padding)]
 		if frame.isdigit():
 			frame = int(frame)
