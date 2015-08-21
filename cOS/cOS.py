@@ -600,7 +600,6 @@ def killJobProcesses(nodesOnly=True):
 			try:
 				name = p.name.lower()
 				if '3dsmax' in name or \
-					'quicktimehelper' in name or \
 					'nuke' in name or \
 					'modo' in name or \
 					'ffmpeg' in name or \
