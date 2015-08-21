@@ -772,11 +772,12 @@ def startSubprocess(processArgs,env=None):
 
 	# else:
 	#     subprocess_flags = 0
-
 	command = ''
 	if arkUtil.varType(processArgs) == 'list':
-		command = '"' + processArgs[0] + '" '
-		for i in range(1, len(processArgs)):
+		if processArgs[0][0] != '"':
+			processArgs[0] = '"' + processArgs[0] + '"'
+
+		for i in range(0, len(processArgs)):
 			processArgs[i] = str(processArgs[i])
 			command += str(processArgs[i]) + ' '
 		print 'command:\n', command
