@@ -282,7 +282,6 @@ def getFrameRange(path):
 
 	minFrame = 9999999
 	maxFrame = -9999999
-	print baseInFile[0:percentLoc] + '*'
 	for f in glob.iglob(baseInFile[0:percentLoc] + '*'):
 		frame = f[percentLoc:(percentLoc + padding)]
 		if frame.isdigit():
@@ -758,8 +757,8 @@ def startSubprocess(processArgs,env=None):
 	#     subprocess_flags = 0
 	command = ''
 	if arkUtil.varType(processArgs) == 'list':
-		if processArgs[0][0] != '"':
-			processArgs[0] = '"' + processArgs[0] + '"'
+		# if processArgs[0][0] != '"':
+		# 	processArgs[0] = '"' + processArgs[0] + '"'
 
 		for i in range(0, len(processArgs)):
 			processArgs[i] = str(processArgs[i])
