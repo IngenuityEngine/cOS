@@ -675,8 +675,9 @@ def updateTools(toolsDir=None):
 		return
 
 	if not toolsDir:
-		toolsDir = globalSettings.TOOLS_ROOT
+		toolsDir = globalSettings.ARK_ROOT
 
+	print toolsDir + 'bin/hardUpdate.bat'
 	os.system(toolsDir + 'bin/hardUpdate.bat')
 	print 'Tools updated'
 	# if the tools haven't been installed to the root, copy them now
