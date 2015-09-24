@@ -1075,12 +1075,12 @@ contains: function(excludes, path)
 	Method: runPython
 
 	Executes a given python file.
-	fix: globalSettings.IEPYTHON currently hardcoded.
+	fix: globalSettings.PYTHON currently hardcoded.
 */
 // runPython: function(pythonFile)
 // {
-// 	var IEPYTHON = 'C:/Python27/python.exe'
-// 	return child_process.exec(IEPYTHON, [pythonFile])
+// 	var PYTHON = 'C:/Python27/python.exe'
+// 	return child_process.exec(PYTHON, [pythonFile])
 // },
 
 /*

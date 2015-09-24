@@ -63,7 +63,7 @@ class cOSTest(unittest.TestCase):
 
 	def test_checkTempDir(self):
 		cOS.checkTempDir()
-		self.assertTrue(os.path.isdir(globalSettings.IETEMP))
+		self.assertTrue(os.path.isdir(globalSettings.TEMP))
 
 	def test_emptyDir(self):
 		cOS.emptyDir('sandbox/')

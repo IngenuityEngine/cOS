@@ -348,11 +348,11 @@ def isDir(path):
 '''
 	Method: checkTempDir
 
-	Checks if globalSettings.IETEMP exists, and if not, creates it.
+	Checks if globalSettings.TEMP exists, and if not, creates it.
 '''
 def checkTempDir():
-	if not os.path.exists(globalSettings.IETEMP):
-		makeDirs(globalSettings.IETEMP)
+	if not os.path.exists(globalSettings.TEMP):
+		makeDirs(globalSettings.TEMP)
 
 '''
 	Method: join
@@ -659,7 +659,7 @@ def runCommand(processArgs,env=None):
 	Executes a given python file.
 '''
 def runPython(pythonFile):
-	return os.system(globalSettings.IEPYTHON + ' ' + pythonFile)
+	return os.system(globalSettings.PYTHON + ' ' + pythonFile)
 
 
 ####################### Update Operations #######################
