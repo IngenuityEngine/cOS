@@ -278,11 +278,13 @@ def getFrameRange(path):
 
 	# second character after the %
 	# ex: %04d returns 4
-	try:
-		padding = int(baseInFile[percentLoc + 2])
-	except Exception as e:
+
+	padding = re.findall(r'%([0-9]+)d', path)
+	if len(padding):
+		padding = padding[0]
+	else:
 		print 'Invalid padding:'
-		print e
+		print path
 		return False
 
 	minFrame = 9999999
