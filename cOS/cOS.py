@@ -281,7 +281,7 @@ def getFrameRange(path):
 
 	padding = re.findall(r'%([0-9]+)d', path)
 	if len(padding):
-		padding = padding[0]
+		padding = int(padding[0])
 	else:
 		print 'Invalid padding:'
 		print path
