@@ -218,7 +218,7 @@ def getVersion(filename):
 	Returns directory name of a file with a trailing '/'.
 '''
 def getDir(filename):
-	return os.path.dirname(filename) + '/'
+	return normalizeDir(os.path.dirname(filename))
 
 '''
 	Method: upADir
@@ -278,7 +278,12 @@ def getFrameRange(path):
 
 	# second character after the %
 	# ex: %04d returns 4
-	padding = int(baseInFile[percentLoc + 2])
+	try:
+		padding = int(baseInFile[percentLoc + 2])
+	except Exception as e:
+		print 'Invalid padding:'
+		print e
+		return False
 
 	minFrame = 9999999
 	maxFrame = -9999999
@@ -772,4 +777,5 @@ def startSubprocess(processArgs,env=None):
 	else:
 		print 'command:\n', processArgs
 
+	# return subprocess.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
 	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
