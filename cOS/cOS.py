@@ -272,6 +272,7 @@ def getFrameRange(path):
 	baseInFile, ext = os.path.splitext(path)
 	# fix: this is done terribly, should be far more generic
 	percentLoc = baseInFile.find('%')
+	extension = fileExtension(path)
 
 	if percentLoc == -1:
 		raise Exception('Frame padding not found in: ' + path)
@@ -289,7 +290,8 @@ def getFrameRange(path):
 
 	minFrame = 9999999
 	maxFrame = -9999999
-	for f in glob.iglob(baseInFile[0:percentLoc] + '*'):
+	files = list(glob.iglob(baseInFile[0:percentLoc] + '*.' + extension))
+	for f in files:
 		frame = f[percentLoc:(percentLoc + padding)]
 		if frame.isdigit():
 			frame = int(frame)
@@ -299,10 +301,15 @@ def getFrameRange(path):
 	if minFrame == 9999999 or maxFrame == -9999999:
 		return False
 
-	return {'min': minFrame,
+	duration = maxFrame - minFrame + 1
+	count = len(files)
+	return {
+			'min': minFrame,
 			'max': maxFrame,
 			'base': baseInFile,
-			'ext': ext}
+			'ext': ext,
+			'complete': duration == count,
+		}
 
 ######################### System Operations ############################
 
@@ -781,3 +788,8 @@ def startSubprocess(processArgs,env=None):
 
 	# return subprocess.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
 	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
+
+
+if __name__ == '__main__':
+	path = 'C:/Trash/sequenceTesting/sequence2.%04d.jpg'
+	print getFrameRange(path)
