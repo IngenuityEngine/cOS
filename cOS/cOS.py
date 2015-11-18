@@ -210,6 +210,28 @@ def getVersion(filename):
 	return 0
 
 
+'''
+	Method: getHighestVersion
+
+	Returns highest version from a given root, matching a given extension.
+'''
+def getHighestVersion(root, extension):
+	# fix: should have normalize extension
+	# ensure dot on extension
+	if extension[0] != '.':
+		extension = '.' + extension
+
+	root = normalizeDir(root)
+	highestVersion = -99999999
+	path = False
+	for f in glob.iglob(root + '*' + extension):
+		fileVersion = getVersion(f)
+		if fileVersion > highestVersion:
+			path = unixPath(f)
+			highestVersion = fileVersion
+
+	return path
+
 ################### Information Retrieval ######################
 
 '''
@@ -306,6 +328,7 @@ def getFrameRange(path):
 	return {
 			'min': minFrame,
 			'max': maxFrame,
+			'duration': duration,
 			'base': baseInFile,
 			'ext': ext,
 			'complete': duration == count,
@@ -684,38 +707,39 @@ def runPython(pythonFile):
 	Updates tools from the git repo if available.
 '''
 def updateTools(toolsDir=None):
-	if not globalSettings.IS_NODE:
-		print 'Bailing on update, not a node'
-		return
+	return True
+	# if not globalSettings.IS_NODE:
+	# 	print 'Bailing on update, not a node'
+	# 	return
 
-	if not toolsDir:
-		toolsDir = globalSettings.ARK_ROOT
+	# if not toolsDir:
+	# 	toolsDir = globalSettings.ARK_ROOT
 
-	print toolsDir + 'bin/hardUpdate.bat'
-	os.system(toolsDir + 'bin/hardUpdate.bat')
-	print 'Tools updated'
-	# if the tools haven't been installed to the root, copy them now
-	# try:
-	# 	import git
-	# except:
-	# 	git = None
+	# print toolsDir + 'bin/hardUpdate.bat'
+	# os.system(toolsDir + 'bin/hardUpdate.bat')
+	# print 'Tools updated'
+	# # if the tools haven't been installed to the root, copy them now
+	# # try:
+	# # 	import git
+	# # except:
+	# # 	git = None
 
-	# if git:
-	# 	try:
-	# 		print '\nTools installed: %s, updating with git python' % toolsDir
-	# 		repo = git.Repo(toolsDir)
-	# 		print repo.git.pull()
-	# 		return True
-	# 	except Exception as err:
-	# 		print '\nError updating tools with git python: ', err
-	# if os.path.isdir(toolsDir + '.git'):
-	# 	print '\nTools installed: %s, updating with git command line' % toolsDir
-	# 	os.system(toolsDir.split(':')[0] + ': && \
-	# 				cd ' + toolsDir + ' && ' +
-	# 				'"' + globalSettings.GIT_EXE + '"' + ' pull')
-	# 	return True
+	# # if git:
+	# # 	try:
+	# # 		print '\nTools installed: %s, updating with git python' % toolsDir
+	# # 		repo = git.Repo(toolsDir)
+	# # 		print repo.git.pull()
+	# # 		return True
+	# # 	except Exception as err:
+	# # 		print '\nError updating tools with git python: ', err
+	# # if os.path.isdir(toolsDir + '.git'):
+	# # 	print '\nTools installed: %s, updating with git command line' % toolsDir
+	# # 	os.system(toolsDir.split(':')[0] + ': && \
+	# # 				cd ' + toolsDir + ' && ' +
+	# # 				'"' + globalSettings.GIT_EXE + '"' + ' pull')
+	# # 	return True
 
-	return False
+	# return False
 
 '''
 	Method: isWindows
