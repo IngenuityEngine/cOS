@@ -226,6 +226,28 @@ def getVersion(filename):
 	return 0
 
 
+'''
+	Method: getHighestVersion
+
+	Returns highest version from a given root, matching a given extension.
+'''
+def getHighestVersion(root, extension):
+	# fix: should have normalize extension
+	# ensure dot on extension
+	if extension[0] != '.':
+		extension = '.' + extension
+
+	root = normalizeDir(root)
+	highestVersion = -99999999
+	path = False
+	for f in glob.iglob(root + '*' + extension):
+		fileVersion = getVersion(f)
+		if fileVersion > highestVersion:
+			path = unixPath(f)
+			highestVersion = fileVersion
+
+	return path
+
 ################### Information Retrieval ######################
 
 '''
@@ -288,6 +310,7 @@ def getFrameRange(path):
 	baseInFile, ext = os.path.splitext(path)
 	# fix: this is done terribly, should be far more generic
 	percentLoc = baseInFile.find('%')
+	extension = fileExtension(path)
 
 	if percentLoc == -1:
 		raise Exception('Frame padding not found in: ' + path)
@@ -305,7 +328,8 @@ def getFrameRange(path):
 
 	minFrame = 9999999
 	maxFrame = -9999999
-	for f in glob.iglob(baseInFile[0:percentLoc] + '*'):
+	files = list(glob.iglob(baseInFile[0:percentLoc] + '*.' + extension))
+	for f in files:
 		frame = f[percentLoc:(percentLoc + padding)]
 		if frame.isdigit():
 			frame = int(frame)
@@ -315,10 +339,16 @@ def getFrameRange(path):
 	if minFrame == 9999999 or maxFrame == -9999999:
 		return False
 
-	return {'min': minFrame,
+	duration = maxFrame - minFrame + 1
+	count = len(files)
+	return {
+			'min': minFrame,
 			'max': maxFrame,
+			'duration': duration,
 			'base': baseInFile,
-			'ext': ext}
+			'ext': ext,
+			'complete': duration == count,
+		}
 
 ######################### System Operations ############################
 
@@ -693,38 +723,39 @@ def runPython(pythonFile):
 	Updates tools from the git repo if available.
 '''
 def updateTools(toolsDir=None):
-	if not globalSettings.IS_NODE:
-		print 'Bailing on update, not a node'
-		return
+	return True
+	# if not globalSettings.IS_NODE:
+	# 	print 'Bailing on update, not a node'
+	# 	return
 
-	if not toolsDir:
-		toolsDir = globalSettings.ARK_ROOT
+	# if not toolsDir:
+	# 	toolsDir = globalSettings.ARK_ROOT
 
-	print toolsDir + 'bin/hardUpdate.bat'
-	os.system(toolsDir + 'bin/hardUpdate.bat')
-	print 'Tools updated'
-	# if the tools haven't been installed to the root, copy them now
-	# try:
-	# 	import git
-	# except:
-	# 	git = None
+	# print toolsDir + 'bin/hardUpdate.bat'
+	# os.system(toolsDir + 'bin/hardUpdate.bat')
+	# print 'Tools updated'
+	# # if the tools haven't been installed to the root, copy them now
+	# # try:
+	# # 	import git
+	# # except:
+	# # 	git = None
 
-	# if git:
-	# 	try:
-	# 		print '\nTools installed: %s, updating with git python' % toolsDir
-	# 		repo = git.Repo(toolsDir)
-	# 		print repo.git.pull()
-	# 		return True
-	# 	except Exception as err:
-	# 		print '\nError updating tools with git python: ', err
-	# if os.path.isdir(toolsDir + '.git'):
-	# 	print '\nTools installed: %s, updating with git command line' % toolsDir
-	# 	os.system(toolsDir.split(':')[0] + ': && \
-	# 				cd ' + toolsDir + ' && ' +
-	# 				'"' + globalSettings.GIT_EXE + '"' + ' pull')
-	# 	return True
+	# # if git:
+	# # 	try:
+	# # 		print '\nTools installed: %s, updating with git python' % toolsDir
+	# # 		repo = git.Repo(toolsDir)
+	# # 		print repo.git.pull()
+	# # 		return True
+	# # 	except Exception as err:
+	# # 		print '\nError updating tools with git python: ', err
+	# # if os.path.isdir(toolsDir + '.git'):
+	# # 	print '\nTools installed: %s, updating with git command line' % toolsDir
+	# # 	os.system(toolsDir.split(':')[0] + ': && \
+	# # 				cd ' + toolsDir + ' && ' +
+	# # 				'"' + globalSettings.GIT_EXE + '"' + ' pull')
+	# # 	return True
 
-	return False
+	# return False
 
 '''
 	Method: isWindows
@@ -797,3 +828,8 @@ def startSubprocess(processArgs,env=None):
 
 	# return subprocess.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
 	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
+
+
+if __name__ == '__main__':
+	path = 'C:/Trash/sequenceTesting/sequence2.%04d.jpg'
+	print getFrameRange(path)
