@@ -723,39 +723,22 @@ def runPython(pythonFile):
 	Updates tools from the git repo if available.
 '''
 def updateTools(toolsDir=None):
-	return True
-	# if not globalSettings.IS_NODE:
-	# 	print 'Bailing on update, not a node'
-	# 	return
+	# return True
+	if not globalSettings.IS_NODE:
+		print 'Bailing on update, not a node'
+		return
 
-	# if not toolsDir:
-	# 	toolsDir = globalSettings.ARK_ROOT
+	toolsDir = globalSettings.ARK_ROOT
 
-	# print toolsDir + 'bin/hardUpdate.bat'
-	# os.system(toolsDir + 'bin/hardUpdate.bat')
-	# print 'Tools updated'
-	# # if the tools haven't been installed to the root, copy them now
-	# # try:
-	# # 	import git
-	# # except:
-	# # 	git = None
-
-	# # if git:
-	# # 	try:
-	# # 		print '\nTools installed: %s, updating with git python' % toolsDir
-	# # 		repo = git.Repo(toolsDir)
-	# # 		print repo.git.pull()
-	# # 		return True
-	# # 	except Exception as err:
-	# # 		print '\nError updating tools with git python: ', err
-	# # if os.path.isdir(toolsDir + '.git'):
-	# # 	print '\nTools installed: %s, updating with git command line' % toolsDir
-	# # 	os.system(toolsDir.split(':')[0] + ': && \
-	# # 				cd ' + toolsDir + ' && ' +
-	# # 				'"' + globalSettings.GIT_EXE + '"' + ' pull')
-	# # 	return True
-
-	# return False
+	try:
+		print toolsDir + 'bin/hardUpdate.bat'
+		os.system(toolsDir + 'bin/hardUpdate.bat')
+		print 'Tools updated'
+		return True
+	except Exception as err:
+		print 'Failed to update tools:', err
+		pass
+		return False
 
 '''
 	Method: isWindows
