@@ -196,7 +196,7 @@ def getConvertFile(outFile):
 '''
 def incrementVersion(filename):
 	version = getVersion(filename) + 1
-	return re.sub('[vV][0-9]+', 'v%03d' % version, filename)
+	return re.sub('[vV][0-9]+', 'v%04d' % version, filename)
 
 '''
 	Method: getVersion
