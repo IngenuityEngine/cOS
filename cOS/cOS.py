@@ -212,7 +212,7 @@ def getConvertFile(outFile):
 '''
 def incrementVersion(filename):
 	version = getVersion(filename) + 1
-	return re.sub('[vV][0-9]+', 'v%03d' % version, filename)
+	return re.sub('[vV][0-9]+', 'v%04d' % version, filename)
 
 '''
 	Method: getVersion
@@ -653,6 +653,8 @@ def killJobProcesses(nodesOnly=True):
 				if '3dsmax' in name or \
 					'nuke' in name or \
 					'modo' in name or \
+					'maya' in name or \
+					'vray' in name or \
 					'ffmpeg' in name or \
 					('cmd.exe' in name and p.pid != processParent) or \
 					('python.exe' in name and p.pid != currentProcess) or \
