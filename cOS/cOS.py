@@ -637,6 +637,8 @@ def killJobProcesses(nodesOnly=True):
 				if '3dsmax' in name or \
 					'nuke' in name or \
 					'modo' in name or \
+					'maya' in name or \
+					'vray' in name or \
 					'ffmpeg' in name or \
 					('cmd.exe' in name and p.pid != processParent) or \
 					('python.exe' in name and p.pid != currentProcess) or \
