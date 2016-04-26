@@ -220,7 +220,9 @@ getFileInfo: function(file, options)
 
 	if (options.lowercaseNames)
 	{
-		_.each(fileInfo, function(val, key) { fileInfo[key] = val.toLowerCase() })
+		_.each(fileInfo, function(val, key) {
+			fileInfo[key] = val.toLowerCase()
+		})
 	}
 
 	return fileInfo
@@ -565,7 +567,7 @@ compileFiles: function(files, compileFunction, options, callback)
 	}
 
 	var compiledFiles = []
-	var compileFuncs = _.collect(files, function(fileInfo)
+	var compileFuncs = _.map(files, function(fileInfo)
 	{
 		return function(done)
 		{
@@ -887,7 +889,7 @@ getFileContents: function(fileInfos, options, callback)
 	}
 
 	fileInfos = cOS.ensureArray(fileInfos)
-	var contentsFuncs = _.collect(fileInfos, function(fileInfo)
+	var contentsFuncs = _.map(fileInfos, function(fileInfo)
 	{
 		return function(cb)
 		{
