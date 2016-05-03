@@ -546,6 +546,38 @@ shouldExclude: function(excludes, path)
 	return exclude
 },
 
+makeDirs: function(directory, mode, callback)
+{
+	if (_.isFunction(mode))
+	{
+		callback = mode
+		mode = undefined
+	}
+
+	directory = cOS.ensureEndingSlash(cOS.unixPath(directory))
+	var parts = directory.split('/').reverse()
+	var currentDirectory = parts.pop() + '/'
+
+	var functions = _.map(_.range(parts.length + 1), function()
+	{
+		return function(callback)
+		{
+			fs.mkdir(currentDirectory, mode, function(err)
+			{
+				// accept exists error or root drive error
+				if (!err ||
+					(err.errno == -4075 || err.errno == -4048))
+				{
+					currentDirectory += parts.pop() + '/'
+					return callback()
+				}
+				callback(err)
+			})
+		}
+	})
+
+	async.series(functions, callback)
+},
 /*
 	Method: compileFiles
 
