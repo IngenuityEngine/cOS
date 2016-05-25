@@ -10,12 +10,14 @@
   "dependencies": {
     "async": "*",
     "copysync": "^0",
-    "expect.js": "^0",
     "glob": "^7",
     "lodash": "^4",
     "mkdirp": "^0",
-    "mocha": "^2",
     "readdirp": "^2"
+  },
+  "devDependencies": {
+    "expect.js": "^0",
+    "mocha": "^2"
   },
   "bin": {},
   "keywords": [],
