@@ -899,40 +899,6 @@ getFileContents: function(fileInfos, options, callback)
 		})
 },
 
-
-// fix: should fail gracefully
-// build: function(options, callback)
-// {
-// 	if (_.isFunction(options))
-// 	{
-// 		callback = options
-// 		options = {}
-// 	}
-
-// 	console.log('Searching:')
-// 	_.each(options.searchPaths, function(path)
-// 	{
-// 		console.log(path)
-// 	})
-// 	console.log('\nFor:', options.extensions)
-
-// 	_.defaults(options, {
-// 										asString: true,
-// 										lowercaseNames: false
-// 									})
-
-
-// 	async.waterfall(
-// 		[
-// 			function(cb) {
-// 				cOS.collectFiles(options.searchPaths, options.extensions, options, cb)
-// 			},
-// 			function(allFiles, cb) {
-// 				cOS.build(allFiles, templateManager.compile, options, cb)
-// 			}
-// 		], callback)
-// },
-
 // fix: remove eventually
 /*
 	Method: ensureArray
@@ -947,7 +913,18 @@ ensureArray: function(val)
 		return []
 	return [val]
 },
+/*
+	Method: ensureExtension
 
+	Checks that a given file has the given extension.  If not, appends the extension.
+*/
+ensureExtension: function(filename, extension)
+{
+	extension = cOS.normalizeExtension(extension)
+	if (cOS.getExtension(filename) != extension)
+		return filename + extension
+	return filename
+},
 /*
 	Method: collectFiles
 
