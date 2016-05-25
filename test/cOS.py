@@ -1,7 +1,14 @@
 import sys, os
 import subprocess
 
-sys.path.append(os.path.abspath('../cOS/'))
+sys.path.append(
+	os.path.abspath(
+		os.path.join(
+			os.path.dirname(os.path.realpath(__file__)),
+			'../cOS/')
+		)
+	)
+
 import cOS
 
 import ieInit
@@ -31,18 +38,16 @@ class cOSTest(unittest.TestCase):
 		for i in range(10):
 			os.system('touch sandbox/seq/frame.%04d.exr' % (i + 1510))
 
-
 	def tearDown(self):
 		os.system('rm -rf sandbox')
-
 
 	def test_mkdir(self):
 		cOS.mkdir('testDir')
 		self.assertTrue(os.path.isdir('testDir'))
 		os.system('rmdir testDir')
 
-	def test_fileExtension(self):
-		ext = cOS.fileExtension('file_v001.mb')
+	def test_getExtension(self):
+		ext = cOS.getExtension('file_v001.mb')
 		self.assertEqual(ext, 'mb')
 
 	def test_getVersion(self):
@@ -77,17 +82,13 @@ class cOSTest(unittest.TestCase):
 		self.assertEqual(info['filename'], 'sandbox/file_v001.mb')
 		self.assertEqual(info['filebase'], 'file_v001')
 
-	def test_stripExtension(self):
-		stripped = cOS.stripExtension('sandbox/file_v001.mb')
+	def test_removeExtension(self):
+		stripped = cOS.removeExtension('sandbox/file_v001.mb')
 		self.assertEqual(stripped, 'sandbox/file_v001')
 
-	def test_stripExtensionNoExtension(self):
-		stripped = cOS.stripExtension('path/to/file')
+	def test_removeExtensionNoExtension(self):
+		stripped = cOS.removeExtension('path/to/file')
 		self.assertEqual(stripped, 'path/to/file')
-
-	def test_filePrep(self):
-		prepped = cOS.filePrep('\\sandbox\\file_v001.mb')
-		self.assertEqual(prepped, '/sandbox/file_v001.mb')
 
 	def test_unixPath(self):
 		prepped = cOS.unixPath('\\sandbox\\file_v001.mb')
@@ -136,9 +137,9 @@ class cOSTest(unittest.TestCase):
 
 	def test_normalizeExtension(self):
 		norm = cOS.normalizeExtension('Mb')
-		self.assertEqual(norm, '.mb')
+		self.assertEqual(norm, 'mb')
 		norm = cOS.normalizeExtension('.mb')
-		self.assertEqual(norm, '.mb')
+		self.assertEqual(norm, 'mb')
 
 	def test_upADir(self):
 		parent = cOS.upADir('path/to/a/file/')

@@ -639,16 +639,6 @@ createFolderSync: function(pathName)
 ///////////////////// Normalization Operations \\\\\\\\\\\\\\\\\\\\\\\\
 
 /*
-	Method: filePrep
-
-	Replaces backslashes with forward slashes in path names.
-*/
-filePrep: function(dir)
-{
-	return dir.replace(/\\/g,'/')
-},
-
-/*
 	Method: unixPath
 
 	Changes backslashes to forward slashes and removes successive slashes, ex \\ or \/
@@ -691,17 +681,17 @@ osPath: function(dir)
 normalizeExtension: function(extension)
 {
 	extension = extension.toLowerCase().trim()
-	if (extension[0] != '.')
-		return '.' + extension
+	if (extension[0] == '.')
+		return extension.slice(1)
 	return extension
 },
 
 /*
-	Method: stripExtension
+	Method: removeExtension
 
 	Removes the extension from a path.  If there is no extension, returns ''
 */
-stripExtension: function(path) {
+removeExtension: function(path) {
 	return path.replace(/\.[^/.]+$/, '')
 },
 
@@ -724,7 +714,7 @@ fileExtension: function(path)
 */
 getConvertFile: function(path)
 {
-	return cOS.stripExtension(path) + '_convert.nk'
+	return cOS.removeExtension(path) + '_convert.nk'
 },
 
 //////////////////////// Versioning Operations ///////////////////////////
@@ -789,7 +779,7 @@ getDir: function(filename)
 getFrameRange: function(path)
 {
 	var baseInFile = cOS.getFileInfo(path).basename
-	var ext = '.' + cOS.fileExtension(path)
+	var ext = '.' + cOS.getExtension(path)
 
 	var percentLoc = baseInFile.indexOf('%')
 

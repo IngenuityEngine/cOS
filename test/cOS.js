@@ -4,6 +4,8 @@
 /////////////////////////
 var _ = require('lodash')
 var expect = require('expect.js')
+var describe = global.describe
+var it = global.it
 // var path = require('path')
 // var fs = require('fs')
 // var path = require('path')
@@ -156,13 +158,6 @@ describe('cOS', function() {
 		})
 	})
 
-	it ('should filePrep', function(done) {
-		expect(cOS.filePrep('\\path\\to\\file')).to.be('/path/to/file')
-		expect(cOS.filePrep('\\\\\\\\//path\\to///\\/\\\\file')).to.be('//////path/to///////file')
-		done()
-
-	})
-
 	it ('should unixPath', function(done) {
 		expect(cOS.unixPath('\\path//to\\\\file')).to.be('/path/to/file')
 		expect(cOS.unixPath('//\\path//to\\\\file\\\\\\')).to.be('/path/to/file/')
@@ -171,22 +166,22 @@ describe('cOS', function() {
 	})
 
 	it ('should universalPath', function(done) {
-		univ = cOS.universalPath('Q:/path/to/file/')
+		var univ = cOS.universalPath('Q:/path/to/file/')
 		expect(univ).to.be('$root/path/to/file/')
 		done()
 	})
 
 	it ('should fileExtension', function(done) {
-		expect(cOS.fileExtension('test.txt')).to.be('txt')
-		expect(cOS.fileExtension('/path/to/file.html')).to.be('html')
-		expect(cOS.fileExtension('/path/to/file/with/no/extension')).to.be('')
+		expect(cOS.getExtension('test.txt')).to.be('txt')
+		expect(cOS.getExtension('/path/to/file.html')).to.be('html')
+		expect(cOS.getExtension('/path/to/file/with/no/extension')).to.be('')
 		done()
 	})
 
-	it ('should stripExtension', function(done) {
-		expect(cOS.stripExtension('text.txt')).to.be('text')
-		expect(cOS.stripExtension('/path/to/file.html')).to.be('/path/to/file')
-		expect(cOS.stripExtension('/path/to/file/with/no/extension')).to.be('/path/to/file/with/no/extension')
+	it ('should removeExtension', function(done) {
+		expect(cOS.removeExtension('text.txt')).to.be('text')
+		expect(cOS.removeExtension('/path/to/file.html')).to.be('/path/to/file')
+		expect(cOS.removeExtension('/path/to/file/with/no/extension')).to.be('/path/to/file/with/no/extension')
 		done()
 	})
 
@@ -222,11 +217,11 @@ describe('cOS', function() {
 
 	it ('should getFrameRange', function(done) {
 		cOS.mkdir('seq')
-		for (i = 0; i < 10; i++)
+		for (var i = 0; i < 10; i+=1)
 			cOS.runCommand('touch', 'seq/filev' + cOS.padLeft(String(i + 1510), '0', 4))
-		info = cOS.getFrameRange('seq/filev%04d')
-		expect(info['min']).to.be(1510)
-		expect(info['max']).to.be(1519)
+		var info = cOS.getFrameRange('seq/filev%04d')
+		expect(info.min).to.be(1510)
+		expect(info.max).to.be(1519)
 		cOS.runCommand('rm', ['-rf, seq'])
 		done()
 	})

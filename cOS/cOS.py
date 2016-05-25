@@ -43,60 +43,43 @@ except:
 
 ##################### Normalization Operations #######################
 
-'''
-	Method: ensureEndingSlash
-
-	Appends a / to the end of a path if it's not there yet.
-'''
 def ensureEndingSlash(path):
+	'''
+		Appends a / to the end of a path if it's not there yet.
+	'''
 	path = unixPath(path)
 	if path[-1] != '/':
 		path = path + '/'
 	return path
 
-'''
-	Method: removeStartingSlash
-
-	Removes backslashes and forward slashes from the beginning of directory names.
-'''
 def removeStartingSlash(path):
+	'''
+		Removes backslashes and forward slashes from the
+		beginning of directory names.
+	'''
 	if (path[0] == '\\' or path[0] == '/'):
 		path = path[1:]
 	return path
 
-'''
-	Method: filePrep
-
-	Replaces backslashes with forward slashes in path names.
-'''
-def filePrep(path):
-	return arkUtil.defaultStringReplace(path).replace('\\','/')
-
-'''
-	Method: normalizeDir
-
-	Dirs always use forward slashses, don't have a leading slash, and have a trailing slash.
-'''
 def normalizeDir(path):
-	path = filePrep(path)
+	'''
+		Dirs always use forward slashses, don't have a leading slash, and have a trailing slash.
+	'''
+	path = unixPath(path)
 	path = removeStartingSlash(path)
 	return ensureEndingSlash(path)
 
-'''
-	Method: normalizePath
-
-	Removes starting slash, and replaces all backslashes with forward slashses.
-'''
 def normalizePath(path):
+	'''
+		Removes starting slash, and replaces all backslashes with forward slashses.
+	'''
 	path = removeStartingSlash(path)
-	return filePrep(path)
+	return unixPath(path)
 
-'''
-	Method: unixPath
-
-	Changes backslashes to forward slashes and removes successive slashes, ex \\ or \/
-'''
 def unixPath(path):
+	'''
+		Changes backslashes to forward slashes and removes successive slashes, ex \\ or \/
+	'''
 	"""changes backslashes to forward slashes.
 	also removes any successive slashes, ex: \\ or \/"""
 	url = path.split('://')
@@ -104,35 +87,10 @@ def unixPath(path):
 		return url[0] + '://' + re.sub(r'[\\/]+', '/', url[1])
 	return re.sub(r'[\\/]+', '/', path)
 
-'''
-	Method: universalPath
-
-	Swaps Universal Root (Q:/) with unix root ($root).
-'''
-def universalPath(path):
-	"""swaps Q:/ with $root/
-		intent is that paths are translated on Windows, Mac, and Linux"""
-	# fix: should get the root drive from somewhere, case insensitive regex
-	path = path.lower()
-	return re.sub('[Qq]:/',globalSettings.UNIVERSAL_ROOT, unixPath(path))
-
-'''
-	Method: osPath
-
-	Swaps unix root ($root) with Universal Root (Q:/)
-'''
-def osPath(path):
-	"""swaps $root/ with Q:/
-		intent is that paths are translated on Windows, Mac, and Linux"""
-	# fix: should get the root drive from somewhere, case insensitive regex
-	return path.replace(globalSettings.UNIVERSAL_ROOT, globalSettings.ROOT)
-
-'''
-	Method: unicodeDictToString
-	Converts the output of a json.loads operation (returning unicode encoding)
-	to byte strings.
-'''
 def unicodeToString(partialJSON):
+	'''
+		to byte strings
+	'''
 	inputType = type(partialJSON)
 	if isinstance(partialJSON, types.StringTypes):
 		return str(partialJSON)
@@ -148,40 +106,45 @@ def unicodeToString(partialJSON):
 
 ###################### Extension Operations ##########################
 
-'''
-	Method: normalizeExtension
+def getExtension(filename):
 
-	Takes in an extension, and makes is lowercase, and precedes it with a '.'
-'''
-def normalizeExtension(ext):
-	ext = ext.lower()
-	if (ext[0] != '.'): return '.' + ext
-	return ext
+	'''
+		Returns file extension all lowercase with no whitespace, preceded by a period.
+	'''
+	if '.' not in filename:
+		return ''
+	return filename.split('.')[-1].lower().strip()
 
-'''
-	Method: stripExtension
-
-	Removes the extension from a path.  If there is no extension, returns ''
-'''
-def stripExtension(path):
-	if '.' in path:
-		return '.'.join(path.split('.')[:-1])
-	return path
+def normalizeExtension(extension):
+	'''
+		Returns file extension all lowercase with no whitespace, preceded by a period.
+	'''
+	extension = extension.lower().strip()
+	if extension[0] == '.':
+		return extension[1:]
+	return extension
 
 '''
-	Method: fileExtention
-
-	Returns file extension of a file (without the '.').
+	Removes extension from filename.
 '''
-def fileExtension(filename):
-	return os.path.splitext(filename)[1][1:].lower()
+def removeExtension(filename):
+	if '.' not in filename:
+		return filename
+	return '.'.join(filename.split('.')[:-1])
 
 '''
-	Method: getConvertFile
-
-	Creates convert file by removing file extension, and appending '_convert.nk'.
+	Checks that a given file has the given extension.  If not, appends the extension.
 '''
+def ensureExtension(filename, extension):
+	extension = normalizeExtension(extension)
+	if (getExtension(filename) != extension):
+		return filename + '.' + extension
+	return filename
+
 def getConvertFile(outFile):
+	'''
+		Creates convert file by removing file extension, and appending '_convert.nk'.
+	'''
 	pi = getFileInfo(outFile)
 	return pi['dirname'] + pi['filebase'] + '_convert.nk'
 
@@ -190,8 +153,6 @@ def getConvertFile(outFile):
 
 # fix: currently increments all versions, should it?
 '''
-	Method: incrementVersion
-
 	Returns file with version incremented in all locations in the name.
 '''
 def incrementVersion(filename):
@@ -199,8 +160,6 @@ def incrementVersion(filename):
 	return re.sub('[vV][0-9]+', 'v%04d' % version, filename)
 
 '''
-	Method: getVersion
-
 	Returns version number of a given filename.
 '''
 def getVersion(filename):
@@ -211,8 +170,6 @@ def getVersion(filename):
 
 
 '''
-	Method: getHighestVersion
-
 	Returns highest version from a given root, matching a given extension.
 '''
 def getHighestVersion(root, extension):
@@ -235,16 +192,12 @@ def getHighestVersion(root, extension):
 ################### Information Retrieval ######################
 
 '''
-	Method: getDir
-
 	Returns directory name of a file with a trailing '/'.
 '''
 def getDir(filename):
 	return normalizeDir(os.path.dirname(filename))
 
 '''
-	Method: upADir
-
 	Returns the path, up a single directory.
 	If being called on a directory, be sure the directory is normalized before calling.
 '''
@@ -255,8 +208,6 @@ def upADir(path):
 	return '/'.join(parts[:-2]) + '/'
 
 '''
-	Method: pathInfo
-
 	Returns a dictionary of the path's dirname, basename, extension, filename and filebase.
 '''
 def pathInfo(path):
@@ -283,8 +234,6 @@ def getFileInfo(path):
 
 	return pathInfo
 '''
-	Method: getFrameRange
-
 	Returns a dictionary with 'min' (minFrame), 'max' (maxFrame), 'base' (fileName), and 'ext' (ext).
 
 	Parameters:
@@ -294,7 +243,7 @@ def getFrameRange(path):
 	baseInFile, ext = os.path.splitext(path)
 	# fix: this is done terribly, should be far more generic
 	percentLoc = baseInFile.find('%')
-	extension = fileExtension(path)
+	extension = getExtension(path)
 
 	if percentLoc == -1:
 		raise Exception('Frame padding not found in: ' + path)
@@ -338,8 +287,6 @@ def getFrameRange(path):
 
 
 '''
-	Method: setEnvironmentVariable
-
 	Sets a given environment variable for the OS.
 
 	Parameters:
@@ -352,8 +299,6 @@ def setEnvironmentVariable(key, val):
 	return os.system('setx %s "%s"' % (key, val))
 
 '''
-	Method: mkdir
-
 	Wrapper for os.mkdir.
 '''
 def mkdir(dirname):
@@ -363,8 +308,6 @@ def mkdir(dirname):
 		return err
 
 '''
-	Method: makeDirs
-
 	Wrapper for os.makedirs.
 '''
 def makeDirs(path):
@@ -375,16 +318,12 @@ def makeDirs(path):
 		return err
 
 '''
-	Method: isDir
-
 	Checks if a path is a directory.
 '''
 def isDir(path):
 	return os.path.isdir(path)
 
 '''
-	Method: checkTempDir
-
 	Checks if globalSettings.TEMP exists, and if not, creates it.
 '''
 def checkTempDir():
@@ -392,32 +331,24 @@ def checkTempDir():
 		makeDirs(globalSettings.TEMP)
 
 '''
-	Method: join
-
 	Concatenates a directory with a file path using forward slashes.
 '''
 def join(a, b):
 	return normalizeDir(a) + normalizePath(b)
 
 '''
-	Method: absolutePath
-
 	Returns absolute path of a given path.
 '''
 def absolutePath(path):
 	return normalizeDir(os.path.abspath(path))
 
 '''
-	Method: realPath
-
 	Returns the normalized real path of a given path.
 '''
 def realPath(path):
 	return os.path.realPath(path)
 
 '''
-	Method: getFiles
-
 	Lists files in a given path.
 '''
 def getFiles(path):
@@ -425,8 +356,6 @@ def getFiles(path):
 	return subprocess.check_output(['ls', path]).split()
 
 '''
-	Method: removePath
-
 	Wrapper for os.remove.  Returns False on error.
 '''
 def removePath(path):
@@ -436,8 +365,6 @@ def removePath(path):
 		return False
 
 '''
-	Method: removeDir
-
 	Removes a directory.  Returns False on error.
 '''
 def removeDir(path):
@@ -447,8 +374,6 @@ def removeDir(path):
 		return False
 
 '''
-	Method: emptyDir
-
 	Removes all files and folders from a directory.
 
 	Parameters:
@@ -482,24 +407,18 @@ def emptyDir(folder,onlyFiles=False, waitTime=5):
 				except:
 					pass
 '''
-	Method: cwd
-
 	Returns the current working directory.
 '''
 def cwd():
 	return normalizeDir(os.getcwd())
 
 '''
-	Method: copyTree
-
 	Copies the src directory tree to the destination.
 '''
 def copyTree(src, dst, symlinks=False, ignore=None):
 	dir_util.copy_tree(src, dst)
 
 '''
-	Method: duplicateDir
-
 	Duplicates a directory, copying files that don't already exist.
 '''
 def duplicateDir(src, dest):
@@ -550,8 +469,6 @@ def duplicateDir(src, dest):
 	# 		# 	shutil.copy(src + root + n, filename)
 
 '''
-	Method: ensureArray
-
 	If input is an array, return input.  If not, make it first element of a list.
 '''
 def ensureArray(val):
@@ -562,8 +479,6 @@ def ensureArray(val):
 	return [val]
 
 '''
-	Method: collectFiles
-
 	Gets all files in the searchPaths with given extensions.
 
 	Parameters:
@@ -583,14 +498,12 @@ def collectFiles(searchPaths, extensions, exclusions):
 		for root, dirs, files in os.walk(path):
 			for name in files:
 				name = join(normalizeDir(root), normalizePath(name))
-				if (fileExtension(name) in extensions) and (name not in exclusions):
+				if (getExtension(name) in extensions) and (name not in exclusions):
 					if name not in filesToReturn:
 						filesToReturn.append(getFileInfo(name))
 	return filesToReturn
 
 '''
-	Method: collectAllFiles
-
 	Returns all files within a specified searchDir.
 '''
 def collectAllFiles(searchDir):
@@ -611,16 +524,12 @@ def collectAllFiles(searchDir):
 ##################### Process Operations ########################
 
 '''
-	Method: getParentPID
-
 	Returns the process ID of the parent process.
 '''
 def getParentPID():
 	return psutil.Process(os.getpid()).ppid
 
 '''
-	Method: killJobProcesses
-
 	Kills all other processes currently on the render node.
 '''
 def killJobProcesses(nodesOnly=True):
@@ -651,8 +560,6 @@ def killJobProcesses(nodesOnly=True):
 				pass
 
 '''
-	Method: runCommand
-
 	Executes a program using psutil.Popen, disabling Windows error dialogues.
 '''
 def runCommand(processArgs,env=None):
@@ -695,8 +602,6 @@ def runCommand(processArgs,env=None):
 	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,env=env)
 
 '''
-	Method: runPython
-
 	Executes a given python file.
 '''
 def runPython(pythonFile):
@@ -706,8 +611,6 @@ def runPython(pythonFile):
 ####################### Update Operations #######################
 
 '''
-	Method: updateTools
-
 	Updates tools from the git repo if available.
 '''
 def updateTools(toolsDir=None):
@@ -729,8 +632,6 @@ def updateTools(toolsDir=None):
 		return False
 
 '''
-	Method: isWindows
-
 	Returns whether or not the machine running the command is Windows.
 '''
 def isWindows():
@@ -740,8 +641,6 @@ def isWindows():
 ####################### Command Line Utilities #######################
 
 '''
-	Method: getArgs
-
 	Generates a string of flag arguments from an iterable of tuples k, v tuples.
 	Arguments are of the form -k1 v1 -k2 v2...etc.
 '''
