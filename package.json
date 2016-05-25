@@ -8,14 +8,14 @@
   },
   "main": "./cOS/cOS.js",
   "dependencies": {
-    "async": "^0.8.0",
-    "copysync": "^0.0.1",
-    "expect.js": "^0.3.1",
-    "glob": "^3.2.9",
-    "lodash": "^2.4.1",
-    "mkdirp": "^0.5.0",
-    "mocha": "^1.18.2",
-    "readdirp": "^1.0.1"
+    "async": "*",
+    "copysync": "^0",
+    "expect.js": "^4",
+    "glob": "^7",
+    "lodash": "^4",
+    "mkdirp": "^0",
+    "mocha": "^2",
+    "readdirp": "^2"
   },
   "bin": {},
   "keywords": [],
