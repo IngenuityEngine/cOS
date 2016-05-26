@@ -22,21 +22,22 @@ describe('cOS', function() {
 		cOS = require('../cOS/cOS')
 	})
 
-	it ('should getFileInfo', function() {
+	it ('should getPathInfo', function() {
 		var options = {
 			root: 'test'
 		}
-		var fileInfo = cOS.getFileInfo('test/test-cOS/four.js', options)
+		var fileInfo = cOS.getPathInfo('test/test-cOS/four.js', options)
 
 		var expectedInfo = {
 			basename: 'four.js',
-			extension: '.js',
+			extension: 'js',
 			name: 'four',
 			dirname: 'test/test-cOS/',
 			path: 'test/test-cOS/four.js',
-			root: 'test',
-			relativeDirname: 'test-cOS/',
-			relativePath: 'test-cOS/four.js'
+			root: 'test/',
+			relativeDirname: './test-cOS/',
+			relativePath: './test-cOS/four.js',
+			filebase: 'test/test-cOS/four'
 		}
 		expect(fileInfo).to.eql(expectedInfo)
 	})
@@ -52,10 +53,10 @@ describe('cOS', function() {
 		expect(cOS.normalizeDir('some/path')).to.be('some/path/')
 		expect(cOS.normalizeDir('some\\path\\')).to.be('some/path/')
 		expect(cOS.normalizeDir('some\\path')).to.be('some/path/')
-		expect(cOS.normalizeDir('/some/path/')).to.be('some/path/')
-		expect(cOS.normalizeDir('/some/path')).to.be('some/path/')
-		expect(cOS.normalizeDir('\\some\\path\\')).to.be('some/path/')
-		expect(cOS.normalizeDir('\\some\\path')).to.be('some/path/')
+		expect(cOS.normalizeDir('/some/path/')).to.be('/some/path/')
+		expect(cOS.normalizeDir('/some/path')).to.be('/some/path/')
+		expect(cOS.normalizeDir('\\some\\path\\')).to.be('/some/path/')
+		expect(cOS.normalizeDir('\\some\\path')).to.be('/some/path/')
 	})
 
 	it('should normalizePath', function() {
@@ -68,7 +69,7 @@ describe('cOS', function() {
 	it('should join', function() {
 		expect(cOS.join('some/path/','file.js')).to.be('some/path/file.js')
 		expect(cOS.join('some/path\\','file.js')).to.be('some/path/file.js')
-		expect(cOS.join('/some/','/path/file.js')).to.be('some/path/file.js')
+		expect(cOS.join('/some/','/path/file.js')).to.be('/some/path/file.js')
 		expect(cOS.join('some\\','\\path\\file.js')).to.be('some/path/file.js')
 	})
 
@@ -183,13 +184,6 @@ describe('cOS', function() {
 		expect(cOS.removeExtension('text.txt')).to.be('text')
 		expect(cOS.removeExtension('/path/to/file.html')).to.be('/path/to/file')
 		expect(cOS.removeExtension('/path/to/file/with/no/extension')).to.be('/path/to/file/with/no/extension')
-		done()
-	})
-
-	it ('should getConvertFile', function(done) {
-		expect(cOS.getConvertFile('test.txt')).to.be('test_convert.nk')
-		expect(cOS.getConvertFile('/path/to/file.html')).to.be('/path/to/file_convert.nk')
-		expect(cOS.getConvertFile('/path/to/file/with/no/extension')).to.be('/path/to/file/with/no/extension_convert.nk')
 		done()
 	})
 

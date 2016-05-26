@@ -41,21 +41,22 @@ except:
 	pass
 
 
-##################### Normalization Operations #######################
+# Normalization
+##################################################
 
 def ensureEndingSlash(path):
 	'''
-		Appends a / to the end of a path if it's not there yet.
+	Ensures that the path has a trailing '/'
 	'''
 	path = unixPath(path)
 	if path[-1] != '/':
-		path = path + '/'
+		path += '/'
 	return path
 
 def removeStartingSlash(path):
 	'''
-		Removes backslashes and forward slashes from the
-		beginning of directory names.
+	Removes backslashes and forward slashes from the
+	beginning of directory names.
 	'''
 	if (path[0] == '\\' or path[0] == '/'):
 		path = path[1:]
@@ -63,116 +64,109 @@ def removeStartingSlash(path):
 
 def normalizeDir(path):
 	'''
-		Dirs always use forward slashses, don't have a leading slash, and have a trailing slash.
+	Dirs always use forward slashses and have a trailing slash.
 	'''
 	path = unixPath(path)
-	path = removeStartingSlash(path)
 	return ensureEndingSlash(path)
 
 def normalizePath(path):
 	'''
-		Removes starting slash, and replaces all backslashes with forward slashses.
+	Removes starting slash, and replaces all backslashes
+	with forward slashses.
 	'''
 	path = removeStartingSlash(path)
 	return unixPath(path)
 
 def unixPath(path):
 	'''
-		Changes backslashes to forward slashes and removes successive slashes, ex \\ or \/
+	Changes backslashes to forward slashes and
+	removes successive slashes, ex \\ or \/
 	'''
-	"""changes backslashes to forward slashes.
-	also removes any successive slashes, ex: \\ or \/"""
 	url = path.split('://')
 	if len(url) > 1:
 		return url[0] + '://' + re.sub(r'[\\/]+', '/', url[1])
 	return re.sub(r'[\\/]+', '/', path)
 
-def unicodeToString(partialJSON):
+def unicodeToString(data):
 	'''
-		to byte strings
+	Replaces unicode with a regular string
+	for a variety of data types
 	'''
-	inputType = type(partialJSON)
-	if isinstance(partialJSON, types.StringTypes):
-		return str(partialJSON)
+	inputType = type(data)
+	if isinstance(data, types.StringTypes):
+		return str(data)
 	elif inputType == types.ListType:
-		return [unicodeToString(x) for x in partialJSON]
+		return [unicodeToString(x) for x in data]
 	elif inputType == types.DictType:
-		# uncomment in Sublime 3
-		# return {unicodeToString(x): unicodeToString(partialJSON[x]) for x in partialJSON}
-		return dict([(unicodeToString(x), unicodeToString(partialJSON[x])) for x in partialJSON])
+		# fix: uncomment in Sublime 3
+		# return {unicodeToString(x): unicodeToString(data[x]) for x in data}
+		return dict([(unicodeToString(x), unicodeToString(data[x])) for x in data])
 	else:
-		return partialJSON
+		return data
 
 
-###################### Extension Operations ##########################
+# Extensions
+##################################################
 
-def getExtension(filename):
-
+def getExtension(path):
 	'''
-		Returns file extension all lowercase with no whitespace, preceded by a period.
+	Returns file extension all lowercase with no whitespace
 	'''
-	if '.' not in filename:
-		return ''
-	return filename.split('.')[-1].lower().strip()
+	path = path.split('.')
+	if len(path) > 1:
+		return path.pop().lower()
+	return ''
 
 def normalizeExtension(extension):
 	'''
-		Returns file extension all lowercase with no whitespace, preceded by a period.
+	Returns file extension all lowercase with no whitespace
 	'''
 	extension = extension.lower().strip()
 	if extension[0] == '.':
 		return extension[1:]
 	return extension
 
-'''
-	Removes extension from filename.
-'''
 def removeExtension(filename):
+	'''
+	Removes extension from filename.
+	'''
 	if '.' not in filename:
 		return filename
 	return '.'.join(filename.split('.')[:-1])
 
-'''
-	Checks that a given file has the given extension.  If not, appends the extension.
-'''
 def ensureExtension(filename, extension):
+	'''
+	Checks that a given file has the given extension.
+	If not, appends the extension.
+	'''
 	extension = normalizeExtension(extension)
 	if (getExtension(filename) != extension):
 		return filename + '.' + extension
 	return filename
 
-def getConvertFile(outFile):
-	'''
-		Creates convert file by removing file extension, and appending '_convert.nk'.
-	'''
-	pi = getFileInfo(outFile)
-	return pi['dirname'] + pi['filebase'] + '_convert.nk'
+# Versioning
+##################################################
 
-
-#################### Versioning Operations ######################
-
-# fix: currently increments all versions, should it?
-'''
-	Returns file with version incremented in all locations in the name.
-'''
-def incrementVersion(filename):
-	version = getVersion(filename) + 1
-	return re.sub('[vV][0-9]+', 'v%04d' % version, filename)
-
-'''
-	Returns version number of a given filename.
-'''
 def getVersion(filename):
+	'''
+	Returns version number of a given filename.
+	'''
 	match = re.findall('[vV]([0-9]+)', filename)
 	if (match):
 		return int(match[-1])
 	return 0
 
+def incrementVersion(filename):
+	'''
+	Increments a file's version number
+	'''
+	version = getVersion(filename) + 1
+	return re.sub('[vV][0-9]+', 'v%04d' % version, filename)
 
-'''
-	Returns highest version from a given root, matching a given extension.
-'''
 def getHighestVersion(root, extension):
+	'''
+	Returns highest version from a given root, matching a given extension.
+	'''
 	# fix: should have normalize extension
 	# ensure dot on extension
 	if extension[0] != '.':
@@ -189,57 +183,65 @@ def getHighestVersion(root, extension):
 
 	return path
 
-################### Information Retrieval ######################
+# Information
+##################################################
 
-'''
-	Returns directory name of a file with a trailing '/'.
-'''
 def getDir(filename):
+	'''
+	Returns directory name of a file with a trailing '/'.
+	'''
 	return normalizeDir(os.path.dirname(filename))
 
-'''
-	Returns the path, up a single directory.
-	If being called on a directory, be sure the directory is normalized before calling.
-'''
 def upADir(path):
+	'''
+	Returns the path, up a single directory.
+	'''
 	path = unixPath(path)
 	parts = path.split('/')
-	if (len(parts) < 3): return path
+	if (len(parts) < 3):
+		return path
 	return '/'.join(parts[:-2]) + '/'
 
-'''
-	Returns a dictionary of the path's dirname, basename, extension, filename and filebase.
-'''
-def pathInfo(path):
-	pathInfo = {}
-	path = path.replace('\\','/')
-	pathParts = path.split('/')
-	pathInfo['dirname'] = '/'.join(pathParts[:-1]) + '/'
-	pathInfo['basename'] = pathParts[-1]
-	pathInfo['extension'] = pathParts[-1].split('.')[-1].strip().lower()
-	pathInfo['filename'] = path
-	pathInfo['filebase'] = '.'.join(pathParts[-1].split('.')[:-1])
+def getFileInfo(path, options=None):
+	'''
+	Returns object with file's basename, extension, name, dirname and path.
+	With options, can also return root, relative dirname, and relative path, and
+	make all fields lowercase.
+	'''
+	fileInfo = {}
+	fileInfo['path'] = normalizePath(path)
+	pathParts = fileInfo['path'].split('/')
+	fileInfo['dirname'] = '/'.join(pathParts[:-1]) + '/'
+	fileInfo['basename'] = pathParts[-1]
+	fileInfo['extension'] = normalizeExtension(pathParts[-1].split('.')[-1].strip().lower())
+	fileInfo['name'] = fileInfo['basename'].replace('.' + fileInfo['extension'], '')
+	fileInfo['filebase'] = fileInfo['path'].replace('.' + fileInfo['extension'], '')
 
-	return pathInfo
+	# fix: relative path could be improved but it's a start
+	if options and \
+			'root' in options and \
+			options['root']:
+		fileInfo['root'] = normalizeDir(options['root'])
+		fileInfo['relativeDirname'] = './' + removeStartingSlash(normalizeDir(fileInfo['dirname'].replace(fileInfo['root'], '')))
+		fileInfo['relativePath'] = './' + removeStartingSlash(normalizePath(fileInfo['path'].replace(fileInfo['root'], '')))
 
-def getFileInfo(path):
-	pathInfo = {}
-	path = path.replace('\\','/')
-	pathParts = path.split('/')
-	pathInfo['dirname'] = '/'.join(pathParts[:-1]) + '/'
-	pathInfo['basename'] = pathParts[-1]
-	pathInfo['extension'] = pathParts[-1].split('.')[-1].strip().lower()
-	pathInfo['filename'] = path
-	pathInfo['filebase'] = '.'.join(pathParts[-1].split('.')[:-1])
+	if options and \
+			'lowercaseNames' in options and \
+		options['lowercaseNames']:
+		# uncomment in Sublime 3
+		# fileInfo = {x: x.lower() for x in fileInfo}
+		fileInfo = dict([(x, x.lower()) for x in fileInfo])
 
-	return pathInfo
-'''
-	Returns a dictionary with 'min' (minFrame), 'max' (maxFrame), 'base' (fileName), and 'ext' (ext).
+	return fileInfo
+
+def getFrameRange(path):
+	'''
+	Returns a dictionary with min, max, duration,
+	base, ext, and complete
 
 	Parameters:
 		path - Generic file in sequence. Ex. text/frame.%04d.exr
-'''
-def getFrameRange(path):
+	'''
 	baseInFile, ext = os.path.splitext(path)
 	# fix: this is done terribly, should be far more generic
 	percentLoc = baseInFile.find('%')
@@ -250,13 +252,11 @@ def getFrameRange(path):
 
 	# second character after the %
 	# ex: %04d returns 4
-
 	padding = re.findall(r'%([0-9]+)d', path)
 	if len(padding):
 		padding = int(padding[0])
 	else:
-		print 'Invalid padding:'
-		print path
+		print 'Invalid padding:', path
 		return False
 
 	minFrame = 9999999
@@ -283,105 +283,105 @@ def getFrameRange(path):
 			'complete': duration == count,
 		}
 
-######################### System Operations ############################
+# System Operations
+##################################################
 
-
-'''
+def setEnvironmentVariable(key, val):
+	'''
 	Sets a given environment variable for the OS.
 
 	Parameters:
 		key - environment variable
 		val - value for the environment variable
-'''
-def setEnvironmentVariable(key, val):
+	'''
 	val = str(val)
 	os.environ[key] = val
 	return os.system('setx %s "%s"' % (key, val))
 
-'''
-	Wrapper for os.mkdir.
-'''
 def mkdir(dirname):
+	'''
+	Wrapper for os.mkdir.
+	'''
 	try:
 		os.mkdir(dirname)
 	except Exception as err:
 		return err
 
-'''
-	Wrapper for os.makedirs.
-'''
 def makeDirs(path):
+	'''
+	Wrapper for os.makedirs.
+	'''
 	dirName = getFileInfo(path)['dirname']
 	try:
 		os.makedirs(dirName)
 	except Exception as err:
 		return err
 
-'''
-	Checks if a path is a directory.
-'''
 def isDir(path):
+	'''
+	Checks if a path is a directory.
+	'''
 	return os.path.isdir(path)
 
-'''
-	Checks if globalSettings.TEMP exists, and if not, creates it.
-'''
 def checkTempDir():
+	'''
+	Checks if globalSettings.TEMP exists, and if not, creates it.
+	'''
 	if not os.path.exists(globalSettings.TEMP):
 		makeDirs(globalSettings.TEMP)
 
 '''
-	Concatenates a directory with a file path using forward slashes.
+Concatenates a directory with a file path using forward slashes.
 '''
 def join(a, b):
 	return normalizeDir(a) + normalizePath(b)
 
-'''
-	Returns absolute path of a given path.
-'''
 def absolutePath(path):
+	'''
+	Returns absolute path of a given path.
+	'''
 	return normalizeDir(os.path.abspath(path))
 
-'''
-	Returns the normalized real path of a given path.
-'''
 def realPath(path):
+	'''
+	Returns the normalized real path of a given path.
+	'''
 	return os.path.realPath(path)
 
-'''
-	Lists files in a given path.
-'''
 def getFiles(path):
+	'''
+	Lists files in a given path.
+	'''
 	path = normalizePath(path)
 	return subprocess.check_output(['ls', path]).split()
 
-'''
-	Wrapper for os.remove.  Returns False on error.
-'''
 def removePath(path):
+	'''
+	Wrapper for os.remove.  Returns False on error.
+	'''
 	try:
 		os.remove(path)
 	except:
 		return False
 
-'''
-	Removes a directory.  Returns False on error.
-'''
 def removeDir(path):
+	'''
+	Removes a directory.  Returns False on error.
+	'''
 	try:
 		shutil.rmtree(path)
 	except:
 		return False
 
-'''
+def emptyDir(folder,onlyFiles=False, waitTime=5):
+	'''
 	Removes all files and folders from a directory.
 
 	Parameters:
 		folder - directory from which to delete
 		onlyFiles - False by default, if only files should be deleted
 		waitTime - 5 by default, how many seconds to wait.
-'''
-def emptyDir(folder,onlyFiles=False, waitTime=5):
+	'''
 	# if onlyFiles:
 	# 	print 'Deleting all files in: %s' % folder
 	# else:
@@ -406,24 +406,22 @@ def emptyDir(folder,onlyFiles=False, waitTime=5):
 					shutil.rmtree(os.path.join(root, d))
 				except:
 					pass
-'''
-	Returns the current working directory.
-'''
 def cwd():
+	'''
+	Returns the current working directory.
+	'''
 	return normalizeDir(os.getcwd())
 
-'''
-	Copies the src directory tree to the destination.
-'''
 def copyTree(src, dst, symlinks=False, ignore=None):
+	'''
+	Copies the src directory tree to the destination.
+	'''
 	dir_util.copy_tree(src, dst)
 
-'''
-	Duplicates a directory, copying files that don't already exist.
-'''
 def duplicateDir(src, dest):
-	"""Duplicates a directory, copying files that don't already exist
- and deleting files not present in src"""
+	'''
+	Duplicates a directory, copying files that don't already exist.
+	'''
 	src = ensureEndingSlash(src)
 	dest = ensureEndingSlash(dest)
 
@@ -468,17 +466,18 @@ def duplicateDir(src, dest):
 	# 			print 'delete:', dest + root + '/' + n
 	# 		# 	shutil.copy(src + root + n, filename)
 
-'''
-	If input is an array, return input.  If not, make it first element of a list.
-'''
 def ensureArray(val):
+	'''
+	If input is an array, return input.  If not, make it first element of a list.
+	'''
 	if isinstance(val, (list, tuple)):
 		return list(val)
 	if (val == None):
 		return []
 	return [val]
 
-'''
+def collectFiles(searchPaths, extensions, exclusions):
+	'''
 	Gets all files in the searchPaths with given extensions.
 
 	Parameters:
@@ -486,8 +485,7 @@ def ensureArray(val):
 		searchPaths - list of paths to search
 		extensions - list of extensions for which to look
 		exclusions - files to exclude from final list
-'''
-def collectFiles(searchPaths, extensions, exclusions):
+	'''
 
 	filesToReturn = []
 	searchPaths = ensureArray(searchPaths)
@@ -503,10 +501,10 @@ def collectFiles(searchPaths, extensions, exclusions):
 						filesToReturn.append(getFileInfo(name))
 	return filesToReturn
 
-'''
-	Returns all files within a specified searchDir.
-'''
 def collectAllFiles(searchDir):
+	'''
+	Returns all files within a specified searchDir.
+	'''
 
 	searchDir = normalizeDir(searchDir)
 
@@ -521,19 +519,18 @@ def collectAllFiles(searchDir):
 
 
 
-##################### Process Operations ########################
-
-'''
-	Returns the process ID of the parent process.
-'''
+# Process Operations
+##################################################
 def getParentPID():
+	'''
+	Returns the process ID of the parent process.
+	'''
 	return psutil.Process(os.getpid()).ppid
 
-'''
-	Kills all other processes currently on the render node.
-'''
 def killJobProcesses(nodesOnly=True):
-	"""Ruthlessly kills off all other processes on the render node"""
+	'''
+	Kills all other processes currently on the render node.
+	'''
 	if 'psutil' in globals():
 		print 'No psutil module found'
 		return False
@@ -559,11 +556,10 @@ def killJobProcesses(nodesOnly=True):
 			except:
 				pass
 
-'''
-	Executes a program using psutil.Popen, disabling Windows error dialogues.
-'''
 def runCommand(processArgs,env=None):
-	"""Runs a program through psutil.Popen, disabling Windows error dialogs"""
+	'''
+	Executes a program using psutil.Popen, disabling Windows error dialogues.
+	'''
 
 	if env:
 		env = dict(os.environ.items() + env.items())
@@ -601,19 +597,19 @@ def runCommand(processArgs,env=None):
 
 	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,env=env)
 
-'''
-	Executes a given python file.
-'''
 def runPython(pythonFile):
+	'''
+	Executes a given python file.
+	'''
 	return os.system(globalSettings.PYTHON + ' ' + pythonFile)
 
 
 ####################### Update Operations #######################
 
-'''
-	Updates tools from the git repo if available.
-'''
 def updateTools(toolsDir=None):
+	'''
+	Updates tools from the git repo if available.
+	'''
 	# return True
 	if not globalSettings.IS_NODE:
 		print 'Bailing on update, not a node'
@@ -631,20 +627,20 @@ def updateTools(toolsDir=None):
 		pass
 		return False
 
-'''
-	Returns whether or not the machine running the command is Windows.
-'''
 def isWindows():
+	'''
+	Returns whether or not the machine running the command is Windows.
+	'''
 	return sys.platform.startswith('win')
 
 
 ####################### Command Line Utilities #######################
 
-'''
+def genArgs(argData):
+	'''
 	Generates a string of flag arguments from an iterable of tuples k, v tuples.
 	Arguments are of the form -k1 v1 -k2 v2...etc.
-'''
-def genArgs(argData):
+	'''
 	args = ''
 	for k,v in argData.iteritems():
 		args += '-%s %s ' % (k,v)

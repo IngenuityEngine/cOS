@@ -23,21 +23,29 @@ Ensure [tryout](https://github.com/IngenuityEngine/tryout) is installed and prop
 
 
 
+## 0.1.0 Changes
 
-## Refactor Part 2
+### Modified
+- normalizeDir - no longer removes starting slash
+- getFileInfo - relative dir now prefixed w/ ./
 
 ### Removed
 fileExtension (use getExtension instead)
 filePrep (use unixPath instead)
+pathInfo (use getPathInfo instead)
+isDirSync (antipattern, don't use)
+isFileSync (antipattern, don't use)
 
 ### Renamed
 stripExtension > removeExtension
+getFileInfo > getPathInfo
 
 
-## Refactor Part 1
 
-### Modifications to existing functionality of functions:
 
+## 0.0.3 Changes
+
+### Modified
 - Modifications to names of functions
 - Python normalizeDir >> ensureEndingSlash
 - Javascript dirName >> getDir
@@ -47,7 +55,7 @@ stripExtension > removeExtension
 - Javascript shouldExclude >> contains
 - Python startSubprocess >> runCommand
 
-### New Functions
+### Added
 - Python - removeStartingSlash(path)
 - Python - normalizeDir(path)
 - Javascript - unixPath(dir)
@@ -76,6 +84,6 @@ stripExtension > removeExtension
 - Javascript - runPython(pythonFile)
 - Python - isWindows()
 
-### Functions to Remove
+### Removed
 - Python - getParentPID() >> Shepherd
 - Python - killJobProcesses >> Shepherd

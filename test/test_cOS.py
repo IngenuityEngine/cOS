@@ -78,13 +78,19 @@ class test(tryout.TestSuite):
 		cOS.emptyDir('sandbox/')
 		self.assertTrue(not subprocess.check_output(['ls', 'sandbox']).split())
 
-	def test_getFileInfo(self):
-		info = cOS.getFileInfo('sandbox/file_v001.mb')
-		self.assertEqual(info['extension'], 'mb')
-		self.assertEqual(info['dirname'], 'sandbox/')
-		self.assertEqual(info['basename'], 'file_v001.mb')
-		self.assertEqual(info['filename'], 'sandbox/file_v001.mb')
-		self.assertEqual(info['filebase'], 'file_v001')
+	def test_getPathInfo(self):
+		options = {'root': 'test'}
+		info = cOS.getPathInfo('test/test-cOS/four.js', options)
+
+		self.assertEqual(info['basename'], 'four.js',)
+		self.assertEqual(info['extension'], '.js',)
+		self.assertEqual(info['name'], 'four',)
+		self.assertEqual(info['dirname'], 'test/test-cOS/',)
+		self.assertEqual(info['path'], 'test/test-cOS/four.js',)
+		self.assertEqual(info['root'], 'test/',)
+		self.assertEqual(info['relativeDirname'], './test-cOS/',)
+		self.assertEqual(info['relativePath'], './test-cOS/four.js')
+		self.assertEqual(info['filebase'], 'test/test-cOS/four')
 
 	def test_removeExtension(self):
 		stripped = cOS.removeExtension('sandbox/file_v001.mb')
@@ -110,10 +116,6 @@ class test(tryout.TestSuite):
 		self.assertTrue('file2' in dir2Files)
 		self.assertTrue('file3' in dir2Files)
 
-	def test_getConvertFile(self):
-		converted = cOS.getConvertFile('sandbox/file_v001.mb')
-		self.assertEqual(converted, 'sandbox/file_v001_convert.nk')
-
 	def test_genArgs(self):
 		args = cOS.genArgs({'k1': 'v1', 'k2' : 'v2', 'k3' : 'v3'})
 		self.assertEqual(args, '-k3 v3 -k2 v2 -k1 v1')
@@ -129,7 +131,7 @@ class test(tryout.TestSuite):
 
 	def test_normalizeDir(self):
 		res = cOS.normalizeDir('/path\\to/file')
-		self.assertEqual(res, 'path/to/file/')
+		self.assertEqual(res, '/path/to/file/')
 
 	def test_normalizeExtension(self):
 		norm = cOS.normalizeExtension('Mb')
@@ -188,14 +190,14 @@ class test(tryout.TestSuite):
 	def test_collectFiles(self):
 		os.system('rm -rf seq')
 		files = cOS.collectFiles('sandbox', 'mb', '')
-		self.assertEqual(sorted(files), sorted([cOS.getFileInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb']]))
-		#self.assertEqual(set(files), set([cOS.getFileInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb', 'sandbox/testdir1/file1', 'sandbox/testdir1/file2', 'sandbox/testdir1/file3', 'sandbox/testdir2/file1']]))
+		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb']]))
+		#self.assertEqual(set(files), set([cOS.getPathInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb', 'sandbox/testdir1/file1', 'sandbox/testdir1/file2', 'sandbox/testdir1/file3', 'sandbox/testdir2/file1']]))
 		files = cOS.collectFiles('sandbox', 'mb', 'sandbox/file_v001.mb')
-		self.assertEqual(sorted(files), sorted([cOS.getFileInfo(f) for f in ['sandbox/file.mb']]))
+		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/file.mb']]))
 
 	def test_collectAllFiles(self):
 		files = cOS.collectAllFiles('sandbox/testdir2')
-		self.assertEqual(sorted(files), sorted([cOS.getFileInfo(f) for f in ['sandbox/testdir2/file1']]))
+		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/testdir2/file1']]))
 
 	def test_isWindows(self):
 		self.assertTrue(cOS.isWindows())

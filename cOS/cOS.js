@@ -20,95 +20,187 @@ var mkdirp = require('mkdirp')
 var cOS = module.exports = {
 
 
-/*
-	Method: ensureEndingSlash
+// Normalization
+//////////////////////////////////////////////////
 
-	Ensures that the path has a trailing '/'
+/*
+Method: ensureEndingSlash
+
+Ensures that the path has a trailing '/'
 */
 ensureEndingSlash: function(path)
 {
-	// no need for an ending slash if there's no directory
-	if (path.length < 1)
-		return path
-
-	var lastChar = path[path.length - 1]
-	path = path.substr(0, path.length - 1)
-
-	if (lastChar == '/' || lastChar == '\\')
-		return path + '/'
-	else
-		return path + lastChar + '/'
-},
-
-
-/*
-	Method: removeStartingSlash
-
-	Removes backslashes and forward slashes from the beginning of directory names.
-*/
-removeStartingSlash: function(dir)
-{
-	if (dir[0] == '\\' || dir[0] == '/')
-		dir = dir.substr(1)
-	return dir
+	path = cOS.unixPath(path)
+	if (path.slice(-1) != '/')
+		path += '/'
+	return path
 },
 
 /*
-	Method: normalizeDir
+Method: removeStartingSlash
 
-	Dirs always use forward slashses, don't have a leading slash, and have a trailing slash.
+Removes backslashes and forward slashes from the
+beginning of directory names.
 */
-normalizeDir: function(dir)
+removeStartingSlash: function(path)
 {
-	dir = dir.replace(/\\/g,'/')
+	if (path[0] == '\\' || path[0] == '/')
+		path = path.substr(1)
+	return path
+},
+
+/*
+Method: normalizeDir
+
+Dirs always use forward slashses and have a trailing slash.
+*/
+normalizeDir: function(path)
+{
+	path = cOS.unixPath(path)
+	return cOS.ensureEndingSlash(path)
+},
+
+/*
+Method: normalizePath
+
+Removes starting slash, and replaces all backslashes
+with forward slashses.
+*/
+normalizePath: function(path)
+{
 	if (cOS.isWindows())
-		dir = cOS.removeStartingSlash(dir)
-	return cOS.ensureEndingSlash(dir)
+		path = cOS.removeStartingSlash(path)
+	return path.replace(/\\/g,'/')
 },
 
-
 /*
-	Method: isDirSync
+Method: unixPath
 
-	Checks if a path is a directory. (Synchronous)
+Changes backslashes to forward slashes and removes successive slashes, ex \\ or \/
 */
-isDirSync: function(path)
+unixPath: function(dir)
 {
-	try {
-		var stats = fs.statSync(path)
-		return stats.isDirectory()
-	} catch (err) {
-		return false
-	}
+	return dir.replace(/[\\/]+/g, '/')
 },
 
-isFileSync: function(path)
-{
-	try {
-		var stats = fs.statSync(path)
-		return stats.isFile()
-	} catch (err) {
-		return false
-	}
-},
+
+// fix: missing unicodeToString
+// unicodeToString: function(data)
+// {
+// 	return data
+// },
+
+
+
+// Extensions
+//////////////////////////////////////////////////
+
 /*
-	Method: makeDirsSync
+Method: getExtension
 
-	Makes a directory. (Synchronous)
+Returns file extension of a file (without the '.').
 */
-makeDirsSync: function(path)
+getExtension: function(path)
 {
-	try {
-		return mkdirp.sync(cOS.normalizeDir(path))
-	} catch (err) {
-		return err
-	}
+	path = path.split('.')
+	if (path.length > 1)
+		return path.pop().toLowerCase()
+	else
+		return ''
 },
-/*
-	Method: upADir
 
-	Returns the path, up a single directory.
-	If being called on a directory, be sure the directory is normalized before calling.
+/*
+Method: normalizeExtension
+
+Takes in an extension, and makes is lowercase, and precedes it with a '.'
+*/
+normalizeExtension: function(extension)
+{
+	extension = extension.toLowerCase().trim()
+	if (extension[0] == '.')
+		return extension.slice(1)
+	return extension
+},
+
+/*
+Method: removeExtension
+
+Removes the extension from a path.  If there is no extension, returns ''
+*/
+removeExtension: function(filename)
+{
+	if (!_.includes(filename, '.'))
+		return filename
+	return filename.split('.').slice(0, -1).join('.')
+},
+
+/*
+Method: ensureExtension
+
+Checks that a given file has the given extension.  If not, appends the extension.
+*/
+ensureExtension: function(filename, extension)
+{
+	extension = cOS.normalizeExtension(extension)
+	if (cOS.getExtension(filename) != extension)
+		return filename + '.' + extension
+	return filename
+},
+
+
+
+// Versioning
+//////////////////////////////////////////////////
+
+/*
+Method: getVersion
+
+Returns version number of a given filename.
+*/
+getVersion: function(filename)
+{
+	var match = filename.match(/[vV][0-9]+/g)
+	if (match.length > 0) return parseInt(match[0].substring(1), 10)
+	return 0
+
+},
+
+/*
+Method: incrementVersion
+
+Returns file with version incremented in all locations in the name.
+*/
+incrementVersion: function(filename)
+{
+	var version = cOS.getVersion(filename) + 1
+	return filename.replace(/[vV][0-9]+/g, 'v' + cOS.padLeft(String(version), '0', 3))
+},
+
+
+// fix: missing getHighestVersion
+// getHighestVersion: function(root, extension)
+// {
+
+// },
+
+// Information
+//////////////////////////////////////////////////
+
+/*
+Method: getDir
+
+Returns directory name of a file with a trailing '/'.
+*/
+getDir: function(filename)
+{
+	return cOS.normalizeDir(path.dirname(filename))
+},
+
+/*
+Method: upADir
+
+Returns the path, up a single directory.
+If being called on a directory, be sure the directory is normalized before calling.
 */
 upADir: function(path)
 {
@@ -120,9 +212,150 @@ upADir: function(path)
 },
 
 /*
-	Method: validEmptyDirSync
+Method: getFileInfo
 
-	Returns an object describing whether a directory is an existing directory (valid), and if it contains files (hasFiles).
+Returns object with file's basename, extension, name, dirname and path.
+With options, can also return root, relative dirname, and relative path, and
+make all fields lowercase.
+*/
+getPathInfo: function(file, options)
+{
+	var fileInfo = {}
+
+	options = options || {}
+	_.defaults(options, {
+			lowercaseNames: false
+		})
+
+	fileInfo.path = cOS.normalizePath(file)
+	fileInfo.dirname = cOS.normalizeDir(path.dirname(file))
+	fileInfo.basename = path.basename(file)
+	fileInfo.extension = cOS.normalizeExtension(path.extname(file))
+	fileInfo.name = fileInfo.basename.replace('.' + fileInfo.extension, '')
+	fileInfo.filebase = fileInfo.path.replace('.' + fileInfo.extension, '')
+
+	// fix: relative path could be improved but it's a start
+	if (options.root)
+	{
+		fileInfo.root = cOS.normalizeDir(options.root)
+		fileInfo.relativeDirname = './' + cOS.removeStartingSlash(cOS.normalizeDir(fileInfo.dirname.replace(fileInfo.root, '')))
+		fileInfo.relativePath = './' + cOS.removeStartingSlash(cOS.normalizePath(fileInfo.path.replace(fileInfo.root, '')))
+	}
+
+	if (options.lowercaseNames)
+	{
+		_.each(fileInfo, function(val, key) {
+			fileInfo[key] = val.toLowerCase()
+		})
+	}
+
+	return fileInfo
+},
+
+/*
+Method: getFrameRange
+
+
+Returns a dictionary with min, max, duration,
+base, ext, and complete
+
+Parameters:
+		path - Generic file in sequence. Ex. text/frame.%04d.exr
+*/
+getFrameRange: function(path)
+{
+	var baseInFile = cOS.getPathInfo(path).basename
+	var ext = '.' + cOS.getExtension(path)
+
+	var percentLoc = baseInFile.indexOf('%')
+
+	if (percentLoc == -1)
+	{
+		console.error('Invalid padding:', path)
+		return false
+	}
+
+	var padding = parseInt(baseInFile.charAt(percentLoc + 2), 10)
+
+	var minFrame = 9999999
+	var maxFrame = -9999999
+
+	var frame
+	var count = 0
+	_.each(fs.readdirSync(cOS.getDir(path)), function(path)
+	{
+		count += 1
+		frame = parseInt(path.substr(percentLoc, padding), 10)
+		maxFrame = Math.max(maxFrame, frame)
+		minFrame = Math.min(minFrame, frame)
+	})
+
+	if (minFrame == 9999999 || maxFrame == -9999999)
+		return false
+
+	var duration = maxFrame - minFrame + 1
+	return {
+		min : minFrame,
+		max : maxFrame,
+		duration: duration,
+		base : baseInFile,
+		ext: ext,
+		complete: duration == count
+	}
+},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+Method: makeDirsSync
+
+Makes a directory. (Synchronous)
+*/
+makeDirsSync: function(path)
+{
+	try {
+		return mkdirp.sync(cOS.normalizeDir(path))
+	} catch (err) {
+		return err
+	}
+},
+/*
+Method: validEmptyDirSync
+
+Returns an object describing whether a directory is an existing directory (valid), and if it contains files (hasFiles).
 */
 validEmptyDirSync: function(dir)
 {
@@ -158,24 +391,13 @@ validEmptyDirSync: function(dir)
 		return {valid: true}
 	}
 },
-/*
-	Method: normalizePath
-
-	Removes starting slash, and replaces all backslashes with forward slashses.
-*/
-normalizePath: function(path)
-{
-	if (cOS.isWindows())
-		path = cOS.removeStartingSlash(path)
-	return path.replace(/\\/g,'/')
-},
 
 // cOS.join that always joins with forward slash
 // fix: should accept a bunch of paths
 /*
-	Method: join
+Method: join
 
-	Concatenates a directory with a file path using forward slashes.
+Concatenates a directory with a file path using forward slashes.
 */
 join: function(a, b)
 {
@@ -189,49 +411,9 @@ dirname: function(file)
 },
 
 /*
-	Method: getFileInfo
+Method: absolutePath
 
-	Returns object with file's basename, extension, name, dirname and path.
-	With options, can also return root, relative dirname, and relative path, and
-	make all fields lowercase.
-*/
-getFileInfo: function(file, options)
-{
-	var fileInfo = {}
-
-	options = options || {}
-	_.defaults(options, {
-			lowercaseNames: false
-		})
-
-	fileInfo.basename = path.basename(file)
-	fileInfo.extension = path.extname(file)
-	fileInfo.name = path.basename(file, fileInfo.extension)
-	fileInfo.dirname = cOS.normalizeDir(path.dirname(file))
-	fileInfo.path = cOS.normalizePath(path.normalize(file))
-
-	// fix: relative path could be improved but it's a start
-	if (options.root)
-	{
-		fileInfo.root = cOS.normalizePath(path.normalize(options.root))
-		fileInfo.relativeDirname = cOS.normalizeDir(fileInfo.dirname.replace(fileInfo.root, ''))
-		fileInfo.relativePath = cOS.normalizePath(fileInfo.path.replace(fileInfo.root, ''))
-	}
-
-	if (options.lowercaseNames)
-	{
-		_.each(fileInfo, function(val, key) {
-			fileInfo[key] = val.toLowerCase()
-		})
-	}
-
-	return fileInfo
-},
-
-/*
-	Method: absolutePath
-
-	Returns absolute path of a given path.
+Returns absolute path of a given path.
 */
 absolutePath: function(path)
 {
@@ -239,9 +421,9 @@ absolutePath: function(path)
 },
 
 /*
-	Method: realPathSync
+Method: realPathSync
 
-	Returns the normalized real path. (Synchronous)
+Returns the normalized real path. (Synchronous)
 */
 realPathSync: function(path)
 {
@@ -249,9 +431,9 @@ realPathSync: function(path)
 },
 
 /*
-	Method: getFilesSync
+Method: getFilesSync
 
-	Lists files in a given path. (Synchronous)
+Lists files in a given path. (Synchronous)
 */
 getFilesSync: function(path)
 {
@@ -263,9 +445,9 @@ getFilesSync: function(path)
 
 // wrap cOS.readFile so we don't have to specify utf8 all the time
 /*
-	Method: readFile
+Method: readFile
 
-	Wrapper of fs.readFile so that utf8 doesn't need to be specified always.
+Wrapper of fs.readFile so that utf8 doesn't need to be specified always.
 */
 readFile: function(path, options, callback)
 {
@@ -292,9 +474,9 @@ unlinkSync: function(path)
 },
 
 /*
-	Method: removeDirSync
+Method: removeDirSync
 
-	Wrapper of fs.rmdir.
+Wrapper of fs.rmdir.
 */
 // removeDirSync: function(path)
 // {
@@ -351,9 +533,9 @@ renameSync: function(oldPath, newPath)
 },
 
 /*
-	Method: emptyDirSync
+Method: emptyDirSync
 
-	Removes all files and subdirectories from a directory.
+Removes all files and subdirectories from a directory.
 */
 emptyDirSync: function(path)
 {
@@ -368,9 +550,9 @@ emptyDir: function(path, callback)
 },
 
 /*
-	Method: cwd
+Method: cwd
 
-	Returns the current working directory.
+Returns the current working directory.
 */
 cwd: function()
 {
@@ -461,9 +643,9 @@ collectAllFiles: function(searchDir, callback)
 // fix: should fail gracefully
 // fix: should be async
 /*
-	Method: collectFilesSync
+Method: collectFilesSync
 
-	Synchronous version of collectFiles.
+Synchronous version of collectFiles.
 */
 collectFilesSync: function(searchPath, extension, files, options)
 {
@@ -500,7 +682,7 @@ collectFilesSync: function(searchPath, extension, files, options)
 			return false
 		searchPath = fs.realpathSync(searchPath)
 		searchPath = cOS.ensureEndingSlash(searchPath)
-		var filter = '*' + extension
+		var filter = '*.' + extension
 		var excludes = '/**/'
 
 		// only exclude if we have a valid exclude array
@@ -523,7 +705,7 @@ collectFilesSync: function(searchPath, extension, files, options)
 			if (cOS.shouldExclude(options.exclude, file))
 				return
 
-			fileInfo = cOS.getFileInfo(file, options)
+			fileInfo = cOS.getPathInfo(file, options)
 			// fix: should have async option
 			if (options.getContents)
 			{
@@ -595,9 +777,9 @@ compileFiles: function(files, compileFunction, options, callback)
 },
 
 /*
-	Method: collectFilenamesSync
+Method: collectFilenamesSync
 
-	Synchronous wrapper for glob.sync.
+Synchronous wrapper for glob.sync.
 */
 collectFilenamesSync: function(search)
 {
@@ -639,20 +821,10 @@ createFolderSync: function(pathName)
 ///////////////////// Normalization Operations \\\\\\\\\\\\\\\\\\\\\\\\
 
 /*
-	Method: unixPath
+Method: universalPath
 
-	Changes backslashes to forward slashes and removes successive slashes, ex \\ or \/
-*/
-unixPath: function(dir)
-{
-	return dir.replace(/[\\/]+/g, '/')
-},
-
-/*
-	Method: universalPath
-
-	Swaps Universal Root (Q:/) with unix root ($root).
-	fix: CURRENTLY HARD CODED UNIVERSAL_ROOT TO BE $root.
+Swaps Universal Root (Q:/) with unix root ($root).
+fix: CURRENTLY HARD CODED UNIVERSAL_ROOT TO BE $root.
 */
 universalPath: function(dir)
 {
@@ -674,45 +846,9 @@ osPath: function(dir)
 ///////////////////////////// Extension Operations ////////////////////////////////
 
 /*
-	Method: normalizeExtension
+Method: getConvertFile
 
-	Takes in an extension, and makes is lowercase, and precedes it with a '.'
-*/
-normalizeExtension: function(extension)
-{
-	extension = extension.toLowerCase().trim()
-	if (extension[0] == '.')
-		return extension.slice(1)
-	return extension
-},
-
-/*
-	Method: removeExtension
-
-	Removes the extension from a path.  If there is no extension, returns ''
-*/
-removeExtension: function(path) {
-	return path.replace(/\.[^/.]+$/, '')
-},
-
-/*
-	Method: getExtension
-
-	Returns file extension of a file (without the '.').
-*/
-getExtension: function(path)
-{
-	path = path.split('.')
-	if (path.length > 1)
-		return path.pop()
-	else
-		return ''
-},
-
-/*
-	Method: getConvertFile
-
-	Creates convert file by removing file extension, and appending '_convert.nk'.
+Creates convert file by removing file extension, and appending '_convert.nk'.
 */
 getConvertFile: function(path)
 {
@@ -722,10 +858,10 @@ getConvertFile: function(path)
 //////////////////////// Versioning Operations ///////////////////////////
 
 /*
-	Method: padLeft
+Method: padLeft
 
-	Pads a given string <str> to the left with <padString> to create a string of length <length>.
-	This exists because javasript does not support string formatting to use %03d.
+Pads a given string <str> to the left with <padString> to create a string of length <length>.
+This exists because javasript does not support string formatting to use %03d.
 */
 padLeft: function(str, padString, length)
 {
@@ -734,91 +870,19 @@ padLeft: function(str, padString, length)
 	return str
 },
 
-/*
-	Method: getVersion
-
-	Returns version number of a given filename.
-*/
-getVersion: function(filename)
-{
-	var match = filename.match(/[vV][0-9]+/g)
-	if (match.length > 0) return parseInt(match[0].substring(1), 10)
-	return 0
-
-},
-
-/*
-	Method: incrementVersion
-
-	Returns file with version incremented in all locations in the name.
-*/
-incrementVersion: function(filename)
-{
-	var version = cOS.getVersion(filename) + 1
-	return filename.replace(/[vV][0-9]+/g, 'v' + cOS.padLeft(String(version), '0', 3))
-},
-
 ////////////////////////// Information Retrieval /////////////////////////////
 
-/*
-	Method: getDir
-
-	Returns directory name of a file with a trailing '/'.
-*/
-getDir: function(filename)
-{
-	return cOS.normalizeDir(path.dirname(filename))
-},
-
-/*
-	Method: getFrameRange
-
-	Returns an object with 'min' (minFrame), 'max' (maxFrame), 'base' (fileName), and 'ext' (ext).
-
-	Parameters:
-		path - Generic file in sequence. Ex. text/frame.%04d.exr
-*/
-getFrameRange: function(path)
-{
-	var baseInFile = cOS.getFileInfo(path).basename
-	var ext = '.' + cOS.getExtension(path)
-
-	var percentLoc = baseInFile.indexOf('%')
-
-	if (percentLoc == -1)
-		throw new Error('Frame padding not found in ' + path)
-
-	var padding = parseInt(baseInFile.charAt(percentLoc + 2), 10)
-
-	var minFrame = 9999999
-	var maxFrame = -9999999
-
-	var frame
-	_.each(fs.readdirSync(cOS.getDir(path)), function(path)
-	{
-		frame = parseInt(path.substr(percentLoc, padding), 10)
-		maxFrame = Math.max(maxFrame, frame)
-		minFrame = Math.min(minFrame, frame)
-	})
-
-	return {
-		'min' : minFrame,
-		'max' : maxFrame,
-		'base' : baseInFile,
-		'ext': ext}
-},
 
 ///////////////////////////// System Operations //////////////////////////////
 
 /*
-	Method: setEnvironmentVariable
+Method: setEnvironmentVariable
 
-	Sets a given environment variable for the OS.
+Sets a given environment variable for the OS.
 
-	Parameters:
-		key - environment variable
-		val - value for the environment variable
-
+Parameters:
+	key - environment variable
+	val - value for the environment variable
 */
 setEnvironmentVariable: function(key, val)
 {
@@ -829,22 +893,29 @@ setEnvironmentVariable: function(key, val)
 
 
 /*
-	Method: mkdir
+Method: mkdir
 
-	Wrapper for fs.mkdir.
+Wrapper for fs.mkdir.
 */
-mkdir: function(dirname) {
-	if (! cOS.isDirSync(dirname)) {
-		fs.mkdir(dirname)
+mkdir: function(dir) {
+	try
+	{
+		fs.mkdir(dir)
+	}
+	catch (err)
+	{
+		console.log('err.code:', err.code)
+		if (err.code != 'EEXIST')
+			throw err
 	}
 },
 
 
 
 /*
-	Method: removePathSync
+Method: removePathSync
 
-	Removes a file. (Synchronous)
+Removes a file. (Synchronous)
 */
 removePathSync: function(path)
 {
@@ -855,9 +926,9 @@ removePathSync: function(path)
 
 
 /*
-	Method: copyTreeSync
+Method: copyTreeSync
 
-	Wrapper of copysync.
+Wrapper of copysync.
 */
 copyTreeSync: function(src, dst)
 {
@@ -865,9 +936,9 @@ copyTreeSync: function(src, dst)
 },
 
 /*
-	Method: getFileContents
+Method: getFileContents
 
-	Uses readFile to get the contents of a file.
+Uses readFile to get the contents of a file.
 */
 getFileContents: function(fileInfos, options, callback)
 {
@@ -900,9 +971,9 @@ getFileContents: function(fileInfos, options, callback)
 
 // fix: remove eventually
 /*
-	Method: ensureArray
+Method: ensureArray
 
-	If input is an array, return input.  If not, makes it an array.  If undefied, returns [].
+If input is an array, return input.  If not, makes it an array.  If undefied, returns [].
 */
 ensureArray: function(val)
 {
@@ -913,28 +984,16 @@ ensureArray: function(val)
 	return [val]
 },
 /*
-	Method: ensureExtension
+Method: collectFiles
 
-	Checks that a given file has the given extension.  If not, appends the extension.
-*/
-ensureExtension: function(filename, extension)
-{
-	extension = cOS.normalizeExtension(extension)
-	if (cOS.getExtension(filename) != extension)
-		return filename + extension
-	return filename
-},
-/*
-	Method: collectFiles
+Gets all files in the searchPaths with given extensions.
 
-	Gets all files in the searchPaths with given extensions.
+Parameters:
 
-	Parameters:
-
-		searchPaths - list of paths to search
-		extensions - list of extensions for which to look
-		options - object specifying root or exclusions
-		callback - a callback function
+	searchPaths - list of paths to search
+	extensions - list of extensions for which to look
+	options - object specifying root or exclusions
+	callback - a callback function
 */
 collectFiles: function(searchPaths, extensions, options, callback)
 {
@@ -972,7 +1031,7 @@ collectFiles: function(searchPaths, extensions, options, callback)
 				// console.log(file)
 				if (cOS.contains(options.exclude, file))
 					return
-				fileInfo = cOS.getFileInfo(file, options)
+				fileInfo = cOS.getPathInfo(file, options)
 				files.push(fileInfo)
 			})
 			callback(null, files)
@@ -1024,9 +1083,9 @@ collectFiles: function(searchPaths, extensions, options, callback)
 },
 
 /*
-	Method: contains
+Method: contains
 
-	Returns whether or not to exclude a given path, given an iterable of paths to exclude.
+Returns whether or not to exclude a given path, given an iterable of paths to exclude.
 */
 contains: function(excludes, path)
 {
@@ -1040,10 +1099,10 @@ contains: function(excludes, path)
 },
 
 /*
-	Method: runPython
+Method: runPython
 
-	Executes a given python file.
-	fix: globalSettings.PYTHON currently hardcoded.
+Executes a given python file.
+fix: globalSettings.PYTHON currently hardcoded.
 */
 // runPython: function(pythonFile)
 // {
@@ -1052,16 +1111,16 @@ contains: function(excludes, path)
 // },
 
 /*
-	Method: runCommand
+Method: runCommand
 
-	Executes a given command with the arguments specified.
+Executes a given command with the arguments specified.
 
-	Parameters:
+Parameters:
 
-		cmd - Command to be executed
-		args - List of arguments to that function
-		options - options forwarded to child_process.spawn
-		callback - callback function
+	cmd - Command to be executed
+	args - List of arguments to that function
+	options - options forwarded to child_process.spawn
+	callback - callback function
 */
 runCommand: function(cmd, args, options, callback)
 {
@@ -1116,7 +1175,7 @@ runCommand: function(cmd, args, options, callback)
 },
 
 /*
-	Method: isWindows
+Method: isWindows
 */
 isWindows: function()
 {
@@ -1124,14 +1183,14 @@ isWindows: function()
 },
 
 /*
-	Method: isLinux
+Method: isLinux
 */
 isLinux: function()
 {
 	return os.platform() == 'linux'
 },
 /*
-	Method: isMac
+Method: isMac
 */
 isMac: function()
 {
@@ -1139,9 +1198,9 @@ isMac: function()
 },
 
 /*
-	Method: getGlobalModulesDir
+Method: getGlobalModulesDir
 
-	Returns the directory of the global modules.
+Returns the directory of the global modules.
 */
 getGlobalModulesDir: function(callback)
 {
