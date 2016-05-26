@@ -6,7 +6,7 @@ var _ = require('lodash')
 var expect = require('expect.js')
 var describe = global.describe
 var it = global.it
-// var path = require('path')
+var async = require('async')
 // var fs = require('fs')
 // var path = require('path')
 
@@ -218,12 +218,36 @@ describe('cOS', function() {
 
 	it ('should getFrameRange', function(done) {
 		cOS.mkdir('seq')
-		for (var i = 0; i < 10; i+=1)
-			cOS.runCommand('touch', 'seq/filev' + cOS.padLeft(String(i + 1510), '0', 4))
-		var info = cOS.getFrameRange('seq/filev%04d')
-		expect(info.min).to.be(1510)
-		expect(info.max).to.be(1519)
-		cOS.runCommand('rm', ['-rf, seq'])
-		done()
+		var funcs = _.map(_.range(10), function(i)
+		{
+			return function(callback)
+			{
+				cOS.runCommand(
+					'touch',
+					'seq/name_v001.' + cOS.padLeft(String(i + 1510), '0', 4) + '.jpg',
+					callback)
+			}
+		})
+		funcs.push(function(callback)
+		{
+			var info = cOS.getFrameRange('seq/name_v001.%04d.jpg')
+			expect(info.min).to.be(1510)
+			expect(info.max).to.be(1519)
+			callback()
+		})
+		funcs.push(function(callback)
+		{
+			cOS.removeDirSync('seq')
+			callback()
+			// cOS.runCommand('rm', ['-rf, seq'], callback)
+		})
+		async.series(funcs, done)
+		// for (var i = 0; i < 10; i+=1)
+		// 	cOS.runCommand('touch', 'seq/name_v001.' + cOS.padLeft(String(i + 1510), '0', 4) + '.jpg')
+		// var info = cOS.getFrameRange('seq/name_v001.%04d.jpg')
+		// console.log('info:', info)
+		// expect(info.min).to.be(1510)
+		// expect(info.max).to.be(1519)
+		// done()
 	})
 })

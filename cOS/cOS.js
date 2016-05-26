@@ -313,7 +313,7 @@ removeDirSync: function(path)
 			cOS.removeDirSync(curPath)
 		// delete file
 		else
-			cOS.removePath(curPath)
+			cOS.removePathSync(curPath)
 	})
 	fs.rmdirSync(path)
 },
@@ -785,7 +785,8 @@ getFrameRange: function(path)
 
 	var percentLoc = baseInFile.indexOf('%')
 
-	if (percentLoc == -1) throw "Frame padding not found in " + path
+	if (percentLoc == -1)
+		throw new Error('Frame padding not found in ' + path)
 
 	var padding = parseInt(baseInFile.charAt(percentLoc + 2), 10)
 
@@ -793,15 +794,11 @@ getFrameRange: function(path)
 	var maxFrame = -9999999
 
 	var frame
-	_.each(fs.readdirSync(cOS.getDir(path)), function(x)
+	_.each(fs.readdirSync(cOS.getDir(path)), function(path)
 	{
-		frame = +(x.substr(percentLoc, padding))
-		console.log(frame)
-		if (!isNaN(frame))
-		{
-			maxFrame = Math.max(maxFrame, frame)
-			minFrame = Math.min(minFrame, frame)
-		}
+		frame = parseInt(path.substr(percentLoc, padding), 10)
+		maxFrame = Math.max(maxFrame, frame)
+		minFrame = Math.min(minFrame, frame)
 	})
 
 	return {
