@@ -74,13 +74,13 @@ describe('cOS', function() {
 
 	it('should collectFiles', function(done) {
 		searchPaths = ['test/test-cOS']
-		extension = '.mustache'
+		extension = 'mustache'
 		function cb(err, files)
 		{
 			if (err) throw err
 			expect(files).to.be.a('object')
 			expect(files.length).to.be(3)
-			var names = _.pluck(files, 'basename')
+			var names = _.map(files, 'basename')
 			expect(names).to.eql(['one.mustache','two.mustache','three.mustache'])
 			done()
 		}
@@ -89,14 +89,14 @@ describe('cOS', function() {
 
 	it('should collectFiles with exclusions', function(done) {
 		searchPaths = ['test/test-cOS']
-		extension = '.mustache'
+		extension = 'mustache'
 		function cb(err, files)
 		{
 			if (err) throw err
 
 			expect(files).to.be.a('object')
 			expect(files.length).to.be(2)
-			var names = _.pluck(files, 'basename')
+			var names = _.map(files, 'basename')
 			expect(names).to.eql(['one.mustache', 'three.mustache'])
 			done()
 		}
@@ -105,13 +105,13 @@ describe('cOS', function() {
 
 	it('should collectFiles searchPaths and extensions', function(done) {
 		searchPaths = ['test/test-cOS/one/two/','test/test-cOS/three']
-		extension = ['.mustache','.styl']
+		extension = ['mustache','styl']
 		function cb(err, files)
 		{
 			if (err) throw err
 			expect(files).to.be.a('object')
 			expect(files.length).to.be(3)
-			var names = _.pluck(files, 'basename')
+			var names = _.map(files, 'basename')
 			expect(names).to.contain('two.mustache','three.mustache','three.styl')
 			done()
 		}
@@ -124,7 +124,7 @@ describe('cOS', function() {
 
 	it ('should upADir', function(){
 		var upDir = cOS.upADir('c:/test/sub')
-		expect(upDir).to.be('c:/')
+		expect(upDir).to.be('c:/test/')
 		upDir = cOS.upADir('c:/')
 		expect(upDir).to.be('c:/')
 		upDir = cOS.upADir('etc/')
@@ -138,9 +138,10 @@ describe('cOS', function() {
 	})
 
 	it ('should runCommand', function(done){
-		cOS.runCommand('ls', function(out, err, exitCode)
+		cOS.runCommand('ls', function(err, out, exitCode)
 		{
-			console.log(out)
+			console.log('out:', out)
+			console.log('err:', err)
 			expect(out).to.contain('LICENSE\nREADME.md')
 			expect(err).to.be('')
 			expect(exitCode).to.be(0)

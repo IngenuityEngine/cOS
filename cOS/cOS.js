@@ -696,15 +696,17 @@ removeExtension: function(path) {
 },
 
 /*
-	Method: fileExtention
+	Method: getExtension
 
 	Returns file extension of a file (without the '.').
 */
-fileExtension: function(path)
+getExtension: function(path)
 {
 	path = path.split('.')
-	if (path.length > 1) return path.pop()
-	else return ''
+	if (path.length > 1)
+		return path.pop()
+	else
+		return ''
 },
 
 /*
@@ -988,7 +990,7 @@ collectFiles: function(searchPaths, extensions, options, callback)
 			searchPath = cOS.normalizeDir(searchPath)
 			_.each(extensions, function getForExtensions(extension)
 			{
-				extension = '*' + cOS.normalizeExtension(extension)
+				extension = '*.' + cOS.normalizeExtension(extension)
 
 				// add a new search func, called later by async
 				searchFuncs.push(function(done)

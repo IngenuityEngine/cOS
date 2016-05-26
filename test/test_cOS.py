@@ -1,27 +1,31 @@
-import sys, os
+
+import os
+import sys
 import subprocess
 
-sys.path.append(
+sys.path.insert(0,
 	os.path.abspath(
 		os.path.join(
 			os.path.dirname(os.path.realpath(__file__)),
-			'../cOS/')
+			'..')
 		)
 	)
-
 import cOS
 
-import ieInit
-ieInit.init()
+sys.path.append('c:/ie/tryout')
+import tryout
+
+import arkInit
+arkInit.init()
 
 import settingsManager
 globalSettings = settingsManager.globalSettings()
 
-import unittest
-
-class cOSTest(unittest.TestCase):
+class test(tryout.TestSuite):
+	title = 'test/test_cOS.py'
 
 	def setUp(self):
+		os.system('rm -rf sandbox')
 		os.system('mkdir sandbox')
 		os.system('touch sandbox/file_v001.mb')
 		os.system('touch sandbox/file.mb')
@@ -94,14 +98,6 @@ class cOSTest(unittest.TestCase):
 		prepped = cOS.unixPath('\\sandbox\\file_v001.mb')
 		self.assertEqual(prepped, '/sandbox/file_v001.mb')
 
-	def test_universalPath(self):
-		uni = cOS.universalPath('Q:/test_file')
-		self.assertEqual(uni, globalSettings.UNIVERSAL_ROOT + 'test_file')
-
-	def test_osPath(self):
-		os = cOS.osPath('$root/test_file')
-		self.assertEqual(os, globalSettings.ROOT + 'test_file')
-
 	def test_ensureEndingSlash(self):
 		normalized = cOS.ensureEndingSlash('path/to/dir')
 		self.assertEqual(normalized, 'path/to/dir/')
@@ -159,7 +155,7 @@ class cOSTest(unittest.TestCase):
 
 	def test_absolutePath(self):
 		absPath = cOS.absolutePath('sandbox')
-		self.assertEqual(absPath, 'c:/ie/cOS/test/sandbox/')
+		self.assertEqual(absPath, 'c:/ie/cOS/sandbox/')
 
 	def test_getFiles(self):
 		files = cOS.getFiles('sandbox')
@@ -181,7 +177,7 @@ class cOSTest(unittest.TestCase):
 
 	def test_cwd(self):
 		cwd = cOS.cwd()
-		self.assertEqual(cwd, 'c:/ie/cOS/test/')
+		self.assertEqual(cwd, 'c:/ie/cOS/')
 
 	def test_ensureArray(self):
 		self.assertEqual(cOS.ensureArray([1,2,3]), [1,2,3])
@@ -205,4 +201,4 @@ class cOSTest(unittest.TestCase):
 		self.assertTrue(cOS.isWindows())
 
 if __name__ == '__main__':
-	unittest.main()
+	tryout.run(test)
