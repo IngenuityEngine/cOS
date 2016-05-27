@@ -30,11 +30,35 @@ Ensure [tryout](https://github.com/IngenuityEngine/tryout) is installed and prop
 - getFileInfo - relative dir now prefixed w/ ./
 
 ### Removed
-fileExtension (use getExtension instead)
-filePrep (use unixPath instead)
-pathInfo (use getPathInfo instead)
-isDirSync (antipattern, don't use)
-isFileSync (antipattern, don't use)
+- fileExtension (use getExtension instead)
+- filePrep (use unixPath instead)
+- pathInfo (use getPathInfo instead)
+- isDirSync (antipattern, don't use)
+- isFileSync (antipattern, don't use)
+
+### Moved
+- find a home for:
+
+	def updateTools(toolsDir=None):
+		'''
+		Updates tools from the git repo if available.
+		'''
+		# return True
+		if not globalSettings.IS_NODE:
+			print 'Bailing on update, not a node'
+			return
+
+		toolsDir = globalSettings.ARK_ROOT
+
+		try:
+			print toolsDir + 'bin/hardUpdate.bat'
+			os.system(toolsDir + 'bin/hardUpdate.bat')
+			print 'Tools updated'
+			return True
+		except Exception as err:
+			print 'Failed to update tools:', err
+			pass
+			return False
 
 ### Renamed
 stripExtension > removeExtension

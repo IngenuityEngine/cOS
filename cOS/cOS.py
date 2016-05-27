@@ -26,15 +26,7 @@ from distutils import dir_util
 import types
 import re
 
-# globalSettings
-#-----------------------------------------------------------------------------
-
-import arkInit
-arkInit.init()
-import settingsManager
-globalSettings = settingsManager.globalSettings()
-# import ieCommon
-import arkUtil
+# fix: why is this try / catched?
 try:
 	import psutil
 except:
@@ -283,9 +275,12 @@ def getFrameRange(path):
 			'complete': duration == count,
 		}
 
+
+
 # System Operations
 ##################################################
 
+# fix: needs to work for linux / osx
 def setEnvironmentVariable(key, val):
 	'''
 	Sets a given environment variable for the OS.
@@ -322,13 +317,6 @@ def isDir(path):
 	Checks if a path is a directory.
 	'''
 	return os.path.isdir(path)
-
-def checkTempDir():
-	'''
-	Checks if globalSettings.TEMP exists, and if not, creates it.
-	'''
-	if not os.path.exists(globalSettings.TEMP):
-		makeDirs(globalSettings.TEMP)
 
 '''
 Concatenates a directory with a file path using forward slashes.
@@ -577,8 +565,10 @@ def runCommand(processArgs,env=None):
 		ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
 
 		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
+		# fix: the value shouldn't be 19, it used to be
+# KEY_ALL_ACCESS which was getting pulled from global settings
 		try:
-			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, globalSettings.KEY_ALL_ACCESS)
+			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, 19)
 		except:
 			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
 		# 1 (True) is the value
@@ -586,7 +576,7 @@ def runCommand(processArgs,env=None):
 
 	# fix: use this everywhere
 	command = ''
-	if arkUtil.varType(processArgs) == 'list':
+	if type(processArgs) == list:
 		command = '"' + processArgs[0] + '" '
 		for i in range(1, len(processArgs)):
 			processArgs[i] = str(processArgs[i])
@@ -601,31 +591,10 @@ def runPython(pythonFile):
 	'''
 	Executes a given python file.
 	'''
-	return os.system(globalSettings.PYTHON + ' ' + pythonFile)
+	return os.system('python ' + pythonFile)
 
 
 ####################### Update Operations #######################
-
-def updateTools(toolsDir=None):
-	'''
-	Updates tools from the git repo if available.
-	'''
-	# return True
-	if not globalSettings.IS_NODE:
-		print 'Bailing on update, not a node'
-		return
-
-	toolsDir = globalSettings.ARK_ROOT
-
-	try:
-		print toolsDir + 'bin/hardUpdate.bat'
-		os.system(toolsDir + 'bin/hardUpdate.bat')
-		print 'Tools updated'
-		return True
-	except Exception as err:
-		print 'Failed to update tools:', err
-		pass
-		return False
 
 def isWindows():
 	'''
@@ -673,8 +642,11 @@ def startSubprocess(processArgs,env=None):
 		#     subprocess_flags = 0x8000000 # hex constant equivalent to win32con.CREATE_NO_WINDOW
 
 		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
+		# fix: this shouldn't be 19
+		# used to be pulled from global settings
+		# also duplicated in runProgram, should pick one
 		try:
-			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, globalSettings.KEY_ALL_ACCESS)
+			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, 19)
 		except:
 			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
 		# 1 (True) is the value
@@ -683,7 +655,7 @@ def startSubprocess(processArgs,env=None):
 	# else:
 	#     subprocess_flags = 0
 	command = ''
-	if arkUtil.varType(processArgs) == 'list':
+	if type(processArgs) == list:
 		command = '"' + processArgs[0] + '" '
 		for i in range(1, len(processArgs)):
 			processArgs[i] = str(processArgs[i])

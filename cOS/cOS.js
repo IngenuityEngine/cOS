@@ -306,6 +306,46 @@ getFrameRange: function(path)
 
 
 
+// System Operations
+//////////////////////////////////////////////////
+
+
+/*
+Method: setEnvironmentVariable
+
+Sets a given environment variable for the OS.
+
+Parameters:
+	key - environment variable
+	val - value for the environment variable
+*/
+// fix: needs to work for linux / osx
+setEnvironmentVariable: function(key, val)
+{
+	val = String(val)
+	process.env[key] = val
+	child_process.exec('setx ' + key + '"' + val + '"')
+},
+
+
+/*
+Method: mkdir
+
+Wrapper for fs.mkdir.
+*/
+mkdir: function(dir) {
+	try
+	{
+		fs.mkdir(dir)
+	}
+	catch (err)
+	{
+		console.log('err.code:', err.code)
+		if (err.code != 'EEXIST')
+			throw err
+	}
+},
+
 
 
 
@@ -874,42 +914,6 @@ padLeft: function(str, padString, length)
 
 
 ///////////////////////////// System Operations //////////////////////////////
-
-/*
-Method: setEnvironmentVariable
-
-Sets a given environment variable for the OS.
-
-Parameters:
-	key - environment variable
-	val - value for the environment variable
-*/
-setEnvironmentVariable: function(key, val)
-{
-	val = String(val)
-	process.env[key] = val
-	child_process.exec('setx ' + key + '"' + val + '"')
-},
-
-
-/*
-Method: mkdir
-
-Wrapper for fs.mkdir.
-*/
-mkdir: function(dir) {
-	try
-	{
-		fs.mkdir(dir)
-	}
-	catch (err)
-	{
-		console.log('err.code:', err.code)
-		if (err.code != 'EEXIST')
-			throw err
-	}
-},
-
 
 
 /*
