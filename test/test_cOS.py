@@ -15,12 +15,6 @@ import cOS
 sys.path.append('c:/ie/tryout')
 import tryout
 
-import arkInit
-arkInit.init()
-
-import settingsManager
-globalSettings = settingsManager.globalSettings()
-
 class test(tryout.TestSuite):
 	title = 'test/test_cOS.py'
 
@@ -45,8 +39,8 @@ class test(tryout.TestSuite):
 	def tearDown(self):
 		os.system('rm -rf sandbox')
 
-	def test_mkdir(self):
-		cOS.mkdir('testDir')
+	def test_makeDir(self):
+		cOS.makeDir('testDir')
 		self.assertTrue(os.path.isdir('testDir'))
 		os.system('rmdir testDir')
 
@@ -66,13 +60,9 @@ class test(tryout.TestSuite):
 		ver = cOS.incrementVersion('sandbox/file_v001.mb')
 		self.assertEqual(cOS.getVersion(ver), 2)
 
-	def test_getDir(self):
-		dirname = cOS.getDir('sandbox/file.mb')
+	def test_getDirName(self):
+		dirname = cOS.getDirName('sandbox/file.mb')
 		self.assertEqual(dirname, 'sandbox/')
-
-	def test_checkTempDir(self):
-		cOS.checkTempDir()
-		self.assertTrue(os.path.isdir(globalSettings.TEMP))
 
 	def test_emptyDir(self):
 		cOS.emptyDir('sandbox/')
@@ -83,7 +73,7 @@ class test(tryout.TestSuite):
 		info = cOS.getPathInfo('test/test-cOS/four.js', options)
 
 		self.assertEqual(info['basename'], 'four.js',)
-		self.assertEqual(info['extension'], '.js',)
+		self.assertEqual(info['extension'], 'js',)
 		self.assertEqual(info['name'], 'four',)
 		self.assertEqual(info['dirname'], 'test/test-cOS/',)
 		self.assertEqual(info['path'], 'test/test-cOS/four.js',)
@@ -145,29 +135,19 @@ class test(tryout.TestSuite):
 		parent = cOS.upADir('path/to/a/file.txt')
 		self.assertEqual(parent, 'path/to/')
 
-	def test_isDir(self):
-		isDir = cOS.isDir('sandbox')
-		self.assertTrue(isDir)
-		isDir = cOS.isDir('DOESNTEXIST')
-		self.assertTrue(not isDir)
-
 	def test_join(self):
-		joined = cOS.join('/path/to/a/directory', '/path/to/a/file.txt')
-		self.assertEqual(joined, 'path/to/a/directory/path/to/a/file.txt')
-
-	def test_absolutePath(self):
-		absPath = cOS.absolutePath('sandbox')
-		self.assertEqual(absPath, 'c:/ie/cOS/sandbox/')
+		joined = cOS.join('/path/to/a/directory/', '/path/to/a/file.txt')
+		self.assertEqual(joined, '/path/to/a/directory/path/to/a/file.txt')
 
 	def test_getFiles(self):
 		files = cOS.getFiles('sandbox')
 		self.assertEqual(set(files), set(['emptyDir', 'seq', 'file_v001.mb', 'file.mb', 'testdir1', 'testdir2', 'sandboxSubdir']))
 
-	def test_removePath(self):
+	def test_removeFile(self):
 		self.assertTrue(os.path.isfile('sandbox/file.mb'))
-		cOS.removePath('sandbox/file.mb')
+		cOS.removeFile('sandbox/file.mb')
 		self.assertTrue(not os.path.isfile('sandbox/file.mb'))
-		ret = cOS.removePath('sandbox/file.mb')
+		ret = cOS.removeFile('sandbox/file.mb')
 		self.assertTrue(not ret)
 
 	def test_removeDir(self):

@@ -15,6 +15,36 @@ var mkdirp = require('mkdirp')
 /////////////////////////
 // var helpers = require('coren/shared/util/helpers')
 
+
+// Helpers
+//////////////////////////////////////////////////
+function ensureArray(val)
+{
+	if (_.isArray(val))
+		return val
+	if (_.isUndefined(val))
+		return []
+	return [val]
+}
+
+/*
+Method: contains
+
+Returns whether or not to exclude a given path,
+given an iterable of paths to exclude.
+*/
+function contains(excludes, path)
+{
+	var exclude = false
+	_.each(excludes, function(str)
+	{
+		if (exclude || path.indexOf(str) != -1)
+			exclude = true
+	})
+	return exclude
+}
+
+
 // cOS
 /////////////////////////
 var cOS = module.exports = {
@@ -153,6 +183,22 @@ ensureExtension: function(filename, extension)
 //////////////////////////////////////////////////
 
 /*
+Method: padLeft
+
+Pads a given string with the pad character until
+it's the given length
+This exists because javasript does not support string
+formatting to use %04d.
+*/
+padLeft: function(str, padString, length)
+{
+	str = String(str)
+	while (str.length < length)
+		str = padString + str;
+	return str
+},
+
+/*
 Method: getVersion
 
 Returns version number of a given filename.
@@ -173,7 +219,7 @@ Returns file with version incremented in all locations in the name.
 incrementVersion: function(filename)
 {
 	var version = cOS.getVersion(filename) + 1
-	return filename.replace(/[vV][0-9]+/g, 'v' + cOS.padLeft(String(version), '0', 3))
+	return filename.replace(/[vV][0-9]+/g, 'v' + cOS.padLeft(version, '0', 3))
 },
 
 
@@ -191,7 +237,7 @@ Method: getDir
 
 Returns directory name of a file with a trailing '/'.
 */
-getDir: function(filename)
+getDirName: function(filename)
 {
 	return cOS.normalizeDir(path.dirname(filename))
 },
@@ -212,7 +258,7 @@ upADir: function(path)
 },
 
 /*
-Method: getFileInfo
+Method: getPathInfo
 
 Returns object with file's basename, extension, name, dirname and path.
 With options, can also return root, relative dirname, and relative path, and
@@ -282,7 +328,7 @@ getFrameRange: function(path)
 
 	var frame
 	var count = 0
-	_.each(fs.readdirSync(cOS.getDir(path)), function(path)
+	_.each(fs.readdirSync(cOS.getDirName(path)), function(path)
 	{
 		count += 1
 		frame = parseInt(path.substr(percentLoc, padding), 10)
@@ -328,56 +374,45 @@ setEnvironmentVariable: function(key, val)
 },
 
 
+
 /*
-Method: mkdir
+Method: makeDir
 
 Wrapper for fs.mkdir.
 */
-mkdir: function(dir) {
-	try
-	{
-		fs.mkdir(dir)
-	}
-	catch (err)
-	{
-		console.log('err.code:', err.code)
-		if (err.code != 'EEXIST')
-			throw err
-	}
+makeDir: function(dir, callback)
+{
+	fs.mkdir(dir, callback)
 },
 
 
+/*
+Method: makeDir
 
+Wrapper for fs.mkdir.
+*/
+makeDirSync: function(dir)
+{
+	try
+	{
+		fs.mkdirSync(dir)
+		return true
+	}
+	catch (err)
+	{
+		return err
+	}
+},
 
+/*
+Method: makeDirs
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Makes a directory. (Synchronous)
+*/
+makeDirs: function(path, callback)
+{
+	mkdirp(cOS.normalizeDir(path), callback)
+},
 
 /*
 Method: makeDirsSync
@@ -392,47 +427,7 @@ makeDirsSync: function(path)
 		return err
 	}
 },
-/*
-Method: validEmptyDirSync
 
-Returns an object describing whether a directory is an existing directory (valid), and if it contains files (hasFiles).
-*/
-validEmptyDirSync: function(dir)
-{
-	var exists = fs.existsSync(dir)
-	if (exists)
-	{
-		if (cOS.isDirSync(dir))
-		{
-			var files = fs.readdirSync(dir)
-			if (files.length)
-			{
-				return {valid: true, hasFiles: true}
-			}
-			return {valid: true}
-		}
-		else
-		{
-			return {
-					valid: false,
-					error: 'Dir: ' + dir + ' exists but is not a directory'
-				}
-		}
-	}
-	else
-	{
-		var rootDir = cOS.upADir(dir)
-		if (!cOS.isDirSync(rootDir))
-			return {
-					valid: false,
-					error:'Root dir: ' + rootDir + ' does not exists'
-				}
-		fs.mkdirSync(dir)
-		return {valid: true}
-	}
-},
-
-// cOS.join that always joins with forward slash
 // fix: should accept a bunch of paths
 /*
 Method: join
@@ -444,31 +439,6 @@ join: function(a, b)
 	return cOS.normalizeDir(a) + cOS.normalizePath(b)
 },
 
-// wrap cOS.dirname w/ normalize
-dirname: function(file)
-{
-	return cOS.normalizeDir(path.dirname(file))
-},
-
-/*
-Method: absolutePath
-
-Returns absolute path of a given path.
-*/
-absolutePath: function(path)
-{
-	return cOS.join(cOS.cwd(), path)
-},
-
-/*
-Method: realPathSync
-
-Returns the normalized real path. (Synchronous)
-*/
-realPathSync: function(path)
-{
-	return cOS.normalizePath(fs.realpathSync(path))
-},
 
 /*
 Method: getFilesSync
@@ -483,79 +453,71 @@ getFilesSync: function(path)
 	return []
 },
 
-// wrap cOS.readFile so we don't have to specify utf8 all the time
 /*
-Method: readFile
+Method: removeFile
 
-Wrapper of fs.readFile so that utf8 doesn't need to be specified always.
+Removes a file.
 */
-readFile: function(path, options, callback)
+removeFile: function(path, callback)
 {
-	if (_.isFunction(options))
-	{
-		callback = options
-		options = {}
-	}
-	else
-		options = options || {}
-
-	_.defaults(options, {
-			encoding: 'utf8'
-		})
-	fs.readFile(path, options, callback)
+	fs.unlink(path, callback)
 },
 
+/*
+Method: removeFileSync
 
-unlinkSync: function(path)
+Removes a file. (Synchronous)
+*/
+removeFileSync: function(path)
 {
-	if (fs.existsSync(path))
+	try
+	{
 		return fs.unlinkSync(path)
-	return false
+	}
+	catch (err)
+	{
+		return err
+	}
 },
 
 /*
 Method: removeDirSync
 
-Wrapper of fs.rmdir.
+Wrapper of fs.rmdirSync, empties the folder
+then removes the it.
 */
-// removeDirSync: function(path)
-// {
-// 	path = cOS.normalizePath(path)
-// 	fs.removeSync(path)
-// },
-removeDirSync: function(path)
-{
-	path = cOS.normalizePath(path)
-	var files = cOS.getFilesSync(path)
-	_.each(files, function(file)
-	{
-		var curPath = path + '/' + file
-		// recurse or
-		if(fs.statSync(curPath).isDirectory())
-			cOS.removeDirSync(curPath)
-		// delete file
-		else
-			cOS.removePathSync(curPath)
-	})
-	fs.rmdirSync(path)
-},
-
 removeDir: function(path, callback)
 {
-	path = cOS.normalizePath(path)
-	fs.remove(path, callback)
+	// fix: need a plugin to do this
+	throw new Error('not implemented')
+	callback()
+},
+/*
+Method: removeDirSync
+
+Wrapper of fs.rmdirSync, empties the folder
+then removes the it.
+*/
+removeDirSync: function(path)
+{
+	// fix: need a plugin to do this
+	throw new Error('not implemented')
+	console.log('path:', path)
 },
 
-remove: function(path, callback)
-{
-	path = cOS.normalizePath(path)
-	fs.remove(path, callback)
-},
 
-removeSync: function(path)
+emptyDir: function(path, callback)
 {
-	path = cOS.normalizePath(path)
-	fs.removeSync(path)
+	fs.emptyDir(path, callback)
+},
+/*
+Method: emptyDirSync
+
+Removes all files and subdirectories from a directory.
+*/
+emptyDirSync: function(path)
+{
+	fs.emptyDirSync(path)
 },
 
 rename: function(oldPath, newPath, callback)
@@ -572,21 +534,24 @@ renameSync: function(oldPath, newPath)
 	fs.renameSync(oldPath, newPath)
 },
 
-/*
-Method: emptyDirSync
-
-Removes all files and subdirectories from a directory.
-*/
-emptyDirSync: function(path)
+copy: function(src, dst, callback)
 {
-	path = cOS.normalizePath(path)
-	fs.emptyDirSync(path)
+	fs.copy(src, dst, callback)
 },
 
-emptyDir: function(path, callback)
+copySync: function(src, dst)
 {
-	path = cOS.normalizePath(path)
-	fs.emptyDir(path, callback)
+	return copysync(src, dst)
+},
+
+/*
+Method: copyTreeSync
+
+Wrapper of copysync.
+*/
+copyTreeSync: function(src, dst)
+{
+	return copysync(src, dst)
 },
 
 /*
@@ -599,39 +564,132 @@ cwd: function()
 	return cOS.normalizeDir(process.cwd())
 },
 
+getUserHome: function()
+{
+	var userHome = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
+	return cOS.normalizeDir(userHome)
+},
 
-// fix: should fail gracefully
-// build: function(options, callback)
+// fix: missing duplicateDir
+
+// duplicateDir: function(src, dst)
 // {
-// 	if (_.isFunction(options))
-// 	{
-// 		callback = options
-// 		options = {}
-// 	}
-
-// 	console.log('Searching:')
-// 	_.each(options.searchPaths, function(path)
-// 	{
-// 		console.log(path)
-// 	})
-// 	console.log('\nFor:', options.extensions)
-
-// 	_.defaults(options, {
-// 										asString: true,
-// 										lowercaseNames: false
-// 									})
-
-
-// 	async.waterfall(
-// 		[
-// 			function(cb) {
-// 				cOS.collectFiles(options.searchPaths, options.extensions, options, cb)
-// 			},
-// 			function(allFiles, cb) {
-// 				cOS.build(allFiles, templateManager.compile, options, cb)
-// 			}
-// 		], callback)
 // },
+
+
+/*
+Method: collectFiles
+
+Gets all files in the searchPaths with given extensions.
+
+Parameters:
+
+	searchPaths - list of paths to search
+	extensions - list of extensions for which to look
+	options - object specifying root or exclusions
+	callback - a callback function
+*/
+collectFiles: function(searchPaths, extensions, options, callback)
+{
+	// optional arguments
+	if (_.isFunction(options))
+	{
+		callback = options
+		options = {}
+	}
+	options = options || {}
+	_.defaults(options, {
+		exclude: []
+	})
+
+	// allow for multiple search paths and extensions
+	searchPaths = ensureArray(searchPaths)
+	extensions = ensureArray(extensions)
+
+	function globFiles(searchPath, extension, options, callback)
+	{
+		var filter = '**/*.' + extension
+		console.log('Searching:', searchPath, 'Filter:', filter)
+
+		function finishedMatching(err, matchingFiles)
+		{
+			if (err)
+				throw new Error('cOS.globFiles.finishedMatching: ' + err)
+
+			// set root for relative paths in fileInfo
+			options.root = searchPath
+			var fileInfo
+			var files = []
+			_.each(matchingFiles, function infoAndExclude(file)
+			{
+				// console.log(file)
+				if (contains(options.exclude, file))
+					return
+				fileInfo = cOS.getPathInfo(file, options)
+				files.push(fileInfo)
+			})
+			callback(null, files)
+		}
+		glob(searchPath + filter, finishedMatching)
+	}
+
+	var searchFuncs = []
+	_.each(searchPaths, function createFuncs(searchPath)
+	{
+		searchPath = cOS.normalizeDir(searchPath)
+		_.each(extensions, function getForExtensions(extension)
+		{
+			extension = cOS.normalizeExtension(extension)
+
+			// add a new search func, called later by async
+			searchFuncs.push(function(done)
+			{
+				globFiles(searchPath, extension, options,
+					function(err, files)
+					{
+						if (err && !options.skipSearchPathsOK)
+						{
+							done(new Error('cOS.collectFiles -> Search path not found: ' +
+								cOS.cwd() + searchPath + err.stack))
+						}
+						else
+						{
+							done(null, files)
+						}
+					})
+			})
+		})
+	})
+
+	async.series(
+		searchFuncs,
+		function allSearched(err, results)
+		{
+			if (err)
+				throw new Error('cOS.collectFiles.allSearched: ' + err.stack)
+
+			var allFiles = []
+			_.each(results, function(files)
+			{
+				allFiles = allFiles.concat(files)
+			})
+
+			callback(null, allFiles)
+		}
+	)
+},
+
+
+/*
+Method: collectFilesSync
+
+Synchronous wrapper for glob.sync.
+*/
+collectFilesSync: function(search)
+{
+	return glob.sync(search)
+},
+
 
 /*
 	Method: collectAllFiles
@@ -680,439 +738,17 @@ collectAllFiles: function(searchDir, callback)
 	return walk(searchDir, callback)
 },
 
-// fix: should fail gracefully
-// fix: should be async
-/*
-Method: collectFilesSync
 
-Synchronous version of collectFiles.
-*/
-collectFilesSync: function(searchPath, extension, files, options)
-{
-	if (!_.isArray(files))
-		files = []
 
-	if (!_.isObject(options))
-		options = {}
+// Processes
+//////////////////////////////////////////////////
 
-	// set default options
-	_.defaults(options, {
-		getContents: true,
-		encoding: 'utf8',
-		exclude: []
-	})
-	// allow for multiple search paths
-	if (_.isArray(searchPath))
-	{
-		_.each(searchPath, function(searchPath) {
-			_.extend(files, cOS.collectFilesSync(searchPath, extension, files, options))
-		})
-	}
-	// allow for multiple extensions
-	else if (_.isArray(extension))
-	{
-		_.each(extension, function(extension) {
-			_.extend(files, cOS.collectFilesSync(searchPath, extension, files, options))
-		})
-	}
-	// otherwise get files and return
-	else if (typeof searchPath == 'string')
-	{
-		if (!fs.existsSync(searchPath))
-			return false
-		searchPath = fs.realpathSync(searchPath)
-		searchPath = cOS.ensureEndingSlash(searchPath)
-		var filter = '*.' + extension
-		var excludes = '/**/'
-
-		// only exclude if we have a valid exclude array
-		if (options.exclude &&
-			_.isArray(options.exclude) &&
-			options.exclude.length)
-			excludes = '!(' + options.exclude.join('|') + ')/**/'
-
-		var rootMatches = glob.sync(searchPath + filter)
-		var extendedMatches = glob.sync(searchPath + excludes + filter)
-		var matchingFiles = rootMatches.concat(extendedMatches)
-
-
-		// debug('Searching:', searchPath, 'Filter:', filter)
-		var fileInfo
-		options.root = searchPath
-		_.each(matchingFiles, function infoAndExclude(file)
-		{
-			// bail if any of the excludes is found in the list
-			if (cOS.shouldExclude(options.exclude, file))
-				return
-
-			fileInfo = cOS.getPathInfo(file, options)
-			// fix: should have async option
-			if (options.getContents)
-			{
-				fileInfo.contents = fs.readFileSync(file, options.encoding)
-			}
-			files.push(fileInfo)
-		})
-	}
-	return files
-},
-
-shouldExclude: function(excludes, path)
-{
-	var exclude = false
-	_.each(excludes, function(str)
-	{
-		if (exclude || path.indexOf(str) != -1)
-			exclude = true
-	})
-	return exclude
-},
-
-/*
-	Method: compileFiles
-
-	Compiles files given a compileFunction and options
-
-	Parameters:
-
-		files - List of files to be compiled
-		compileFunction - function used to compile files
-		options - options to be forwarded to the compileFunction
-		callback - a callback function
-*/
-compileFiles: function(files, compileFunction, options, callback)
-{
-	if (_.isFunction(options))
-	{
-		callback = options
-		options = {}
-	}
-
-	var compiledFiles = []
-	var compileFuncs = _.map(files, function(fileInfo)
-	{
-		return function(done)
-		{
-			// debug('Compiling:', fileInfo.path)
-			try
-			{
-				fileInfo.contents = compileFunction(fileInfo.contents, fileInfo, options)
-				compiledFiles.push(fileInfo)
-			}
-			catch (err)
-			{
-				// done(Error('Compile failed for file:\n\n' + fileInfo.path + '\n\n' + err))
-				throw Error('Compile failed for file:\n\n' + fileInfo.path + '\n\n' + err.stack)
-			}
-			done()
-		}
-	})
-	async.parallel(
-		compileFuncs,
-		function(err)
-		{
-			callback(err, compiledFiles)
-		}
-	)
-},
-
-/*
-Method: collectFilenamesSync
-
-Synchronous wrapper for glob.sync.
-*/
-collectFilenamesSync: function(search)
-{
-	return glob.sync(search)
-},
-
-
-
-getUserHome: function()
-{
-	var userHome = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE
-	return cOS.normalizeDir(userHome)
-},
-
-copySync: function(src, dst)
-{
-	return copysync(src, dst)
-},
-
-copy: function(src, dst, callback)
-{
-	fs.copy(src, dst, callback)
-},
-
-createFolder: function(pathName, callback)
-{
-	fs.ensureDir(pathName, callback)
-},
-
-createFolderSync: function(pathName)
-{
-	fs.ensureDirSync(pathName)
-},
-
-
-// Methods
-/////////////////////////
-
-///////////////////// Normalization Operations \\\\\\\\\\\\\\\\\\\\\\\\
-
-/*
-Method: universalPath
-
-Swaps Universal Root (Q:/) with unix root ($root).
-fix: CURRENTLY HARD CODED UNIVERSAL_ROOT TO BE $root.
-*/
-universalPath: function(dir)
-{
-	dir = dir.toLowerCase()
-	return cOS.unixPath(dir).replace('q:', '$root')
-},
-
-/*
-	Method: osPath
-
-	Swaps unix root ($root) with Universal Root (Q:/)
-*/
-osPath: function(dir)
-{
-	return dir.replace('$root', 'Q:/')
-},
-
-
-///////////////////////////// Extension Operations ////////////////////////////////
-
-/*
-Method: getConvertFile
-
-Creates convert file by removing file extension, and appending '_convert.nk'.
-*/
-getConvertFile: function(path)
-{
-	return cOS.removeExtension(path) + '_convert.nk'
-},
-
-//////////////////////// Versioning Operations ///////////////////////////
-
-/*
-Method: padLeft
-
-Pads a given string <str> to the left with <padString> to create a string of length <length>.
-This exists because javasript does not support string formatting to use %03d.
-*/
-padLeft: function(str, padString, length)
-{
-	while (str.length < length)
-		str = padString + str;
-	return str
-},
-
-////////////////////////// Information Retrieval /////////////////////////////
-
-
-///////////////////////////// System Operations //////////////////////////////
-
-
-/*
-Method: removePathSync
-
-Removes a file. (Synchronous)
-*/
-removePathSync: function(path)
-{
-	if (fs.existsSync(path))
-		return fs.unlinkSync(path)
-	return false
-},
-
-
-/*
-Method: copyTreeSync
-
-Wrapper of copysync.
-*/
-copyTreeSync: function(src, dst)
-{
-	return copysync(src, dst)
-},
-
-/*
-Method: getFileContents
-
-Uses readFile to get the contents of a file.
-*/
-getFileContents: function(fileInfos, options, callback)
-{
-	if (_.isFunction(options))
-	{
-		callback = options
-		options = {}
-	}
-
-	fileInfos = cOS.ensureArray(fileInfos)
-	var contentsFuncs = _.map(fileInfos, function(fileInfo)
-	{
-		return function(cb)
-		{
-			cOS.readFile(fileInfo.path, options, function(err, data)
-			{
-				if (err)
-					return cb(err)
-				fileInfo.contents = data
-				cb()
-			})
-		}
-	})
-	async.parallel(contentsFuncs,
-		function(err)
-		{
-			callback(err, fileInfos)
-		})
-},
-
-// fix: remove eventually
-/*
-Method: ensureArray
-
-If input is an array, return input.  If not, makes it an array.  If undefied, returns [].
-*/
-ensureArray: function(val)
-{
-	if (_.isArray(val))
-		return val
-	if (_.isUndefined(val))
-		return []
-	return [val]
-},
-/*
-Method: collectFiles
-
-Gets all files in the searchPaths with given extensions.
-
-Parameters:
-
-	searchPaths - list of paths to search
-	extensions - list of extensions for which to look
-	options - object specifying root or exclusions
-	callback - a callback function
-*/
-collectFiles: function(searchPaths, extensions, options, callback)
-{
-	// if they didnt' pass options
-	if (_.isFunction(options))
-	{
-		callback = options
-		options = {}
-	}
-	options = options || {}
-	_.defaults(options, {
-		exclude: []
-	})
-
-	// allow for multiple search paths and extensions
-	searchPaths = cOS.ensureArray(searchPaths)
-	extensions = cOS.ensureArray(extensions)
-
-	function globFiles(searchPath, extension, options, callback)
-	{
-		var filter = '**/' + extension
-		console.log('Searching:', searchPath, 'Filter:', filter)
-
-		function finishedMatching(err, matchingFiles)
-		{
-			if (err)
-				throw new Error('cOS.globFiles.finishedMatching: ' + err)
-
-			// set root for relative paths in fileInfo
-			options.root = searchPath
-			var fileInfo
-			var files = []
-			_.each(matchingFiles, function infoAndExclude(file)
-			{
-				// console.log(file)
-				if (cOS.contains(options.exclude, file))
-					return
-				fileInfo = cOS.getPathInfo(file, options)
-				files.push(fileInfo)
-			})
-			callback(null, files)
-		}
-		glob(searchPath + filter, finishedMatching)
-	}
-
-	var searchFuncs = []
-	_.each(searchPaths,
-		function createFuncs(searchPath)
-		{
-			searchPath = cOS.normalizeDir(searchPath)
-			_.each(extensions, function getForExtensions(extension)
-			{
-				extension = '*.' + cOS.normalizeExtension(extension)
-
-				// add a new search func, called later by async
-				searchFuncs.push(function(done)
-				{
-					globFiles(searchPath, extension, options,
-						function(err, files)
-						{
-							if (err && !options.skipSearchPathsOK)
-								done(new Error('cOS.collectFiles -> Search path not found: ' +
-									cOS.cwd() + searchPath + err.stack))
-							else
-								done(null, files)
-						})
-				})
-			})
-		})
-
-	async.parallel(
-		searchFuncs,
-		function allSearched(err, results)
-		{
-			if (err)
-				throw new Error('cOS.collectFiles.allSearched: ' + err.stack)
-
-			var allFiles = []
-			_.each(results, function(files)
-			{
-				allFiles = allFiles.concat(files)
-			})
-
-			callback(null, allFiles)
-		}
-	)
-},
-
-/*
-Method: contains
-
-Returns whether or not to exclude a given path, given an iterable of paths to exclude.
-*/
-contains: function(excludes, path)
-{
-	var exclude = false
-	_.each(excludes, function(str)
-	{
-		if (exclude || path.indexOf(str) != -1)
-			exclude = true
-	})
-	return exclude
-},
-
-/*
-Method: runPython
-
-Executes a given python file.
-fix: globalSettings.PYTHON currently hardcoded.
-*/
-// runPython: function(pythonFile)
+// fix: missing getParentPID
+// getParentPID: function()
 // {
-// 	var PYTHON = 'C:/Python27/python.exe'
-// 	return child_process.exec(PYTHON, [pythonFile])
+
 // },
+
 
 /*
 Method: runCommand
@@ -1178,6 +814,41 @@ runCommand: function(cmd, args, options, callback)
 		})
 },
 
+
+runPython: function(pythonFile, options, callback)
+{
+	cOS.runCommand('python', [pythonFile], options, callback)
+},
+
+
+// IO
+//////////////////////////////////////////////////
+/*
+Method: readFile
+
+Wrapper of fs.readFile so we don't have to
+specify utf8 all the time
+*/
+readFile: function(path, options, callback)
+{
+	if (_.isFunction(options))
+	{
+		callback = options
+		options = {}
+	}
+	else
+		options = options || {}
+
+	_.defaults(options, {
+			encoding: 'utf8'
+		})
+	fs.readFile(path, options, callback)
+},
+
+
+// OS
+//////////////////////////////////////////////////
+
 /*
 Method: isWindows
 */
@@ -1200,6 +871,8 @@ isMac: function()
 {
 	return os.platform() == 'darwin'
 },
+
+
 
 /*
 Method: getGlobalModulesDir

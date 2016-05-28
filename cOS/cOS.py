@@ -32,6 +32,17 @@ try:
 except:
 	pass
 
+# Helpers
+##################################################
+def ensureArray(val):
+	'''
+	If input is an array, return input.  If not, make it first element of a list.
+	'''
+	if isinstance(val, (list, tuple)):
+		return list(val)
+	if (val == None):
+		return []
+	return [val]
 
 # Normalization
 ##################################################
@@ -178,7 +189,7 @@ def getHighestVersion(root, extension):
 # Information
 ##################################################
 
-def getDir(filename):
+def getDirName(filename):
 	'''
 	Returns directory name of a file with a trailing '/'.
 	'''
@@ -194,7 +205,7 @@ def upADir(path):
 		return path
 	return '/'.join(parts[:-2]) + '/'
 
-def getFileInfo(path, options=None):
+def getPathInfo(path, options=None):
 	'''
 	Returns object with file's basename, extension, name, dirname and path.
 	With options, can also return root, relative dirname, and relative path, and
@@ -293,12 +304,13 @@ def setEnvironmentVariable(key, val):
 	os.environ[key] = val
 	return os.system('setx %s "%s"' % (key, val))
 
-def mkdir(dirname):
+def makeDir(dirname):
 	'''
-	Wrapper for os.mkdir.
+	Wrapper for os.makeDir.
 	'''
 	try:
 		os.mkdir(dirname)
+		return True
 	except Exception as err:
 		return err
 
@@ -306,35 +318,18 @@ def makeDirs(path):
 	'''
 	Wrapper for os.makedirs.
 	'''
-	dirName = getFileInfo(path)['dirname']
+	dirName = getPathInfo(path)['dirname']
 	try:
 		os.makedirs(dirName)
 	except Exception as err:
 		return err
 
-def isDir(path):
-	'''
-	Checks if a path is a directory.
-	'''
-	return os.path.isdir(path)
-
-'''
-Concatenates a directory with a file path using forward slashes.
-'''
 def join(a, b):
+	'''
+	Concatenates a directory with a file path
+	using forward slashes.
+	'''
 	return normalizeDir(a) + normalizePath(b)
-
-def absolutePath(path):
-	'''
-	Returns absolute path of a given path.
-	'''
-	return normalizeDir(os.path.abspath(path))
-
-def realPath(path):
-	'''
-	Returns the normalized real path of a given path.
-	'''
-	return os.path.realPath(path)
 
 def getFiles(path):
 	'''
@@ -343,18 +338,22 @@ def getFiles(path):
 	path = normalizePath(path)
 	return subprocess.check_output(['ls', path]).split()
 
-def removePath(path):
+def removeFile(path):
 	'''
-	Wrapper for os.remove.  Returns False on error.
+	Wrapper for os.remove, returns the error instead of
+	throwing it
 	'''
+	if os.path.isdir(path):
+		return Exception('Path is a directory, not a file')
 	try:
 		os.remove(path)
-	except:
-		return False
+	except Exception as err:
+		return err
 
 def removeDir(path):
 	'''
-	Removes a directory.  Returns False on error.
+	Removes a directory.  Returns the error instead of
+	throwing it
 	'''
 	try:
 		shutil.rmtree(path)
@@ -394,17 +393,32 @@ def emptyDir(folder,onlyFiles=False, waitTime=5):
 					shutil.rmtree(os.path.join(root, d))
 				except:
 					pass
-def cwd():
-	'''
-	Returns the current working directory.
-	'''
-	return normalizeDir(os.getcwd())
+
+
+def copy(src, dst):
+	return shutil.copy2(src, dst)
 
 def copyTree(src, dst, symlinks=False, ignore=None):
 	'''
 	Copies the src directory tree to the destination.
 	'''
 	dir_util.copy_tree(src, dst)
+
+
+def rename (oldPath, newPath, callback):
+	oldPath = normalizePath(oldPath)
+	newPath = normalizePath(newPath)
+	os.rename(oldPath, newPath)
+
+def cwd():
+	'''
+	Returns the current working directory.
+	'''
+	return normalizeDir(os.getcwd())
+
+def getUserHome():
+	userHome = os.environ.get('HOME') or os.environ.get('HOMEPATH') or os.environ.get('USERPROFILE')
+	return normalizeDir(userHome)
 
 def duplicateDir(src, dest):
 	'''
@@ -440,29 +454,6 @@ def duplicateDir(src, dest):
 			else:
 				print 'exists:', srcFilename
 
-	# fix: should delete old crap
-	# for root, dirs, files in os.walk(src):
-	# 	for n in dirs:
-	# 		folder = src + root + n
-	# 		if not os.path.isdir(folder):
-	# 			print 'delete folder:', dest + root + n
-	# 		# 	os.makedirsfolder
-
-	# 	for n in files:
-	# 		filename = src + root + '/' + n
-	# 		if not os.path.isdir(folder):
-	# 			print 'delete:', dest + root + '/' + n
-	# 		# 	shutil.copy(src + root + n, filename)
-
-def ensureArray(val):
-	'''
-	If input is an array, return input.  If not, make it first element of a list.
-	'''
-	if isinstance(val, (list, tuple)):
-		return list(val)
-	if (val == None):
-		return []
-	return [val]
 
 def collectFiles(searchPaths, extensions, exclusions):
 	'''
@@ -486,7 +477,7 @@ def collectFiles(searchPaths, extensions, exclusions):
 				name = join(normalizeDir(root), normalizePath(name))
 				if (getExtension(name) in extensions) and (name not in exclusions):
 					if name not in filesToReturn:
-						filesToReturn.append(getFileInfo(name))
+						filesToReturn.append(getPathInfo(name))
 	return filesToReturn
 
 def collectAllFiles(searchDir):
@@ -501,13 +492,13 @@ def collectAllFiles(searchDir):
 		for name in files:
 				name = join(normalizeDir(root), normalizePath(name))
 				if name not in filesToReturn:
-					filesToReturn.append(getFileInfo(name))
+					filesToReturn.append(getPathInfo(name))
 	return filesToReturn
 
 
 
 
-# Process Operations
+# Processes
 ##################################################
 def getParentPID():
 	'''
@@ -515,105 +506,21 @@ def getParentPID():
 	'''
 	return psutil.Process(os.getpid()).ppid
 
-def killJobProcesses(nodesOnly=True):
-	'''
-	Kills all other processes currently on the render node.
-	'''
-	if 'psutil' in globals():
-		print 'No psutil module found'
-		return False
-	if not nodesOnly or 'RENDER' in os.environ['COMPUTERNAME']:
-		currentProcess = os.getpid()
-		processParent = getParentPID()
-		for p in psutil.process_iter():
-			try:
-				name = p.name.lower()
-				if '3dsmax' in name or \
-					'nuke' in name or \
-					'modo' in name or \
-					'houdini' in name or \
-					'mantra' in name or \
-					'maya' in name or \
-					'vray' in name or \
-					'ffmpeg' in name or \
-					('cmd.exe' in name and p.pid != processParent) or \
-					('python.exe' in name and p.pid != currentProcess) or \
-					'maxwell' in name:
-					print 'Terminating %s' % name
-					p.terminate()
-			except:
-				pass
-
 def runCommand(processArgs,env=None):
 	'''
 	Executes a program using psutil.Popen, disabling Windows error dialogues.
 	'''
+	command = ' '.join(ensureArray(processArgs))
+	os.system(command)
 
-	if env:
-		env = dict(os.environ.items() + env.items())
-	else:
-		env = os.environ
-
-	if sys.platform.startswith('win'):
-		# Don't display the Windows GPF dialog if the invoked program dies.
-		# See comp.os.ms-windows.programmer.win32
-		# How to suppress crash notification dialog?, Jan 14,2004 -
-		# Raymond Chen's response [1]
-		import ctypes, _winreg
-
-		SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
-		ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
-
-		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
-		# fix: the value shouldn't be 19, it used to be
-# KEY_ALL_ACCESS which was getting pulled from global settings
-		try:
-			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, 19)
-		except:
-			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
-		# 1 (True) is the value
-		_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
-
-	# fix: use this everywhere
-	command = ''
-	if type(processArgs) == list:
-		command = '"' + processArgs[0] + '" '
-		for i in range(1, len(processArgs)):
-			processArgs[i] = str(processArgs[i])
-			command += str(processArgs[i]) + ' '
-		print 'command:\n', command
-	else:
-		print 'command:\n', processArgs
-
-	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,env=env)
-
+# fix: should use a better methodology for this
+# pretty sure python has some way of running a file
 def runPython(pythonFile):
 	'''
 	Executes a given python file.
 	'''
 	return os.system('python ' + pythonFile)
 
-
-####################### Update Operations #######################
-
-def isWindows():
-	'''
-	Returns whether or not the machine running the command is Windows.
-	'''
-	return sys.platform.startswith('win')
-
-
-####################### Command Line Utilities #######################
-
-def genArgs(argData):
-	'''
-	Generates a string of flag arguments from an iterable of tuples k, v tuples.
-	Arguments are of the form -k1 v1 -k2 v2...etc.
-	'''
-	args = ''
-	for k,v in argData.iteritems():
-		args += '-%s %s ' % (k,v)
-	return args[:-1]
 
 def startSubprocess(processArgs,env=None):
 	"""Runs a program through psutil.Popen, disabling Windows error dialogs"""
@@ -668,6 +575,45 @@ def startSubprocess(processArgs,env=None):
 	return psutil.Popen(processArgs,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
 
 
-if __name__ == '__main__':
-	path = 'C:/Trash/sequenceTesting/sequence2.%04d.jpg'
-	print getFrameRange(path)
+# IO
+##################################################
+def readFile(path):
+	with open(path) as fileHandle:
+		return fileHandle.readlines()
+
+# OS
+##################################################
+def isWindows():
+	'''
+	Returns whether or not the machine running the command is Windows.
+	'''
+	return sys.platform.startswith('win')
+
+def isLinux():
+	'''
+	Returns whether or not the machine running the command is Windows.
+	'''
+	return sys.platform.startswith('linux')
+
+def isMac():
+	'''
+	Returns whether or not the machine running the command is Windows.
+	'''
+	return sys.platform.startswith('darwin')
+
+
+
+# Command Line Utilities
+##################################################
+
+# fix: shouldn't really be using this, should
+# generally call subprocess or some other way
+def genArgs(argData):
+	'''
+	Generates a string of flag arguments from a dictionary.
+	Arguments are of the form -k1 v1 -k2 v2
+	'''
+	args = ''
+	for k,v in argData.iteritems():
+		args += '-%s %s ' % (k,v)
+	return args[:-1]

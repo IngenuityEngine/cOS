@@ -132,9 +132,10 @@ describe('cOS', function() {
 		expect(upDir).to.be('etc/')
 	})
 
-	it('should collectFilenamesSync', function(done) {
+	it('should collectFilesSync', function(done) {
 		var searchPath = cOS.join(__dirname, 'test/test-cOS')
-		cOS.collectFilenamesSync(searchPath)
+		var files = cOS.collectFilesSync(searchPath)
+		expect(files.length).to.be.greaterThan(0)
 		done()
 	})
 
@@ -211,7 +212,7 @@ describe('cOS', function() {
 	})
 
 	it ('should getFrameRange', function(done) {
-		cOS.mkdir('seq')
+		cOS.makeDirSync('seq')
 		var funcs = _.map(_.range(10), function(i)
 		{
 			return function(callback)

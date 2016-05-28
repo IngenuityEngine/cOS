@@ -28,13 +28,33 @@ Ensure [tryout](https://github.com/IngenuityEngine/tryout) is installed and prop
 ### Modified
 - normalizeDir - no longer removes starting slash
 - getFileInfo - relative dir now prefixed w/ ./
+- runCommand (python) - now just runs the command w/ os.system, used to be a duplicate of startSubprocess
+
+### Renamed
+- stripExtension > removeExtension
+- getFileInfo > getPathInfo
+- dirname > getDirName
+- collectFilenamesSync > collectFilesSync
 
 ### Removed
-- fileExtension (use getExtension instead)
-- filePrep (use unixPath instead)
-- pathInfo (use getPathInfo instead)
+- fileExtension (use getExtension)
+- filePrep (use unixPath)
+- pathInfo (use getPathInfo)
 - isDirSync (antipattern, don't use)
+- isDir (antipattern, don't use)
 - isFileSync (antipattern, don't use)
+- absolutePath (unused)
+- remove (use removeFile or removeDir)
+- removeSync (use removeFileSync or removeDirSync)
+- collectFilesSync (unused)
+- getDir (use getDirName)
+- unlinkSync (use removeFileSync)
+- createFolder (use makeDir)
+- createFolderSync (use makeDir)
+- osPath (use pathman)
+- universalPath (use pathman)
+- getConvertFile (unused)
+- checkTempDir (doesn't belong here)
 
 ### Moved
 - find a home for:
@@ -60,9 +80,34 @@ Ensure [tryout](https://github.com/IngenuityEngine/tryout) is installed and prop
 			pass
 			return False
 
-### Renamed
-stripExtension > removeExtension
-getFileInfo > getPathInfo
+	def killJobProcesses(nodesOnly=True):
+		'''
+		Kills all other processes currently on the render node.
+		'''
+		if 'psutil' in globals():
+			print 'No psutil module found'
+			return False
+		if not nodesOnly or 'RENDER' in os.environ['COMPUTERNAME']:
+			currentProcess = os.getpid()
+			processParent = getParentPID()
+			for p in psutil.process_iter():
+				try:
+					name = p.name.lower()
+					if '3dsmax' in name or \
+						'nuke' in name or \
+						'modo' in name or \
+						'houdini' in name or \
+						'mantra' in name or \
+						'maya' in name or \
+						'vray' in name or \
+						'ffmpeg' in name or \
+						('cmd.exe' in name and p.pid != processParent) or \
+						('python.exe' in name and p.pid != currentProcess) or \
+						'maxwell' in name:
+						print 'Terminating %s' % name
+						p.terminate()
+				except:
+					pass
 
 
 
