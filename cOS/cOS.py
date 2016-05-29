@@ -347,6 +347,7 @@ def removeFile(path):
 		return Exception('Path is a directory, not a file')
 	try:
 		os.remove(path)
+		return True
 	except Exception as err:
 		return err
 
@@ -355,10 +356,13 @@ def removeDir(path):
 	Removes a directory.  Returns the error instead of
 	throwing it
 	'''
+	if os.path.isfile(path):
+		return Exception('Path is a file, not a directory')
 	try:
 		shutil.rmtree(path)
-	except:
-		return False
+		return True
+	except Exception as err:
+		return err
 
 def emptyDir(folder,onlyFiles=False, waitTime=5):
 	'''
@@ -393,7 +397,6 @@ def emptyDir(folder,onlyFiles=False, waitTime=5):
 					shutil.rmtree(os.path.join(root, d))
 				except:
 					pass
-
 
 def copy(src, dst):
 	return shutil.copy2(src, dst)

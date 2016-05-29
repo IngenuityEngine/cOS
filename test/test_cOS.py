@@ -148,7 +148,7 @@ class test(tryout.TestSuite):
 		cOS.removeFile('sandbox/file.mb')
 		self.assertTrue(not os.path.isfile('sandbox/file.mb'))
 		ret = cOS.removeFile('sandbox/file.mb')
-		self.assertTrue(not ret)
+		self.assertTrue(ret != True)
 
 	def test_removeDir(self):
 		self.assertTrue(os.path.isdir('sandbox/emptyDir'))
