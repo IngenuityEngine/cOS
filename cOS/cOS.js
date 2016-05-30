@@ -873,6 +873,24 @@ isMac: function()
 },
 
 
+// Command Line Utilities
+//////////////////////////////////////////////////
+
+// fix: breaks on single dash arguments, improve
+// fix: use optimist or whatever when we're somewhere
+// with docs and internet
+// getArgs: function(args)
+// {
+// 	i = 1
+// 	if not args:
+// 		args = sys.argv
+// 	options = {'__file__':args[0]}
+// 	while (i < sys.argv.__len__() - 1):
+// 		options[args[i].replace('-','').replace(':', '')] = args[i + 1]
+// 		i += 2
+// 	return options
+// },
+
 
 /*
 Method: getGlobalModulesDir

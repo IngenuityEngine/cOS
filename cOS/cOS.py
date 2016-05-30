@@ -620,3 +620,14 @@ def genArgs(argData):
 	for k,v in argData.iteritems():
 		args += '-%s %s ' % (k,v)
 	return args[:-1]
+
+# fix: breaks on single dash arguments, improve
+def getArgs(args=None):
+	i = 1
+	if not args:
+		args = sys.argv
+	options = {'__file__':args[0]}
+	while (i < sys.argv.__len__() - 1):
+		options[args[i].replace('-','').replace(':', '')] = args[i + 1]
+		i += 2
+	return options
