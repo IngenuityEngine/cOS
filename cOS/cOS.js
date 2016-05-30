@@ -10,6 +10,7 @@ var child_process = require('child_process')
 var copysync = require('copysync')
 var async = require('async')
 var mkdirp = require('mkdirp')
+var rimraf = require('rimraf')
 
 // Our Modules
 /////////////////////////
@@ -481,16 +482,13 @@ removeFileSync: function(path)
 },
 
 /*
-Method: removeDirSync
+Method: removeDir
 
-Wrapper of fs.rmdirSync, empties the folder
-then removes the it.
+Removes a directory completely
 */
 removeDir: function(path, callback)
 {
-	// fix: need a plugin to do this
-	throw new Error('not implemented')
-	callback()
+	rimraf(path, callback)
 },
 /*
 Method: removeDirSync
@@ -500,15 +498,26 @@ then removes the it.
 */
 removeDirSync: function(path)
 {
-	// fix: need a plugin to do this
-	throw new Error('not implemented')
-	console.log('path:', path)
+	try
+	{
+		rimraf.sync(path)
+		return true
+	}
+	catch (err)
+	{
+		return err
+	}
 },
 
-
+// fix: doesn't keep permissions, etc on original directory
 emptyDir: function(path, callback)
 {
-	fs.emptyDir(path, callback)
+	cOS.removeDir(path, function(err)
+	{
+		if (err)
+			return callback(err)
+		cOS.makeDir(path, callback)
+	})
 },
 /*
 Method: emptyDirSync

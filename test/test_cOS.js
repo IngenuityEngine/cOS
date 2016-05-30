@@ -133,8 +133,7 @@ describe('cOS', function() {
 	})
 
 	it('should collectFilesSync', function(done) {
-		var searchPath = cOS.join(__dirname, 'test/test-cOS')
-		var files = cOS.collectFilesSync(searchPath)
+		var files = cOS.collectFilesSync(__dirname)
 		expect(files.length).to.be.greaterThan(0)
 		done()
 	})
@@ -165,12 +164,6 @@ describe('cOS', function() {
 		expect(cOS.unixPath('\\path//to\\\\file')).to.be('/path/to/file')
 		expect(cOS.unixPath('//\\path//to\\\\file\\\\\\')).to.be('/path/to/file/')
 		expect(cOS.unixPath('\\\\\\\\//path\\to///\\/\\\\file\\/\\/\\\\//\\\\//')).to.be('/path/to/file/')
-		done()
-	})
-
-	it ('should universalPath', function(done) {
-		var univ = cOS.universalPath('Q:/path/to/file/')
-		expect(univ).to.be('$root/path/to/file/')
 		done()
 	})
 

@@ -13,7 +13,8 @@
     "glob": "^7",
     "lodash": "^4",
     "mkdirp": "^0",
-    "readdirp": "^2"
+    "readdirp": "^2",
+    "rimraf": "^2"
   },
   "devDependencies": {
     "expect.js": "^0",

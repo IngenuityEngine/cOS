@@ -155,7 +155,7 @@ class test(tryout.TestSuite):
 		cOS.removeDir('sandbox/emptyDir')
 		self.assertTrue(not os.path.isdir('sandbox/emptyDir'))
 		ret = cOS.removeDir('sandbox/emptyDir')
-		self.assertTrue(not ret)
+		self.assertTrue(ret != True)
 
 	def test_cwd(self):
 		cwd = cOS.cwd()
