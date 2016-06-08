@@ -21,7 +21,10 @@ Ensure [tryout](https://github.com/IngenuityEngine/tryout) is installed and prop
 	c:/ie/cOS >> python test
 ```
 
-
+Todo:
+- [ ] rename:
+	- collectFiles > getFiles
+	- collectFilesSync > getFilesSync
 
 ## 0.1.0 Changes
 
@@ -35,6 +38,7 @@ Ensure [tryout](https://github.com/IngenuityEngine/tryout) is installed and prop
 - getFileInfo > getPathInfo
 - dirname > getDirName
 - collectFilenamesSync > collectFilesSync
+- collectRegexMatches > getRegexMatches
 
 ### Removed
 - fileExtension (use getExtension)

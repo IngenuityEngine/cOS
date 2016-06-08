@@ -69,7 +69,12 @@ def normalizeDir(path):
 	'''
 	Dirs always use forward slashses and have a trailing slash.
 	'''
-	path = unixPath(path)
+	# lower case drive leters
+	if path[1] == ':':
+		path = path[0].lower() + path[1:]
+
+	# ensureEndingSlash already makes sure
+	# the path is a unixPath
 	return ensureEndingSlash(path)
 
 def normalizePath(path):
@@ -85,9 +90,10 @@ def unixPath(path):
 	Changes backslashes to forward slashes and
 	removes successive slashes, ex \\ or \/
 	'''
-	url = path.split('://')
-	if len(url) > 1:
-		return url[0] + '://' + re.sub(r'[\\/]+', '/', url[1])
+	# lower case drive leters
+	if path[1] == ':':
+		path = path[0].lower() + path[1:]
+
 	return re.sub(r'[\\/]+', '/', path)
 
 def unicodeToString(data):

@@ -109,9 +109,12 @@ Method: unixPath
 
 Changes backslashes to forward slashes and removes successive slashes, ex \\ or \/
 */
-unixPath: function(dir)
+unixPath: function(path)
 {
-	return dir.replace(/[\\/]+/g, '/')
+	// lower case drive leters
+	if (path.slice(1,2) == ':')
+		path = path.slice(0,2).toLowerCase() + path.slice(2)
+	return path.replace(/[\\/]+/g, '/')
 },
 
 
