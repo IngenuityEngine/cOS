@@ -138,7 +138,7 @@ describe('cOS', function() {
 		done()
 	})
 
-	it ('should runCommand', function(done){
+	it ('should runCommand', function(done) {
 		cOS.runCommand('ls', function(err, out, exitCode)
 		{
 			console.log('out:', out)
@@ -150,7 +150,8 @@ describe('cOS', function() {
 		})
 	})
 
-	it ('should getGlobalModulesDir', function(done){
+	it ('should getGlobalModulesDir', function(done) {
+		this.timeout = 3000
 		cOS.getGlobalModulesDir(function(err, path)
 		{
 			console.log('"' + path + '"')

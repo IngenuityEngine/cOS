@@ -1,20 +1,3 @@
-#-----------------------------------------------------------------------------
-# ieOS.py
-# By Grant Miller (blented@gmail.com)
-# v 1.00
-# Created On: 2012/02/06
-# Modified On: 2014/05/20
-#-----------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------
-# Required Files:
-# ieCommon, globalSettings
-#-----------------------------------------------------------------------------
-
-#-----------------------------------------------------------------------------
-# Description:
-# Various file system helper functions
-#-----------------------------------------------------------------------------
 
 import os
 import time
@@ -387,7 +370,7 @@ def makeDirs(path):
 	'''
 	Wrapper for os.makedirs.
 	'''
-	dirName = getPathInfo(path)['dirname']
+	dirName = getDirName(path)
 	try:
 		os.makedirs(dirName)
 	except Exception as err:
