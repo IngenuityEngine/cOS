@@ -298,7 +298,7 @@ def getFrameRange(path):
 ##################################################
 
 # fix: needs to work for linux / osx
-def setEnvironmentVariable(key, val):
+def setEnvironmentVariable(key, val, permanent=True):
 	'''
 	Sets a given environment variable for the OS.
 
@@ -308,7 +308,49 @@ def setEnvironmentVariable(key, val):
 	'''
 	val = str(val)
 	os.environ[key] = val
-	return os.system('setx %s "%s"' % (key, val))
+
+	if not permanent:
+		return True
+
+	# set the environment variable permanently
+	# super simple on windows, just use setx
+	if isWindows():
+		os.system('setx %s "%s"' % (key, val))
+
+	# set variables in the /etc/environment file
+	# on mac and linux
+	elif isMac() or isLinux():
+		environmentFile = '/etc/environment'
+		setString = key + '=' + val
+
+		# read all the lines in
+		with open(environmentFile) as f:
+			lines = f.readlines()
+
+		found = False
+		i = 0
+		while i < len(lines):
+			if line.startswith(key + '='):
+				# if we've already set the variable
+				# just remove the line
+				if found:
+					del lines[i]
+				# otherwise ensure the line is set
+				# to the correct value
+				else:
+					line = setString
+				found = True
+
+		# if we never found the variable
+		# append a line to set it
+		if not found:
+			lines.append(setString)
+
+		# then write all the lines back to the
+		# environmentFile
+		with open(environmentFile, 'w') as f:
+			for line in lines:
+				f.write(line)
 
 def makeDir(dirname):
 	'''
@@ -521,6 +563,21 @@ def runCommand(processArgs,env=None):
 	'''
 	command = ' '.join(ensureArray(processArgs))
 	os.system(command)
+
+# returns the output (STDOUT + STDERR) of a given command
+def getCommandOutput(command, **kwargs):
+	try:
+		output = subprocess.check_output(
+			command,
+			stderr=subprocess.STDOUT,
+			**kwargs)
+		if output[-1] == '\n':
+			output = output[:-1]
+		return output.lower()
+	except subprocess.CalledProcessError as err:
+		return err.output.lower()
+	except:
+		return False
 
 # fix: should use a better methodology for this
 # pretty sure python has some way of running a file
