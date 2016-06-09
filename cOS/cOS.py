@@ -25,6 +25,7 @@ import shutil
 from distutils import dir_util
 import types
 import re
+import fnmatch
 
 # fix: why is this try / catched?
 try:
@@ -292,6 +293,26 @@ def getFrameRange(path):
 			'complete': duration == count,
 		}
 
+def getSequenceBaseName(filename):
+	regex_baseName = re.compile('(.+)[_\.][0-9]+\.[a-z0-9]+$')
+	try:
+		baseName = regex_baseName.search(filename).group(1)
+		return baseName
+	except:
+		raise IndexError('The filename given does not have the \
+			format <name>_<frameNumber>.<extension> or \
+			<name>.<frameNumber>.<extension>: %s' % filename)
+
+def getFrameNumber(filename):
+	regex_FrameNumber = re.compile('.+[_\.]([0-9]+)\.[a-z0-9]+$')
+	try:
+		frame = regex_FrameNumber.search(filename).group(1)
+		return frame
+	except:
+		raise IndexError('The filename given does not have the \
+			format <name>_<frameNumber>.<extension> or \
+			<name>.<frameNumber>.<extension>: %s' % filename)
+
 
 
 # System Operations
@@ -330,7 +351,7 @@ def setEnvironmentVariable(key, val, permanent=True):
 		found = False
 		i = 0
 		while i < len(lines):
-			if line.startswith(key + '='):
+			if lines[i].startswith(key + '='):
 				# if we've already set the variable
 				# just remove the line
 				if found:
@@ -378,13 +399,6 @@ def join(a, b):
 	using forward slashes.
 	'''
 	return normalizeDir(a) + normalizePath(b)
-
-def getFiles(path):
-	'''
-	Lists files in a given path.
-	'''
-	path = normalizePath(path)
-	return subprocess.check_output(['ls', path]).split()
 
 def removeFile(path):
 	'''
@@ -545,6 +559,45 @@ def collectAllFiles(searchDir):
 				if name not in filesToReturn:
 					filesToReturn.append(getPathInfo(name))
 	return filesToReturn
+
+def getFiles(path,
+		fileIncludes=False,
+		folderIncludes=False,
+		fileExcludes=[],
+		folderExcludes=[]):
+
+	def shouldInclude(path):
+		# file includes only work on files
+		if fileIncludes and not os.path.isdir(path):
+			for pattern in fileIncludes:
+				if not fnmatch.fnmatch(path, pattern):
+					return False
+		if folderIncludes:
+			for folder in folderIncludes:
+				if folder not in path:
+					return False
+
+		for pattern in fileExcludes:
+			if fnmatch.fnmatch(path, pattern):
+				return False
+		for folder in folderExcludes:
+			if folder in path:
+				return False
+
+		return True
+
+	allFiles = []
+	for root, dirs, files in os.walk(path):
+		dirs[:] = [d for d in dirs
+			if shouldInclude(
+				unixPath(os.path.join(root, d))
+				)]
+		for f in files:
+			path = unixPath(os.path.join(root, f))
+			if shouldInclude(path):
+				allFiles.append(path)
+
+	return allFiles
 
 
 

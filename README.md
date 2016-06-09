@@ -25,8 +25,16 @@ Todo:
 - [ ] rename:
 	- collectFiles > getFiles
 	- collectFilesSync > getFilesSync
+- [ ] refactor javascript's getFiles to match python's implementation
+- [ ] refactor the places javascript's getFiles is used to work with the new implementation
+- [ ] add getSequenceBaseName to javascript
+- [ ] add getFrameNumber to javascript
 
 ## 0.1.0 Changes
+### Added
+- getFiles (python)
+- getSequenceBaseName (python)
+- getFrameNumber (python)
 
 ### Modified
 - normalizeDir - no longer removes starting slash
