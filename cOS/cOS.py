@@ -543,6 +543,10 @@ def collectAllFiles(searchDir):
 					filesToReturn.append(getPathInfo(name))
 	return filesToReturn
 
+# def getDirs(path):
+# 	return getFiles(path, fileExcludes=['*'], depth=0)
+
+# fix: add depth
 def getFiles(path,
 		fileIncludes=False,
 		folderIncludes=False,
