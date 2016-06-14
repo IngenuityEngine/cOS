@@ -6,7 +6,6 @@ import subprocess
 import glob
 import shutil
 from distutils import dir_util
-import types
 import re
 import fnmatch
 
@@ -30,7 +29,6 @@ def ensureArray(val):
 
 # Normalization
 ##################################################
-
 def ensureEndingSlash(path):
 	'''
 	Ensures that the path has a trailing '/'
@@ -79,23 +77,6 @@ def unixPath(path):
 		path = path[0].lower() + path[1:]
 
 	return re.sub(r'[\\/]+', '/', path)
-
-def unicodeToString(data):
-	'''
-	Replaces unicode with a regular string
-	for a variety of data types
-	'''
-	inputType = type(data)
-	if isinstance(data, types.StringTypes):
-		return str(data)
-	elif inputType == types.ListType:
-		return [unicodeToString(x) for x in data]
-	elif inputType == types.DictType:
-		# fix: uncomment in Sublime 3
-		# return {unicodeToString(x): unicodeToString(data[x]) for x in data}
-		return dict([(unicodeToString(x), unicodeToString(data[x])) for x in data])
-	else:
-		return data
 
 
 # Extensions

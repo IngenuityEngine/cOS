@@ -118,14 +118,6 @@ unixPath: function(path)
 },
 
 
-// fix: missing unicodeToString
-// unicodeToString: function(data)
-// {
-// 	return data
-// },
-
-
-
 // Extensions
 //////////////////////////////////////////////////
 
