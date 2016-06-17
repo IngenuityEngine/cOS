@@ -33,6 +33,7 @@ def ensureEndingSlash(path):
 	'''
 	Ensures that the path has a trailing '/'
 	'''
+
 	path = unixPath(path)
 	if path[-1] != '/':
 		path += '/'
@@ -76,7 +77,13 @@ def unixPath(path):
 	if path[1] == ':':
 		path = path[0].lower() + path[1:]
 
-	return re.sub(r'[\\/]+', '/', path)
+	# bit hacky, but basically we want to keep
+	# :// for http:// type urls
+	# so we split on that, replace the slashes in the parts
+	# then join it all back together
+	parts = path.split('://')
+	replaced = [re.sub(r'[\\/]+', '/', p) for p in parts]
+	return '://'.join(replaced)
 
 
 # Extensions

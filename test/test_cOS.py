@@ -16,7 +16,7 @@ sys.path.append('c:/ie/tryout')
 import tryout
 
 class test(tryout.TestSuite):
-	title = 'test/test_cOS.py'
+	title = 'test/cOS.py'
 
 	def setUp(self):
 		os.system('rm -rf sandbox')
@@ -39,36 +39,36 @@ class test(tryout.TestSuite):
 	def tearDown(self):
 		os.system('rm -rf sandbox')
 
-	def test_makeDir(self):
+	def makeDir(self):
 		cOS.makeDir('testDir')
 		self.assertTrue(os.path.isdir('testDir'))
 		os.system('rmdir testDir')
 
-	def test_getExtension(self):
+	def getExtension(self):
 		ext = cOS.getExtension('file_v001.mb')
 		self.assertEqual(ext, 'mb')
 
-	def test_getVersion(self):
+	def getVersion(self):
 		ver = cOS.getVersion('sandbox/file_v001.mb')
 		self.assertEqual(ver, 1)
 
-	def test_getVersionError(self):
+	def getVersionError(self):
 		ver = cOS.getVersion('sandbox/file.mb')
 		self.assertEqual(ver, 0)
 
-	def test_incrementVersion(self):
+	def incrementVersion(self):
 		ver = cOS.incrementVersion('sandbox/file_v001.mb')
 		self.assertEqual(cOS.getVersion(ver), 2)
 
-	def test_getDirName(self):
+	def getDirName(self):
 		dirname = cOS.getDirName('sandbox/file.mb')
 		self.assertEqual(dirname, 'sandbox/')
 
-	def test_emptyDir(self):
+	def emptyDir(self):
 		cOS.emptyDir('sandbox/')
 		self.assertTrue(not subprocess.check_output(['ls', 'sandbox']).split())
 
-	def test_getPathInfo(self):
+	def getPathInfo(self):
 		options = {'root': 'test'}
 		info = cOS.getPathInfo('test/test-cOS/four.js', options)
 
@@ -82,23 +82,25 @@ class test(tryout.TestSuite):
 		self.assertEqual(info['relativePath'], './test-cOS/four.js')
 		self.assertEqual(info['filebase'], 'test/test-cOS/four')
 
-	def test_removeExtension(self):
+	def removeExtension(self):
 		stripped = cOS.removeExtension('sandbox/file_v001.mb')
 		self.assertEqual(stripped, 'sandbox/file_v001')
 
-	def test_removeExtensionNoExtension(self):
+	def removeExtensionNoExtension(self):
 		stripped = cOS.removeExtension('path/to/file')
 		self.assertEqual(stripped, 'path/to/file')
 
-	def test_unixPath(self):
+	def unixPath(self):
 		prepped = cOS.unixPath('\\sandbox\\file_v001.mb')
 		self.assertEqual(prepped, '/sandbox/file_v001.mb')
 
-	def test_ensureEndingSlash(self):
+	def ensureEndingSlash(self):
 		normalized = cOS.ensureEndingSlash('path/to/dir')
 		self.assertEqual(normalized, 'path/to/dir/')
+		normalized = cOS.ensureEndingSlash('http://some/url')
+		self.assertEqual(normalized, 'http://some/url')
 
-	def test_duplicateDir(self):
+	def duplicateDir(self):
 		cOS.duplicateDir('sandbox/testdir1', 'sandbox/testdir2')
 		dir2Files = subprocess.check_output(['ls', 'sandbox/testdir2']).split()
 		self.assertEqual(len(dir2Files), 3)
@@ -106,40 +108,40 @@ class test(tryout.TestSuite):
 		self.assertTrue('file2' in dir2Files)
 		self.assertTrue('file3' in dir2Files)
 
-	def test_genArgs(self):
+	def genArgs(self):
 		args = cOS.genArgs({'k1': 'v1', 'k2' : 'v2', 'k3' : 'v3'})
 		self.assertEqual(args, '-k3 v3 -k2 v2 -k1 v1')
 
-	def test_getFrameRange(self):
+	def getFrameRange(self):
 		info = cOS.getFrameRange('sandbox/seq/frame.%04d.exr')
 		self.assertEqual(info['min'], 1510)
 		self.assertEqual(info['max'], 1519)
 
-	def test_removeStartingSlash(self):
+	def removeStartingSlash(self):
 		res = cOS.removeStartingSlash('/path/to/file')
 		self.assertEqual(res, 'path/to/file')
 
-	def test_normalizeDir(self):
+	def normalizeDir(self):
 		res = cOS.normalizeDir('/path\\to/file')
 		self.assertEqual(res, '/path/to/file/')
 
-	def test_normalizeExtension(self):
+	def normalizeExtension(self):
 		norm = cOS.normalizeExtension('Mb')
 		self.assertEqual(norm, 'mb')
 		norm = cOS.normalizeExtension('.mb')
 		self.assertEqual(norm, 'mb')
 
-	def test_upADir(self):
+	def upADir(self):
 		parent = cOS.upADir('path/to/a/file/')
 		self.assertEqual(parent, 'path/to/a/')
 		parent = cOS.upADir('path/to/a/file.txt')
 		self.assertEqual(parent, 'path/to/')
 
-	def test_join(self):
+	def join(self):
 		joined = cOS.join('/path/to/a/directory/', '/path/to/a/file.txt')
 		self.assertEqual(joined, '/path/to/a/directory/path/to/a/file.txt')
 
-	def test_getFiles(self):
+	def getFiles(self):
 		root = os.path.abspath(
 			os.path.join(
 				os.path.dirname(os.path.realpath(__file__)),
@@ -153,31 +155,31 @@ class test(tryout.TestSuite):
 		# fix: this test is pretty bad :\
 		self.assertTrue(len(files) > 4)
 
-	def test_removeFile(self):
+	def removeFile(self):
 		self.assertTrue(os.path.isfile('sandbox/file.mb'))
 		cOS.removeFile('sandbox/file.mb')
 		self.assertTrue(not os.path.isfile('sandbox/file.mb'))
 		ret = cOS.removeFile('sandbox/file.mb')
 		self.assertTrue(ret != True)
 
-	def test_removeDir(self):
+	def removeDir(self):
 		self.assertTrue(os.path.isdir('sandbox/emptyDir'))
 		cOS.removeDir('sandbox/emptyDir')
 		self.assertTrue(not os.path.isdir('sandbox/emptyDir'))
 		ret = cOS.removeDir('sandbox/emptyDir')
 		self.assertTrue(ret != True)
 
-	def test_cwd(self):
+	def cwd(self):
 		cwd = cOS.cwd()
 		self.assertEqual(cwd, 'c:/ie/cOS/')
 
-	def test_ensureArray(self):
+	def ensureArray(self):
 		self.assertEqual(cOS.ensureArray([1,2,3]), [1,2,3])
 		self.assertEqual(cOS.ensureArray('abc'), ['abc'])
 		self.assertEqual(cOS.ensureArray(None), [])
 		self.assertEqual(cOS.ensureArray((1,2,3)), [1,2,3])
 
-	def test_collectFiles(self):
+	def collectFiles(self):
 		os.system('rm -rf seq')
 		files = cOS.collectFiles('sandbox', 'mb', '')
 		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb']]))
@@ -185,11 +187,11 @@ class test(tryout.TestSuite):
 		files = cOS.collectFiles('sandbox', 'mb', 'sandbox/file_v001.mb')
 		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/file.mb']]))
 
-	def test_collectAllFiles(self):
+	def collectAllFiles(self):
 		files = cOS.collectAllFiles('sandbox/testdir2')
 		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/testdir2/file1']]))
 
-	def test_isWindows(self):
+	def isWindows(self):
 		self.assertTrue(cOS.isWindows())
 
 if __name__ == '__main__':
