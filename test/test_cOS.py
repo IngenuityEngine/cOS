@@ -1,19 +1,13 @@
 
 import os
-import sys
 import subprocess
 
-sys.path.insert(0,
-	os.path.abspath(
-		os.path.join(
-			os.path.dirname(os.path.realpath(__file__)),
-			'..')
-		)
-	)
+import arkInit
+arkInit.init()
+
+import tryout
 import cOS
 
-sys.path.append('c:/ie/tryout')
-import tryout
 
 class test(tryout.TestSuite):
 	title = 'test/cOS.py'
@@ -98,7 +92,7 @@ class test(tryout.TestSuite):
 		normalized = cOS.ensureEndingSlash('path/to/dir')
 		self.assertEqual(normalized, 'path/to/dir/')
 		normalized = cOS.ensureEndingSlash('http://some/url')
-		self.assertEqual(normalized, 'http://some/url')
+		self.assertEqual(normalized, 'http://some/url/')
 
 	def duplicateDir(self):
 		cOS.duplicateDir('sandbox/testdir1', 'sandbox/testdir2')
@@ -169,9 +163,11 @@ class test(tryout.TestSuite):
 		ret = cOS.removeDir('sandbox/emptyDir')
 		self.assertTrue(ret != True)
 
-	def cwd(self):
-		cwd = cOS.cwd()
-		self.assertEqual(cwd, 'c:/ie/cOS/')
+	# fix: can't really test this as we don't know what the
+	# directory should be
+	# def cwd(self):
+	# 	cwd = cOS.cwd()
+	# 	self.assertTrue()
 
 	def ensureArray(self):
 		self.assertEqual(cOS.ensureArray([1,2,3]), [1,2,3])
