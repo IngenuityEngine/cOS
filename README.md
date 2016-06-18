@@ -25,6 +25,7 @@ Todo:
 - [ ] rename:
 	- collectFiles > getFiles
 	- collectFilesSync > getFilesSync
+	- copyTree > copyDir
 - [ ] refactor javascript's getFiles to match python's implementation
 - [ ] refactor the places javascript's getFiles is used to work with the new implementation
 - [ ] add getSequenceBaseName to javascript

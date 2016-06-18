@@ -190,5 +190,18 @@ class test(tryout.TestSuite):
 	def isWindows(self):
 		self.assertTrue(cOS.isWindows())
 
+	def getCommandOutput(self):
+		out, err = cOS.getCommandOutput('jkfsdajkl')
+		self.assertTrue(out == False)
+		self.assertTrue(err)
+
+		testFile = cOS.getDirName(__file__) + \
+			'testOutput/simple.py'
+		out, err = cOS.getCommandOutput('python ' + testFile)
+		print 'out:', out
+		print 'err:', err
+		self.assertTrue('hello world' in out)
+		self.assertEqual(err, False)
+
 if __name__ == '__main__':
 	tryout.run(test)

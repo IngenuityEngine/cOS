@@ -601,11 +601,11 @@ def getCommandOutput(command, **kwargs):
 			**kwargs)
 		if output[-1] == '\n':
 			output = output[:-1]
-		return output.lower()
+		return (output.lower(), False)
 	except subprocess.CalledProcessError as err:
-		return err.output.lower()
-	except:
-		return False
+		return (False, err.output.lower())
+	except Exception as err:
+		return (False, err)
 
 # fix: should use a better methodology for this
 # pretty sure python has some way of running a file
