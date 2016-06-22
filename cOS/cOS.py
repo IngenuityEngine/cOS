@@ -722,3 +722,47 @@ def getArgs(args=None):
 		options[args[i].replace('-','').replace(':', '')] = args[i + 1]
 		i += 2
 	return options
+
+def getTotalRam():
+	'''
+	Get the total system memory in GB on Linux and Windows
+
+	From:
+	http://stackoverflow.com/questions/2017545/get-memory-usage-of-computer-in-windows-with-python
+	'''
+	if isLinux():
+		totalMemory = os.popen('free -m').readlines()[1].split()[1]
+		return float(totalMemory) / 1024
+	elif isWindows():
+		import ctypes
+
+		class MemoryUse(ctypes.Structure):
+		    _fields_ = [
+		        ('dwLength', ctypes.c_ulong),
+		        ('dwMemoryLoad', ctypes.c_ulong),
+		        ('ullTotalPhys', ctypes.c_ulonglong),
+		        ('ullAvailPhys', ctypes.c_ulonglong),
+		        ('ullTotalPageFile', ctypes.c_ulonglong),
+		        ('ullAvailPageFile', ctypes.c_ulonglong),
+		        ('ullTotalVirtual', ctypes.c_ulonglong),
+		        ('ullAvailVirtual', ctypes.c_ulonglong),
+		        ('sullAvailExtendedVirtual', ctypes.c_ulonglong),
+		    ]
+
+		    def __init__(self):
+		        # have to initialize this to the size of
+		        # MemoryUse
+		        self.dwLength = ctypes.sizeof(self)
+		        super(MemoryUse, self).__init__()
+
+		stat = MemoryUse()
+		ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat))
+		return float(stat.ullTotalPhys) / 1024000000
+	else:
+		return 0
+
+def main():
+	print 'total ram:', getTotalRam()
+
+if __name__ == '__main__':
+	main()
