@@ -26,7 +26,7 @@ Todo:
 	- collectFiles > getFiles
 	- collectFilesSync > getFilesSync
 	- copyTree > copyDir
-- [ ] refactor javascript's getFiles to match python's implementation
+- [ ] refactor javascript's getFiles to match python's implementation as it's far superior
 - [ ] refactor the places javascript's getFiles is used to work with the new implementation
 - [ ] add getSequenceBaseName to javascript
 - [ ] add getFrameNumber to javascript
@@ -70,60 +70,8 @@ Todo:
 - checkTempDir (doesn't belong here)
 
 ### Moved
-- find a home for:
-
-	def updateTools(toolsDir=None):
-		'''
-		Updates tools from the git repo if available.
-		'''
-		# return True
-		if not globalSettings.IS_NODE:
-			print 'Bailing on update, not a node'
-			return
-
-		toolsDir = globalSettings.ARK_ROOT
-
-		try:
-			print toolsDir + 'bin/hardUpdate.bat'
-			os.system(toolsDir + 'bin/hardUpdate.bat')
-			print 'Tools updated'
-			return True
-		except Exception as err:
-			print 'Failed to update tools:', err
-			pass
-			return False
-
-	def killJobProcesses(nodesOnly=True):
-		'''
-		Kills all other processes currently on the render node.
-		'''
-		if 'psutil' in globals():
-			print 'No psutil module found'
-			return False
-		if not nodesOnly or 'RENDER' in os.environ['COMPUTERNAME']:
-			currentProcess = os.getpid()
-			processParent = getParentPID()
-			for p in psutil.process_iter():
-				try:
-					name = p.name.lower()
-					if '3dsmax' in name or \
-						'nuke' in name or \
-						'modo' in name or \
-						'houdini' in name or \
-						'mantra' in name or \
-						'maya' in name or \
-						'vray' in name or \
-						'ffmpeg' in name or \
-						('cmd.exe' in name and p.pid != processParent) or \
-						('python.exe' in name and p.pid != currentProcess) or \
-						'maxwell' in name:
-						print 'Terminating %s' % name
-						p.terminate()
-				except:
-					pass
-
-
-
+- updateTools moved to moduleTools
+- killJobProcesses moved to shepherd.computer
 
 ## 0.0.3 Changes
 
