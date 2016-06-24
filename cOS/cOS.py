@@ -74,7 +74,9 @@ def unixPath(path):
 	removes successive slashes, ex \\ or \/
 	'''
 	# lower case drive leters
-	if path[1] == ':':
+	if not path:
+		return ''
+	if len(path) > 1 and path[1] == ':':
 		path = path[0].lower() + path[1:]
 
 	# bit hacky, but basically we want to keep
