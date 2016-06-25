@@ -191,31 +191,39 @@ def getPathInfo(path, options=None):
 	With options, can also return root, relative dirname, and relative path, and
 	make all fields lowercase.
 	'''
-	fileInfo = {}
-	fileInfo['path'] = normalizePath(path)
-	pathParts = fileInfo['path'].split('/')
-	fileInfo['dirname'] = '/'.join(pathParts[:-1]) + '/'
-	fileInfo['basename'] = pathParts[-1]
-	fileInfo['extension'] = normalizeExtension(pathParts[-1].split('.')[-1].strip().lower())
-	fileInfo['name'] = fileInfo['basename'].replace('.' + fileInfo['extension'], '')
-	fileInfo['filebase'] = fileInfo['path'].replace('.' + fileInfo['extension'], '')
+	if len(path) == 0:
+		return {
+			'path': '',
+			'dirname': '',
+			'basename': '',
+			'extension': '',
+			'name': '',
+			'filebase': '',
+			'root': '',
+			'relativeDirname': '',
+			'relativePath': '',
+		}
+	pathInfo = {}
+	pathInfo['path'] = normalizePath(path)
+	pathParts = pathInfo['path'].split('/')
+	pathInfo['dirname'] = '/'.join(pathParts[:-1]) + '/'
+	pathInfo['basename'] = pathParts[-1]
+	pathInfo['extension'] = normalizeExtension(pathParts[-1].split('.')[-1].strip().lower())
+	pathInfo['name'] = pathInfo['basename'].replace('.' + pathInfo['extension'], '')
+	pathInfo['filebase'] = pathInfo['path'].replace('.' + pathInfo['extension'], '')
 
 	# fix: relative path could be improved but it's a start
-	if options and \
-			'root' in options and \
-			options['root']:
-		fileInfo['root'] = normalizeDir(options['root'])
-		fileInfo['relativeDirname'] = './' + removeStartingSlash(normalizeDir(fileInfo['dirname'].replace(fileInfo['root'], '')))
-		fileInfo['relativePath'] = './' + removeStartingSlash(normalizePath(fileInfo['path'].replace(fileInfo['root'], '')))
+	if options.get('root'):
+		pathInfo['root'] = normalizeDir(options['root'])
+		pathInfo['relativeDirname'] = './' + removeStartingSlash(normalizeDir(pathInfo['dirname'].replace(pathInfo['root'], '')))
+		pathInfo['relativePath'] = './' + removeStartingSlash(normalizePath(pathInfo['path'].replace(pathInfo['root'], '')))
 
-	if options and \
-			'lowercaseNames' in options and \
-		options['lowercaseNames']:
+	if options.get('lowercaseNames'):
 		# uncomment in Sublime 3
-		# fileInfo = {x: x.lower() for x in fileInfo}
-		fileInfo = dict([(x, x.lower()) for x in fileInfo])
+		# pathInfo = {x: x.lower() for x in pathInfo}
+		pathInfo = dict([(x, x.lower()) for x in pathInfo])
 
-	return fileInfo
+	return pathInfo
 
 def getFrameRange(path):
 	'''
