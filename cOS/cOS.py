@@ -185,7 +185,7 @@ def upADir(path):
 		return path
 	return '/'.join(parts[:-2]) + '/'
 
-def getPathInfo(path, options=None):
+def getPathInfo(path, options={}):
 	'''
 	Returns object with file's basename, extension, name, dirname and path.
 	With options, can also return root, relative dirname, and relative path, and
