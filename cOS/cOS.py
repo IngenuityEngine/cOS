@@ -610,8 +610,12 @@ def getCommandOutput(command, cwd=None, **kwargs):
 			cwd=cwd,
 			stderr=subprocess.STDOUT,
 			**kwargs)
-		if output[-1] == '\n':
+		if output and \
+			len(output) > 0 and \
+			output[-1] == '\n':
 			output = output[:-1]
+		if not output:
+			output = ''
 		return (output.lower(), False)
 	except subprocess.CalledProcessError as err:
 		return (False, err.output.lower())
