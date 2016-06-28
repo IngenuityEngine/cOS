@@ -323,7 +323,7 @@ def setEnvironmentVariable(key, val, permanent=True):
 	# on mac and linux
 	elif isMac() or isLinux():
 		environmentFile = '/etc/environment'
-		setString = key + '=' + val
+		setString = key + '=' + val + '\n'
 
 		# read all the lines in
 		with open(environmentFile) as f:
@@ -342,6 +342,7 @@ def setEnvironmentVariable(key, val, permanent=True):
 				else:
 					line = setString
 				found = True
+			i += 1
 
 		# if we never found the variable
 		# append a line to set it
