@@ -8,12 +8,7 @@ import shutil
 from distutils import dir_util
 import re
 import fnmatch
-
-# fix: why is this try / catched?
-try:
-	import psutil
-except:
-	pass
+import psutil
 
 # Helpers
 ##################################################
