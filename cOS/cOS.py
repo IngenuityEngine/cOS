@@ -1,4 +1,3 @@
-
 import os
 import time
 import sys
@@ -8,7 +7,10 @@ import shutil
 from distutils import dir_util
 import re
 import fnmatch
-import psutil
+try:
+	import psutil
+except:
+	pass
 
 # Helpers
 ##################################################
