@@ -640,32 +640,6 @@ def startSubprocess(processArgs,env=None):
 	# for arg in processArgs:
 	# 	print arg
 
-	if sys.platform.startswith('win'):
-		# Don't display the Windows GPF dialog if the invoked program dies.
-		# See comp.os.ms-windows.programmer.win32
-		# How to suppress crash notification dialog?, Jan 14,2004 -
-		# Raymond Chen's response [1]
-		import ctypes, _winreg
-
-		SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
-		ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
-
-		# if creationFlags != None:
-		#     subprocess_flags = creationFlags
-		# else:
-		#     subprocess_flags = 0x8000000 # hex constant equivalent to win32con.CREATE_NO_WINDOW
-
-		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
-		# fix: this shouldn't be 19
-		# used to be pulled from global settings
-		# also duplicated in runProgram, should pick one
-		try:
-			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, 19)
-		except:
-			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
-		# 1 (True) is the value
-		_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
-
 	# else:
 	#     subprocess_flags = 0
 	command = ''
