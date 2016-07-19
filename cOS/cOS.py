@@ -552,9 +552,11 @@ def getFiles(path,
 	def shouldInclude(path):
 		# file includes only work on files
 		if fileIncludes and not os.path.isdir(path):
+			keep = False
 			for pattern in fileIncludes:
-				if not fnmatch.fnmatch(path, pattern):
-					return False
+				if fnmatch.fnmatch(path, pattern):
+					keep = True
+			return keep
 		if folderIncludes:
 			for folder in folderIncludes:
 				if folder not in path:
