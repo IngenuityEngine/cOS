@@ -603,12 +603,13 @@ def runCommand(processArgs,env=None):
 	os.system(command)
 
 # returns the output (STDOUT + STDERR) of a given command
-def getCommandOutput(command, cwd=None, **kwargs):
+def getCommandOutput(command, cwd=None, shell=True, **kwargs):
 	try:
 		output = subprocess.check_output(
 			command,
 			cwd=cwd,
 			stderr=subprocess.STDOUT,
+			shell=shell,
 			**kwargs)
 		if output and \
 			len(output) > 0 and \
