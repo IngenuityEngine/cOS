@@ -552,9 +552,11 @@ def getFiles(path,
 	def shouldInclude(path):
 		# file includes only work on files
 		if fileIncludes and not os.path.isdir(path):
+			keep = False
 			for pattern in fileIncludes:
-				if not fnmatch.fnmatch(path, pattern):
-					return False
+				if fnmatch.fnmatch(path, pattern):
+					keep = True
+			return keep
 		if folderIncludes:
 			for folder in folderIncludes:
 				if folder not in path:
@@ -601,12 +603,13 @@ def runCommand(processArgs,env=None):
 	os.system(command)
 
 # returns the output (STDOUT + STDERR) of a given command
-def getCommandOutput(command, cwd=None, **kwargs):
+def getCommandOutput(command, cwd=None, shell=True, **kwargs):
 	try:
 		output = subprocess.check_output(
 			command,
 			cwd=cwd,
 			stderr=subprocess.STDOUT,
+			shell=shell,
 			**kwargs)
 		if output and \
 			len(output) > 0 and \
@@ -629,7 +632,7 @@ def runPython(pythonFile):
 	return os.system('python ' + pythonFile)
 
 
-def startSubprocess(processArgs, env=None):
+def startSubprocess(processArgs, env=None, shell=False):
 	"""Runs a program through psutil.Popen, disabling Windows error dialogs"""
 
 	if env:
@@ -644,7 +647,12 @@ def startSubprocess(processArgs, env=None):
 	#     subprocess_flags = 0
 	command = ''
 	if type(processArgs) == list:
-		command = '"' + processArgs[0] + '" '
+		# wrap program w/ quotes if it has spaces
+		if ' ' in processArgs[0]:
+			command = '"' + processArgs[0] + '" '
+		else:
+			command = processArgs[0] + ' '
+
 		for i in range(1, len(processArgs)):
 			processArgs[i] = str(processArgs[i])
 			command += str(processArgs[i]) + ' '
@@ -656,8 +664,8 @@ def startSubprocess(processArgs, env=None):
 		processArgs,
 		stdout=subprocess.PIPE,
 		stderr=subprocess.PIPE,
-		env=env)
-
+		env=env,
+		shell=shell)
 
 # IO
 ##################################################
