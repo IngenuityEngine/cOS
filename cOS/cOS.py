@@ -236,7 +236,8 @@ def getFrameRange(path):
 	extension = getExtension(path)
 
 	if percentLoc == -1:
-		raise Exception('Frame padding not found in: ' + path)
+		print 'Frame padding not found in: ' + path
+		return False
 
 	# second character after the %
 	# ex: %04d returns 4
@@ -258,6 +259,7 @@ def getFrameRange(path):
 			minFrame = min(minFrame,frame)
 
 	if minFrame == 9999999 or maxFrame == -9999999:
+		print 'No frames found:', path
 		return False
 
 	duration = maxFrame - minFrame + 1
