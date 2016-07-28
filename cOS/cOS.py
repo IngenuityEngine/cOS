@@ -7,6 +7,9 @@ import shutil
 from distutils import dir_util
 import re
 import fnmatch
+import Queue
+import threading
+
 try:
 	import psutil
 except:
@@ -633,6 +636,118 @@ def runPython(pythonFile):
 	'''
 	return os.system('python ' + pythonFile)
 
+
+def waitOnProcess(process,
+	checkInFunc=False,
+	checkErrorFunc=False,
+	timeout=False,
+	loggingFunc=False,
+	checkInInterval=10,
+	outputBufferLength=10000):
+
+	if not loggingFunc:
+		def loggingFunc(*args):
+			print args.join(' ')
+
+	def queueOutput(self, out, outQueue):
+		if out:
+			for line in iter(out.readline, ''):
+				outQueue.put(line)
+			out.close()
+
+	def checkProcess(process):
+		if not process.is_running():
+			return False
+		# STATUS_ZOMBIE doesn't work on Windows
+		if not isWindows():
+			return process.status() != psutil.STATUS_ZOMBIE
+		return True
+
+	def getQueueContents(queue, printContents=True):
+		contents = ''
+		while not queue.empty():
+			line = queue.get_nowait()
+			contents += line
+			if printContents:
+				# remove the newline at the end
+				print line[:-1]
+		return contents
+
+	lastUpdate = time.time()
+
+	out = newOut = ''
+	err = newErr = ''
+
+	processStartTime = int(time.time())
+
+	# threads dies with the program
+	outQueue = Queue.Queue()
+	processThread = threading.Thread(target=queueOutput, args=(process.stdout, outQueue))
+	processThread.daemon = True
+	processThread.start()
+
+	errQueue = Queue.Queue()
+	errProcessThread = threading.Thread(target=queueOutput, args=(process.stderr, errQueue))
+	errProcessThread.daemon = True
+	errProcessThread.start()
+
+
+	while checkProcess(process):
+		newOut = getQueueContents(outQueue, printContents=False)
+		newErr = getQueueContents(errQueue, printContents=False)
+		out += newOut
+		err += newErr
+
+		if newOut:
+			loggingFunc(newOut[:-1])
+		if newErr:
+			onlyWhitespace = re.findall(newErr, '^[\n\r\s]+$')
+			# only care about non-white space errors
+			if len(onlyWhitespace) == 0:
+				if checkErrorFunc:
+					checkErrorFunc(newErr[:-1])
+				else:
+					loggingFunc('\n\nError:')
+					loggingFunc(newErr[:-1])
+					loggingFunc('\n')
+
+		# check in to see how we're doing
+		if time.time() > lastUpdate + checkInInterval:
+			# only keep the last 10,000 lines of log
+			out = out[-outputBufferLength:]
+			err = err[-outputBufferLength:]
+
+			lastUpdate = time.time()
+			if checkInFunc and not checkInFunc(out, err):
+				try:
+					process.kill()
+				except:
+					loggingFunc('Could not kill, please forcefully close the executing program')
+				return (False, 'Check in failed')
+
+			# if we've been rendering longer than the time alotted, bail
+			processTime = (int(time.time()) - processStartTime) / 60.0
+			if timeout and processTime >= timeout:
+				loggingFunc('Process timed out.  Total process time: %.2f min' % processTime)
+				return (False, 'timed out')
+
+	# call wait to kill the zombie process on *nix systems
+	process.wait()
+
+	sys.stdout.flush()
+	sys.stderr.flush()
+
+	newOut = getQueueContents(outQueue, printContents=False)
+	newErr = getQueueContents(errQueue, printContents=False)
+	out += newOut
+	err += newErr
+
+	if newOut:
+		loggingFunc(newOut[:-1])
+	if newErr and checkErrorFunc:
+		checkErrorFunc(err)
+
+	return (out, err)
 
 def startSubprocess(processArgs, env=None, shell=False):
 	"""Runs a program through psutil.Popen, disabling Windows error dialogs"""
