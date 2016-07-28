@@ -636,7 +636,6 @@ def runPython(pythonFile):
 	'''
 	return os.system('python ' + pythonFile)
 
-
 def waitOnProcess(process,
 	checkInFunc=False,
 	checkErrorFunc=False,
@@ -649,7 +648,7 @@ def waitOnProcess(process,
 		def loggingFunc(*args):
 			print args.join(' ')
 
-	def queueOutput(self, out, outQueue):
+	def queueOutput(out, outQueue):
 		if out:
 			for line in iter(out.readline, ''):
 				outQueue.put(line)
@@ -690,7 +689,6 @@ def waitOnProcess(process,
 	errProcessThread = threading.Thread(target=queueOutput, args=(process.stderr, errQueue))
 	errProcessThread.daemon = True
 	errProcessThread.start()
-
 
 	while checkProcess(process):
 		newOut = getQueueContents(outQueue, printContents=False)
@@ -809,8 +807,6 @@ def isMac():
 	Returns whether or not the machine running the command is Windows.
 	'''
 	return sys.platform.startswith('darwin')
-
-
 
 # Command Line Utilities
 ##################################################
