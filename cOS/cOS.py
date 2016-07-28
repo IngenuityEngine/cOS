@@ -656,6 +656,7 @@ def waitOnProcess(process,
 
 	def checkProcess(process):
 		if not process.is_running():
+			print 'Process stopped'
 			return False
 		# STATUS_ZOMBIE doesn't work on Windows
 		if not isWindows():
