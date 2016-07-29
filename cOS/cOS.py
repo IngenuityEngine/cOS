@@ -701,6 +701,8 @@ def waitOnProcess(process,
 	errProcessThread.daemon = True
 	errProcessThread.start()
 
+	re_whitespace = re.compile('^[\n\r\s]+$')
+
 	while checkProcess(process):
 		newOut = getQueueContents(outQueue, printContents=False)
 		newErr = getQueueContents(errQueue, printContents=False)
@@ -710,9 +712,9 @@ def waitOnProcess(process,
 		if newOut:
 			loggingFunc(newOut[:-1])
 		if newErr:
-			onlyWhitespace = re.findall('^[\n\r\s]+$', newErr)
+			notOnlyWhitespace = re_whitespace.match(newErr)
 			# only care about non-white space errors
-			if len(onlyWhitespace) == 0:
+			if notOnlyWhitespace:
 				if checkErrorFunc:
 					checkErrorFunc(newErr[:-1])
 				else:
