@@ -589,9 +589,6 @@ def getFiles(path,
 
 	return allFiles
 
-
-
-
 # Processes
 ##################################################
 def getParentPID():
@@ -646,7 +643,7 @@ def waitOnProcess(process,
 
 	if not loggingFunc:
 		def loggingFunc(*args):
-			print args.join(' ')
+			print ' '.join(args)
 
 	def queueOutput(out, outQueue):
 		if out:
