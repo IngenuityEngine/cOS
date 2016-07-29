@@ -395,7 +395,11 @@ def removeFile(path):
 		os.remove(path)
 		return True
 	except Exception as err:
-		return err
+		# If error is "not exists", don't raise, just return
+		if not os.path.exists(path):
+			return err
+		else:
+			raise err
 
 def removeDir(path):
 	'''
@@ -408,7 +412,11 @@ def removeDir(path):
 		shutil.rmtree(path)
 		return True
 	except Exception as err:
-		return err
+		# If error is "not exists", don't raise, just return
+		if not os.path.exists(path):
+			return err
+		else:
+			raise err
 
 def emptyDir(folder,onlyFiles=False, waitTime=5):
 	'''
