@@ -697,7 +697,7 @@ def waitOnProcess(process,
 		if newOut:
 			loggingFunc(newOut[:-1])
 		if newErr:
-			onlyWhitespace = re.findall(newErr, '^[\n\r\s]+$')
+			onlyWhitespace = re.findall('^[\n\r\s]+$', newErr)
 			# only care about non-white space errors
 			if len(onlyWhitespace) == 0:
 				if checkErrorFunc:
