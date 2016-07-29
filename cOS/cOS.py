@@ -603,7 +603,12 @@ def getParentPID():
 	'''
 	Returns the process ID of the parent process.
 	'''
-	return psutil.Process(os.getpid()).ppid
+	# Try/catch for old versions of old versions of psutil
+	try:
+		psutil.Process(os.getpid()).ppid()
+	except TypeError as err:
+		print 'Psutil likely outdated. Update psutil.'
+		raise err
 
 def runCommand(processArgs,env=None):
 	'''
