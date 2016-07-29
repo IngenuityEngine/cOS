@@ -605,9 +605,9 @@ def getParentPID():
 	'''
 	# Try/catch for old versions of old versions of psutil
 	try:
-		psutil.Process(os.getpid()).ppid()
+		psutil.Process(os.getpid()).ppid
 	except TypeError as err:
-		print 'Psutil likely outdated. Update psutil.'
+		print 'Psutil version 1.2 supported. Please revert.'
 		raise err
 
 def runCommand(processArgs,env=None):
