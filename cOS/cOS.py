@@ -7,6 +7,9 @@ import shutil
 from distutils import dir_util
 import re
 import fnmatch
+import Queue
+import threading
+
 try:
 	import psutil
 except:
@@ -236,7 +239,8 @@ def getFrameRange(path):
 	extension = getExtension(path)
 
 	if percentLoc == -1:
-		raise Exception('Frame padding not found in: ' + path)
+		print 'Frame padding not found in: ' + path
+		return False
 
 	# second character after the %
 	# ex: %04d returns 4
@@ -258,6 +262,7 @@ def getFrameRange(path):
 			minFrame = min(minFrame,frame)
 
 	if minFrame == 9999999 or maxFrame == -9999999:
+		print 'No frames found:', path
 		return False
 
 	duration = maxFrame - minFrame + 1
@@ -390,7 +395,11 @@ def removeFile(path):
 		os.remove(path)
 		return True
 	except Exception as err:
-		return err
+		# If error is "not exists", don't raise, just return
+		if not os.path.exists(path):
+			return err
+		else:
+			raise err
 
 def removeDir(path):
 	'''
@@ -403,7 +412,11 @@ def removeDir(path):
 		shutil.rmtree(path)
 		return True
 	except Exception as err:
-		return err
+		# If error is "not exists", don't raise, just return
+		if not os.path.exists(path):
+			return err
+		else:
+			raise err
 
 def emptyDir(folder,onlyFiles=False, waitTime=5):
 	'''
@@ -584,16 +597,18 @@ def getFiles(path,
 
 	return allFiles
 
-
-
-
 # Processes
 ##################################################
 def getParentPID():
 	'''
 	Returns the process ID of the parent process.
 	'''
-	return psutil.Process(os.getpid()).ppid
+	# Try/catch for old versions of old versions of psutil
+	try:
+		psutil.Process(os.getpid()).ppid
+	except TypeError as err:
+		print 'Psutil version 1.2 supported. Please revert.'
+		raise err
 
 def runCommand(processArgs,env=None):
 	'''
@@ -631,6 +646,119 @@ def runPython(pythonFile):
 	'''
 	return os.system('python ' + pythonFile)
 
+def waitOnProcess(process,
+	checkInFunc=False,
+	checkErrorFunc=False,
+	timeout=False,
+	loggingFunc=False,
+	checkInInterval=10,
+	outputBufferLength=10000):
+
+	if not loggingFunc:
+		def loggingFunc(*args):
+			print ' '.join(args)
+
+	def queueOutput(out, outQueue):
+		if out:
+			for line in iter(out.readline, ''):
+				outQueue.put(line)
+			out.close()
+
+	def checkProcess(process):
+		if not process.is_running():
+			print 'Process stopped'
+			return False
+		# STATUS_ZOMBIE doesn't work on Windows
+		if not isWindows():
+			return process.status() != psutil.STATUS_ZOMBIE
+		return True
+
+	def getQueueContents(queue, printContents=True):
+		contents = ''
+		while not queue.empty():
+			line = queue.get_nowait()
+			contents += line
+			if printContents:
+				# remove the newline at the end
+				print line[:-1]
+		return contents
+
+	lastUpdate = time.time()
+
+	out = newOut = ''
+	err = newErr = ''
+
+	processStartTime = int(time.time())
+
+	# threads dies with the program
+	outQueue = Queue.Queue()
+	processThread = threading.Thread(target=queueOutput, args=(process.stdout, outQueue))
+	processThread.daemon = True
+	processThread.start()
+
+	errQueue = Queue.Queue()
+	errProcessThread = threading.Thread(target=queueOutput, args=(process.stderr, errQueue))
+	errProcessThread.daemon = True
+	errProcessThread.start()
+
+	re_whitespace = re.compile('^[\n\r\s]+$')
+
+	while checkProcess(process):
+		newOut = getQueueContents(outQueue, printContents=False)
+		newErr = getQueueContents(errQueue, printContents=False)
+		out += newOut
+		err += newErr
+
+		if newOut:
+			loggingFunc(newOut[:-1])
+		if newErr:
+			notOnlyWhitespace = re_whitespace.match(newErr)
+			# only care about non-white space errors
+			if notOnlyWhitespace:
+				if checkErrorFunc:
+					checkErrorFunc(newErr[:-1])
+				else:
+					loggingFunc('\n\nError:')
+					loggingFunc(newErr[:-1])
+					loggingFunc('\n')
+
+		# check in to see how we're doing
+		if time.time() > lastUpdate + checkInInterval:
+			# only keep the last 10,000 lines of log
+			out = out[-outputBufferLength:]
+			err = err[-outputBufferLength:]
+
+			lastUpdate = time.time()
+			if checkInFunc and not checkInFunc(out, err):
+				try:
+					process.kill()
+				except:
+					loggingFunc('Could not kill, please forcefully close the executing program')
+				return (False, 'Check in failed')
+
+			# if we've been rendering longer than the time alotted, bail
+			processTime = (int(time.time()) - processStartTime) / 60.0
+			if timeout and processTime >= timeout:
+				loggingFunc('Process timed out.  Total process time: %.2f min' % processTime)
+				return (False, 'timed out')
+
+	# call wait to kill the zombie process on *nix systems
+	process.wait()
+
+	sys.stdout.flush()
+	sys.stderr.flush()
+
+	newOut = getQueueContents(outQueue, printContents=False)
+	newErr = getQueueContents(errQueue, printContents=False)
+	out += newOut
+	err += newErr
+
+	if newOut:
+		loggingFunc(newOut[:-1])
+	if newErr and checkErrorFunc:
+		checkErrorFunc(err)
+
+	return (out, err)
 
 def startSubprocess(processArgs, env=None, shell=False):
 	"""Runs a program through psutil.Popen, disabling Windows error dialogs"""
@@ -639,6 +767,29 @@ def startSubprocess(processArgs, env=None, shell=False):
 		env = dict(os.environ.items() + env.items())
 	else:
 		env = os.environ
+
+	if sys.platform.startswith('win'):
+		# Don't display the Windows GPF dialog if the invoked program dies.
+		# See comp.os.ms-windows.programmer.win32
+		# How to suppress crash notification dialog?, Jan 14,2004 -
+		# Raymond Chen's response [1]
+		import ctypes, _winreg
+
+		SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
+		ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
+
+		# if creationFlags != None:
+		#     subprocess_flags = creationFlags
+		# else:
+		#     subprocess_flags = 0x8000000 # hex constant equivalent to win32con.CREATE_NO_WINDOW
+
+		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
+		try:
+			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, _winreg.KEY_ALL_ACCESS)
+		except:
+			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
+		# 1 (True) is the value
+		_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
 
 	# for arg in processArgs:
 	# 	print arg
@@ -692,8 +843,6 @@ def isMac():
 	Returns whether or not the machine running the command is Windows.
 	'''
 	return sys.platform.startswith('darwin')
-
-
 
 # Command Line Utilities
 ##################################################
