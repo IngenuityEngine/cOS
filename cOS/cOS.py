@@ -9,8 +9,6 @@ import re
 import fnmatch
 import Queue
 import threading
-import settingsManager
-globalSettings = settingsManager.globalSettings()
 
 try:
 	import psutil
@@ -787,7 +785,7 @@ def startSubprocess(processArgs, env=None, shell=False):
 
 		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
 		try:
-			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, globalSettings.KEY_ALL_ACCESS)
+			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, _winreg.KEY_ALL_ACCESS)
 		except:
 			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
 		# 1 (True) is the value
