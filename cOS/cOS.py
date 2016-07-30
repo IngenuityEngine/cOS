@@ -9,6 +9,8 @@ import re
 import fnmatch
 import Queue
 import threading
+import settingsManager
+globalSettings = settingsManager.globalSettings()
 
 try:
 	import psutil
@@ -767,6 +769,29 @@ def startSubprocess(processArgs, env=None, shell=False):
 		env = dict(os.environ.items() + env.items())
 	else:
 		env = os.environ
+
+	if sys.platform.startswith('win'):
+		# Don't display the Windows GPF dialog if the invoked program dies.
+		# See comp.os.ms-windows.programmer.win32
+		# How to suppress crash notification dialog?, Jan 14,2004 -
+		# Raymond Chen's response [1]
+		import ctypes, _winreg
+
+		SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
+		ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
+
+		# if creationFlags != None:
+		#     subprocess_flags = creationFlags
+		# else:
+		#     subprocess_flags = 0x8000000 # hex constant equivalent to win32con.CREATE_NO_WINDOW
+
+		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
+		try:
+			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, globalSettings.KEY_ALL_ACCESS)
+		except:
+			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
+		# 1 (True) is the value
+		_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
 
 	# for arg in processArgs:
 	# 	print arg
