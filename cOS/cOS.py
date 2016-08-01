@@ -776,12 +776,13 @@ def startSubprocess(processArgs, env=None, shell=False):
 		import ctypes, _winreg
 
 		SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
-		ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX);
-
-		# if creationFlags != None:
-		#     subprocess_flags = creationFlags
-		# else:
-		#     subprocess_flags = 0x8000000 # hex constant equivalent to win32con.CREATE_NO_WINDOW
+		SEM_FAILCRITICALERRORS = 0x0001
+		try:
+			ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS) # equivalent to 0x0003
+		except:
+			print 'Error setting Windows ErrorMode'
+			raise
+		CREATE_NO_WINDOW = 0x08000000
 
 		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
 		try:
@@ -791,11 +792,9 @@ def startSubprocess(processArgs, env=None, shell=False):
 		# 1 (True) is the value
 		_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
 
-	# for arg in processArgs:
-	# 	print arg
-
-	# else:
-	#     subprocess_flags = 0
+		subprocess_flags = CREATE_NO_WINDOW
+	else:
+		subprocess_flags = 0
 	command = ''
 	if type(processArgs) == list:
 		# wrap program w/ quotes if it has spaces
@@ -816,7 +815,8 @@ def startSubprocess(processArgs, env=None, shell=False):
 		stdout=subprocess.PIPE,
 		stderr=subprocess.PIPE,
 		env=env,
-		shell=shell)
+		shell=shell,
+		creationflags=subprocess_flags)
 
 # IO
 ##################################################
