@@ -772,7 +772,7 @@ def startSubprocess(processArgs, env=None, shell=False):
 		# See comp.os.ms-windows.programmer.win32
 		# How to suppress crash notification dialog?, Jan 14,2004 -
 		# Raymond Chen's response [1]
-		import ctypes, _winreg
+		import ctypes
 
 		SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
 		SEM_FAILCRITICALERRORS = 0x0001
@@ -783,18 +783,23 @@ def startSubprocess(processArgs, env=None, shell=False):
 			print 'Error setting Windows ErrorMode'
 			raise
 		CREATE_NO_WINDOW = 0x08000000
-
-		keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
-		try:
-			key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, _winreg.KEY_ALL_ACCESS)
-		except:
-			key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
-		# 1 (True) is the value
-		_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
-
 		subprocess_flags = CREATE_NO_WINDOW
+
+		try:
+			import _winreg
+			keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
+			try:
+				key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, _winreg.KEY_ALL_ACCESS)
+			except:
+				key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
+			# 1 (True) is the value
+			_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
+		except:
+			print 'Error setting Microsoft Error Reporting, passing...'
+
 	else:
 		subprocess_flags = 0
+
 	command = ''
 	if type(processArgs) == list:
 		# wrap program w/ quotes if it has spaces
