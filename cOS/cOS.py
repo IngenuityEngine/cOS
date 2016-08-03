@@ -461,7 +461,6 @@ def copyTree(src, dst, symlinks=False, ignore=None):
 	'''
 	dir_util.copy_tree(src, dst)
 
-
 def rename (oldPath, newPath, callback):
 	oldPath = normalizePath(oldPath)
 	newPath = normalizePath(newPath)
@@ -778,7 +777,8 @@ def startSubprocess(processArgs, env=None, shell=False):
 		SEM_NOGPFAULTERRORBOX = 0x0002 # From MSDN
 		SEM_FAILCRITICALERRORS = 0x0001
 		try:
-			ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS) # equivalent to 0x0003
+			# equivalent to 0x0003
+			ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS)
 		except:
 			print 'Error setting Windows ErrorMode'
 			raise
