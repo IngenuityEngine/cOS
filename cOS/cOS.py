@@ -682,7 +682,7 @@ def waitOnProcess(process,
 				print line[:-1]
 		return contents
 
-	lastUpdate = 0
+	lastUpdate = time.time()
 
 	out = newOut = ''
 	err = newErr = ''
