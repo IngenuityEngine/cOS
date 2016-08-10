@@ -785,17 +785,19 @@ def startSubprocess(processArgs, env=None, shell=False):
 		CREATE_NO_WINDOW = 0x08000000
 		subprocess_flags = CREATE_NO_WINDOW
 
-		try:
-			import _winreg
-			keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
-			try:
-				key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, _winreg.KEY_ALL_ACCESS)
-			except:
-				key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
-			# 1 (True) is the value
-			_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
-		except:
-			print 'Error setting Microsoft Error Reporting, passing...'
+		# Here for posterity but this seems to always fail, so not active at the moment
+		# This is supposed to suppress the Microsoft popup ('submit error to Microsoft')
+		# try:
+		# 	import _winreg
+		# 	keyVal = r'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
+		# 	try:
+		# 		key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyVal, 0, _winreg.KEY_ALL_ACCESS)
+		# 	except:
+		# 		key = _winreg.CreateKey(_winreg.HKEY_LOCAL_MACHINE, keyVal)
+		# 	# 1 (True) is the value
+		# 	_winreg.SetValueEx(key, 'ForceQueue', 0, _winreg.REG_DWORD, 1)
+		# except:
+		# 	print 'Error setting Microsoft Error Reporting, passing...'
 
 	else:
 		subprocess_flags = 0
