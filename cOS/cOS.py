@@ -780,7 +780,7 @@ def startSubprocess(processArgs, env=None, shell=False):
 			# equivalent to 0x0003
 			ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS)
 		except:
-			print 'Error setting Windows ErrorMode'
+			print 'Error setting Windows Error Mode'
 			raise
 		CREATE_NO_WINDOW = 0x08000000
 		subprocess_flags = CREATE_NO_WINDOW
