@@ -655,7 +655,7 @@ def waitOnProcess(process,
 
 	if not loggingFunc:
 		def loggingFunc(*args):
-			print ' '.join(args)
+			print ' '.join([str(arg) for arg in args])
 
 	def queueOutput(out, outQueue):
 		if out:
