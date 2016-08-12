@@ -134,6 +134,18 @@ def getVersion(filename):
 	'''
 	Returns version number of a given filename.
 	'''
+	try:
+		if str(int(filename)) == filename:
+			return int(filename)
+	except:
+		pass
+
+	try:
+		if int(filename) == filename:
+			return int(filename)
+	except:
+		pass
+
 	match = re.findall('[vV]([0-9]+)', filename)
 	if (match):
 		return int(match[-1])

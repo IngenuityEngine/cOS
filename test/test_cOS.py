@@ -46,6 +46,13 @@ class test(tryout.TestSuite):
 		ver = cOS.getVersion('sandbox/file_v001.mb')
 		self.assertEqual(ver, 1)
 
+		ver = cOS.getVersion('654')
+		self.assertEqual(ver, 654)
+
+		ver = cOS.getVersion(27)
+		self.assertEqual(ver, 27)
+
+
 	def getVersionError(self):
 		ver = cOS.getVersion('sandbox/file.mb')
 		self.assertEqual(ver, 0)
