@@ -354,7 +354,7 @@ def setEnvironmentVariable(key, val, permanent=True):
 				# otherwise ensure the line is set
 				# to the correct value
 				else:
-					line = setString
+					lines[i] = setString
 				found = True
 			i += 1
 
