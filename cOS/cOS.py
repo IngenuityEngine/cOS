@@ -62,10 +62,10 @@ def normalizeDir(path):
 
 def normalizePath(path):
 	'''
-	Removes starting slash, and replaces all backslashes
+	Replaces all backslashes
 	with forward slashses.
+	Removed: removeStartingSlash
 	'''
-	path = removeStartingSlash(path)
 	return unixPath(path)
 
 def unixPath(path):
