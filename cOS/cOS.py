@@ -394,6 +394,7 @@ def join(a, b):
 	Concatenates a directory with a file path
 	using forward slashes.
 	'''
+	b = removeStartingSlash(b)
 	return normalizeDir(a) + normalizePath(b)
 
 def removeFile(path):

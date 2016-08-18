@@ -202,7 +202,7 @@ class test(tryout.TestSuite):
 		self.assertTrue(out == False)
 		self.assertTrue(err)
 
-		testFile = cOS.getDirName(__file__) + \
+		testFile = cOS.getDirName(os.path.realpath(__file__)) + \
 			'testOutput/simple.py'
 		out, err = cOS.getCommandOutput('python ' + testFile)
 		print 'out:', out
