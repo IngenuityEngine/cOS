@@ -687,12 +687,19 @@ def waitOnProcess(process,
 
 	def getQueueContents(queue, printContents=True):
 		contents = ''
-		while not queue.empty():
+		lines = 0
+		maxLines = 200
+		while not queue.empty() and lines < maxLines:
 			line = queue.get_nowait()
 			contents += line
 			if printContents:
 				# remove the newline at the end
 				print line[:-1]
+			lines += 1
+
+		if lines >= maxLines:
+			print '\n\n\nbailed on getting the rest of the queue'
+			queue.queue.clear()
 		return contents
 
 	lastUpdate = 0
