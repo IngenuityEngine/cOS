@@ -336,6 +336,7 @@ def setEnvironmentVariable(key, val, permanent=True):
 	# set variables in the /etc/environment file
 	# on mac and linux
 	elif isMac() or isLinux():
+		os.system('export %s=%s' % (key, val))
 		environmentFile = '/etc/environment'
 		setString = key + '=' + val + '\n'
 
@@ -934,6 +935,22 @@ def getTotalRam():
 		return float(stat.ullTotalPhys) / 1024000000
 	else:
 		return 0
+
+def followFile(fileObject, waitTime=2):
+	# go to the end of the file
+	# the '2' denotes '0 from the end'
+	fileObject.seek(0, 2)
+	while True:
+		line = fileObject.readline()
+		if not line:
+			time.sleep(waitTime)
+			continue
+
+		# trim off the last character if it's a new line
+		if line[-1] == '\n':
+			line = line[:-1]
+		yield line
+
 
 def main():
 	print 'total ram:', getTotalRam()
