@@ -936,6 +936,51 @@ def getTotalRam():
 	else:
 		return 0
 
+def findCaseInsensitiveFilename(path, mustExist=False):
+	'''
+	Finds a matching filename if one exists
+
+	ex:
+	c:/Some/Folder/awesome.txt
+	would match the actual file:
+	c:/some/folder/AWESOME.txt
+	if mustExist=False would also match
+	c:/some/folder/NewPath/yeah.txt
+	'''
+
+	path = unixPath(path)
+	parts = path.split('/')
+
+	pathFound = False
+	for i in range(len(parts)-1):
+		pathFound = False
+
+		searchRoot = '/'.join(parts[0:i+1]) + '/'
+		fileOrFolderToMatch = parts[i+1].lower()
+
+		if not os.path.isdir(searchRoot):
+			if mustExist:
+				print searchRoot, 'not a directory'
+			break
+
+		files = os.listdir(searchRoot)
+		for f in files:
+			# print 'checking:', f, fileOrFolderToMatch
+			if f.lower() == fileOrFolderToMatch:
+				parts[i+1] = f
+				pathFound = True
+
+		if not pathFound:
+			if mustExist:
+				print 'Could not find:', fileOrFolderToMatch
+			break
+
+	if mustExist and not pathFound:
+		return False
+
+	return '/'.join(parts)
+
+
 def followFile(fileObject, waitTime=2):
 	# go to the end of the file
 	# the '2' denotes '0 from the end'
@@ -953,4 +998,20 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	print 'total ram:', getTotalRam()
+	basePath = 'C:/Program Files/Chaos Group/V-Ray/Maya 2016 for x64/vray_netinstall_client_setup.bat'
+	casePath = basePath.lower()
+
+	basePath = 'R:/OpticalFlaresLicense.lic'
+	casePath = 'r:/opticalFLARESLicense.lic'
+
+	basePath = 'Q:/Users/Grant_Miller/projects/someSweetProject/yeah.py'
+	casePath = 'Q:/Users/Grant_Miller/PROJECTS/someSweetProject/yeah.py'
+
+	print basePath
+	print findCaseInsensitiveFilename(casePath)
+	print findCaseInsensitiveFilename(casePath, mustExist=True)
+
+	# print 'total ram:', getTotalRam()
+
+if __name__ == '__main__':
+	main()
