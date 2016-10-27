@@ -219,8 +219,8 @@ incrementVersion: function(filename)
 },
 
 
-// fix: missing getHighestVersion
-// getHighestVersion: function(root, extension)
+// fix: missing getHighestVersionFilePath
+// getHighestVersionFilePath: function(root, extension)
 // {
 
 // },

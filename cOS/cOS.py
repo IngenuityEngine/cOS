@@ -158,7 +158,7 @@ def incrementVersion(filename):
 	version = getVersion(filename) + 1
 	return re.sub('[vV][0-9]+', 'v%04d' % version, filename)
 
-def getHighestVersion(root, extension):
+def getHighestVersionFilePath(root, extension=''):
 	'''
 	Returns highest version from a given root, matching a given extension.
 	'''
