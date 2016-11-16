@@ -368,7 +368,7 @@ def setEnvironmentVariable(key, val, permanent=True):
 		# environmentFile
 		with open(environmentFile, 'w') as f:
 			for line in lines:
-				f.write(line)
+				f.write(line.replace(' ',''))
 
 def makeDir(dirname):
 	'''
