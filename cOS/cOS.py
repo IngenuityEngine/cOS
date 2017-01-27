@@ -308,7 +308,17 @@ def getFrameNumber(filename):
 			format <name>_<frameNumber>.<extension> or \
 			<name>.<frameNumber>.<extension>: %s' % filename)
 
+def isFrameRangeText(filename):
+	regex = re.compile('/[a-z0-9._/:%]+ [0-9]+-[0-9]+$/ig')
+	return regex.match(filename)
 
+def getFrameRangeText(filename):
+	frameRange = getFrameRange(filename)
+	if not frameRange:
+		raise Exception('Invalid filename: ' + filename)
+	print 'Frame Range:', frameRange
+	return filename + ' %d-%d' % \
+		(frameRange['min'], frameRange['max'])
 
 # System Operations
 ##################################################
