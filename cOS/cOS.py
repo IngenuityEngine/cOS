@@ -608,7 +608,11 @@ def collapseFiles(searchDir):
 					except IndexError:
 						print("Done!")
 
-				collapsedList.append(fileSections[0]+"%0"+str(len(fileSections[1]))+fileSections[2]+ " " + str(int(filePieces[-2])) +"-"+str(int(filePieces[-2])+j-i-1))
+				collapsedList.append(fileSections[0] +
+									"%0" + str(len(fileSections[1])) +
+									fileSections[2] + " " +
+									str(int(filePieces[-2])) + "-" +
+									str(int(filePieces[-2]) + j - i - 1))
 				i = j
 
 			except ValueError:
