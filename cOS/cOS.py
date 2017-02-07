@@ -308,7 +308,17 @@ def getFrameNumber(filename):
 			format <name>_<frameNumber>.<extension> or \
 			<name>.<frameNumber>.<extension>: %s' % filename)
 
+def isFrameRangeText(filename):
+	regex = re.compile('/[a-z0-9._/:%]+ [0-9]+-[0-9]+$/ig')
+	return regex.match(filename)
 
+def getFrameRangeText(filename):
+	frameRange = getFrameRange(filename)
+	if not frameRange:
+		raise Exception('Invalid filename: ' + filename)
+	print 'Frame Range:', frameRange
+	return filename + ' %d-%d' % \
+		(frameRange['min'], frameRange['max'])
 
 # System Operations
 ##################################################
@@ -564,6 +574,53 @@ def collectAllFiles(searchDir):
 				if name not in filesToReturn:
 					filesToReturn.append(getPathInfo(name))
 	return filesToReturn
+
+def collapseFiles(searchDir):
+	searchDir = normalizeDir(searchDir)
+	fileList = [f for f in os.listdir(searchDir) if os.path.isfile(os.path.join(searchDir, f))]
+	fileList.sort()
+
+	collapsedList = []
+
+	fileList.sort()
+
+	i = 0
+	# New Logic to rename sequential files in QList
+	while i < len(fileList):
+		filePieces = fileList[i].split(".")
+		if len(filePieces) <= 2:
+			collapsedList.append(fileList[i])
+			i+=1
+		else:
+			try:
+				int(filePieces[-2])
+				fileSections = fileList[i].partition(filePieces[-2])
+				leftFileSection = fileSections[0]
+				rightFileSection = fileSections[2]
+				j = i
+				while j<len(fileList) and leftFileSection == fileSections[0] and rightFileSection == fileSections[2]:
+					j+=1
+					try:
+						filePiece = fileList[j].split(".")[-2]
+						newFileSections = fileList[j].partition(filePiece)
+						leftFileSection = newFileSections[0]
+						rightFileSection = newFileSections[2]
+					except IndexError:
+						print("Done!")
+
+				collapsedList.append(fileSections[0] +
+									"%0" + str(len(fileSections[1])) +
+									fileSections[2] + " " +
+									str(int(filePieces[-2])) + "-" +
+									str(int(filePieces[-2]) + j - i - 1))
+				i = j
+
+			except ValueError:
+				collapsedList.append(fileList[i])
+				i+=1
+
+	return collapsedList
+
 
 # def getDirs(path):
 # 	return getFiles(path, fileExcludes=['*'], depth=0)
@@ -912,23 +969,23 @@ def getTotalRam():
 		import ctypes
 
 		class MemoryUse(ctypes.Structure):
-		    _fields_ = [
-		        ('dwLength', ctypes.c_ulong),
-		        ('dwMemoryLoad', ctypes.c_ulong),
-		        ('ullTotalPhys', ctypes.c_ulonglong),
-		        ('ullAvailPhys', ctypes.c_ulonglong),
-		        ('ullTotalPageFile', ctypes.c_ulonglong),
-		        ('ullAvailPageFile', ctypes.c_ulonglong),
-		        ('ullTotalVirtual', ctypes.c_ulonglong),
-		        ('ullAvailVirtual', ctypes.c_ulonglong),
-		        ('sullAvailExtendedVirtual', ctypes.c_ulonglong),
-		    ]
+			_fields_ = [
+				('dwLength', ctypes.c_ulong),
+				('dwMemoryLoad', ctypes.c_ulong),
+				('ullTotalPhys', ctypes.c_ulonglong),
+				('ullAvailPhys', ctypes.c_ulonglong),
+				('ullTotalPageFile', ctypes.c_ulonglong),
+				('ullAvailPageFile', ctypes.c_ulonglong),
+				('ullTotalVirtual', ctypes.c_ulonglong),
+				('ullAvailVirtual', ctypes.c_ulonglong),
+				('sullAvailExtendedVirtual', ctypes.c_ulonglong),
+			]
 
-		    def __init__(self):
-		        # have to initialize this to the size of
-		        # MemoryUse
-		        self.dwLength = ctypes.sizeof(self)
-		        super(MemoryUse, self).__init__()
+			def __init__(self):
+				# have to initialize this to the size of
+				# MemoryUse
+				self.dwLength = ctypes.sizeof(self)
+				super(MemoryUse, self).__init__()
 
 		stat = MemoryUse()
 		ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat))
