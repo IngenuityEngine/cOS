@@ -309,8 +309,8 @@ def getFrameNumber(filename):
 			<name>.<frameNumber>.<extension>: %s' % filename)
 
 def isFrameRangeText(filename):
-	regex = re.compile('/[a-z0-9._/:%]+ [0-9]+-[0-9]+$/ig')
-	return regex.match(filename)
+	regex = re.compile('^[a-zA-Z0-9._/:%]+ [0-9]+-[0-9]+$')
+	return regex.match(filename) is not None
 
 def getFrameRangeText(filename):
 	frameRange = getFrameRange(filename)
@@ -575,22 +575,17 @@ def collectAllFiles(searchDir):
 					filesToReturn.append(getPathInfo(name))
 	return filesToReturn
 
-def collapseFiles(searchDir):
-	searchDir = normalizeDir(searchDir)
-	fileList = [f for f in os.listdir(searchDir) if os.path.isfile(os.path.join(searchDir, f))]
+def collapseFiles(fileList):
 	fileList.sort()
-
 	collapsedList = []
-
-	fileList.sort()
 
 	i = 0
 	# New Logic to rename sequential files in QList
 	while i < len(fileList):
-		filePieces = fileList[i].split(".")
+		filePieces = fileList[i].split('.')
 		if len(filePieces) <= 2:
 			collapsedList.append(fileList[i])
-			i+=1
+			i += 1
 		else:
 			try:
 				int(filePieces[-2])
@@ -601,17 +596,17 @@ def collapseFiles(searchDir):
 				while j<len(fileList) and leftFileSection == fileSections[0] and rightFileSection == fileSections[2]:
 					j+=1
 					try:
-						filePiece = fileList[j].split(".")[-2]
+						filePiece = fileList[j].split('.')[-2]
 						newFileSections = fileList[j].partition(filePiece)
 						leftFileSection = newFileSections[0]
 						rightFileSection = newFileSections[2]
 					except IndexError:
-						print("Done!")
+						print('Done!')
 
 				collapsedList.append(fileSections[0] +
-									"%0" + str(len(fileSections[1])) +
-									fileSections[2] + " " +
-									str(int(filePieces[-2])) + "-" +
+									'%0' + str(len(fileSections[1])) +
+									fileSections[2] + ' ' +
+									str(int(filePieces[-2])) + '-' +
 									str(int(filePieces[-2]) + j - i - 1))
 				i = j
 
@@ -1055,18 +1050,20 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	basePath = 'C:/Program Files/Chaos Group/V-Ray/Maya 2016 for x64/vray_netinstall_client_setup.bat'
-	casePath = basePath.lower()
+	filename = 'r:/Blackish_s03/Final_Renders/BLA_308/EXR_Linear/BLA_308_018_020_v0007/BLA_308_018_020_v0007.%04.exr 1000-1048'
+	print isFrameRangeText(filename)
+	# basePath = 'C:/Program Files/Chaos Group/V-Ray/Maya 2016 for x64/vray_netinstall_client_setup.bat'
+	# casePath = basePath.lower()
 
-	basePath = 'R:/OpticalFlaresLicense.lic'
-	casePath = 'r:/opticalFLARESLicense.lic'
+	# basePath = 'R:/OpticalFlaresLicense.lic'
+	# casePath = 'r:/opticalFLARESLicense.lic'
 
-	basePath = 'Q:/Users/Grant_Miller/projects/someSweetProject/yeah.py'
-	casePath = 'Q:/Users/Grant_Miller/PROJECTS/someSweetProject/yeah.py'
+	# basePath = 'Q:/Users/Grant_Miller/projects/someSweetProject/yeah.py'
+	# casePath = 'Q:/Users/Grant_Miller/PROJECTS/someSweetProject/yeah.py'
 
-	print basePath
-	print findCaseInsensitiveFilename(casePath)
-	print findCaseInsensitiveFilename(casePath, mustExist=True)
+	# print basePath
+	# print findCaseInsensitiveFilename(casePath)
+	# print findCaseInsensitiveFilename(casePath, mustExist=True)
 
 	# print 'total ram:', getTotalRam()
 
