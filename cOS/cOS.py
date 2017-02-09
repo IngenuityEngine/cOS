@@ -178,6 +178,13 @@ def getHighestVersionFilePath(root, extension=''):
 
 	return path
 
+def createVersionFile(filename, version, padding = 4, extension = ''):
+
+	'''
+	Returns filename with version and extension
+	'''
+	return filename + '_v' + str(version).zfill(padding) + '.' + extension
+
 # Information
 ##################################################
 
