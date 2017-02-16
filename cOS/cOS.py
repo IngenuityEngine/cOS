@@ -631,8 +631,8 @@ def collapseFiles(fileList):
 
 # fix: add depth
 def getFiles(path,
-		fileIncludes=False,
-		folderIncludes=False,
+		fileIncludes=[],
+		folderIncludes=[],
 		fileExcludes=[],
 		folderExcludes=[],
 		includeAfterExclude=False):
@@ -1092,8 +1092,9 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	filename = 'r:/Blackish_s03/Final_Renders/BLA_308/EXR_Linear/BLA_308_018_020_v0007/BLA_308_018_020_v0007.%04.exr 1000-1048'
-	print isFrameRangeText(filename)
+	pass
+	# filename = 'r:/Blackish_s03/Final_Renders/BLA_308/EXR_Linear/BLA_308_018_020_v0007/BLA_308_018_020_v0007.%04.exr 1000-1048'
+	# print isFrameRangeText(filename)
 	# basePath = 'C:/Program Files/Chaos Group/V-Ray/Maya 2016 for x64/vray_netinstall_client_setup.bat'
 	# casePath = basePath.lower()
 
