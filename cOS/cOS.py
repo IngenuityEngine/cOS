@@ -600,7 +600,9 @@ def collapseFiles(fileList):
 				leftFileSection = fileSections[0]
 				rightFileSection = fileSections[2]
 				j = i
-				while j<len(fileList) and leftFileSection == fileSections[0] and rightFileSection == fileSections[2]:
+				while j<len(fileList) and \
+					leftFileSection==fileSections[0] and \
+					rightFileSection == fileSections[2]:
 					j+=1
 					try:
 						filePiece = fileList[j].split('.')[-2]
