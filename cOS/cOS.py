@@ -611,7 +611,7 @@ def collapseFiles(fileList):
 						print('Done!')
 
 				collapsedList.append(fileSections[0] +
-									'%0' + str(len(fileSections[1])) +
+									'%0' + str(len(fileSections[1])) + 'd' +
 									fileSections[2] + ' ' +
 									str(int(filePieces[-2])) + '-' +
 									str(int(filePieces[-2]) + j - i - 1))
