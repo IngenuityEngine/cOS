@@ -634,39 +634,72 @@ def getFiles(path,
 		fileIncludes=False,
 		folderIncludes=False,
 		fileExcludes=[],
-		folderExcludes=[]):
+		folderExcludes=[],
+		includeAfterExclude=False):
+	'''
+	if the folder or file include/exclude lists have an *
+	getFiles() will use wildcard matching, otherwise it will
+	use simple "in"-style matching
 
-	def shouldInclude(path):
-		# file includes only work on files
-		if fileIncludes and not os.path.isdir(path):
-			keep = False
+	Ex:
+
+	'''
+
+	def shouldInclude(path, root, isDir=False):
+		fullPath = unixPath(os.path.join(root, path))
+
+		if fileIncludes and not isDir:
 			for pattern in fileIncludes:
-				if fnmatch.fnmatch(path, pattern):
-					keep = True
-			return keep
-		if folderIncludes:
-			for folder in folderIncludes:
-				if folder not in path:
-					return False
+				if ('*' in pattern and \
+					(fnmatch.fnmatch(fullPath, pattern) or \
+					fnmatch.fnmatch(path, pattern))) or \
+					pattern in fullPath:
+					return True
+			if not includeAfterExclude:
+				return False
 
-		for pattern in fileExcludes:
-			if fnmatch.fnmatch(path, pattern):
+		if folderIncludes and isDir:
+			for pattern in folderIncludes:
+				if ('*' in pattern and \
+					(fnmatch.fnmatch(fullPath, pattern) or \
+					fnmatch.fnmatch(path, pattern))) or \
+					pattern in fullPath:
+					return True
+			if not includeAfterExclude:
 				return False
-		for folder in folderExcludes:
-			if folder in path:
-				return False
+
+		if isDir:
+			for pattern in folderExcludes:
+				if ('*' in pattern and \
+					(fnmatch.fnmatch(fullPath, pattern) or \
+					fnmatch.fnmatch(path, pattern))) or \
+					pattern in fullPath:
+					return False
+		else:
+			for pattern in fileExcludes:
+				if ('*' in pattern and \
+					(fnmatch.fnmatch(fullPath, pattern) or \
+					fnmatch.fnmatch(path, pattern))) or \
+					pattern in fullPath:
+					return False
 
 		return True
 
+	if fileIncludes:
+		fileIncludes = ensureArray(fileIncludes)
+	if folderIncludes:
+		folderIncludes = ensureArray(folderIncludes)
+	if fileExcludes:
+		fileExcludes = ensureArray(fileExcludes)
+	if folderExcludes:
+		folderExcludes = ensureArray(folderExcludes)
+
 	allFiles = []
 	for root, dirs, files in os.walk(path):
-		dirs[:] = [d for d in dirs
-			if shouldInclude(
-				unixPath(os.path.join(root, d))
-				)]
+		dirs[:] = [d for d in dirs if shouldInclude(d, root, True)]
 		for f in files:
 			path = unixPath(os.path.join(root, f))
-			if shouldInclude(path):
+			if shouldInclude(f, root, False):
 				allFiles.append(path)
 
 	return allFiles
