@@ -610,7 +610,7 @@ def collapseFiles(fileList):
 						leftFileSection = newFileSections[0]
 						rightFileSection = newFileSections[2]
 					except IndexError:
-						print('Done!')
+						pass
 
 				collapsedList.append(fileSections[0] +
 									'%0' + str(len(fileSections[1])) + 'd' +
