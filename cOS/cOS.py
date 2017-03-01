@@ -552,7 +552,9 @@ def getFolderContents(filepath, includeFiles=True, includeFolders=True):
 		filename = os.path.join(filepath, f)
 		isDir = os.path.isdir(filename)
 		if includeFolders and isDir:
+			paths.append(normalizeDir(filename))
 		elif includeFiles and not isDir:
+			paths.append(normalizePath(filename))
 
 	return paths
 
