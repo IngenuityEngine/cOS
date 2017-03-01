@@ -542,6 +542,20 @@ def duplicateDir(src, dest):
 				print 'exists:', srcFilename
 
 
+def getFolderContents(filepath, includeFiles=True, includeFolders=True):
+	'''
+	Returns files and folders directly under the path.
+	'''
+	paths = []
+	files = os.listdir(filepath)
+	for f in files:
+		filename = os.path.join(filepath, f)
+		isDir = os.path.isdir(filename)
+		if includeFolders and isDir:
+		elif includeFiles and not isDir:
+
+	return paths
+
 def collectFiles(searchPaths, extensions, exclusions):
 	'''
 	Gets all files in the searchPaths with given extensions.
