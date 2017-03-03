@@ -651,7 +651,8 @@ def getFiles(path,
 		folderIncludes=[],
 		fileExcludes=[],
 		folderExcludes=[],
-		includeAfterExclude=False):
+		includeAfterExclude=False,
+		depth = -1):
 	'''
 	if the folder or file include/exclude lists have an *
 	getFiles() will use wildcard matching, otherwise it will
@@ -701,6 +702,20 @@ def getFiles(path,
 
 		return True
 
+# custom walk method with depth
+# link for reference: http://stackoverflow.com/questions/229186/os-walk-without-digging-into-directories-below
+	def walklevel(some_dir, depth=-1):
+		some_dir = some_dir.rstrip(os.path.sep)
+		assert os.path.isdir(some_dir)
+		num_sep = some_dir.count(os.path.sep)
+		for root, dirs, files in os.walk(some_dir):
+			dirs[:] = [d for d in dirs if shouldInclude(d, root, True)]
+			yield root, dirs, files
+			num_sep_this = root.count(os.path.sep)
+			if depth > -1:
+				if num_sep + depth <= num_sep_this:
+					del dirs[:]
+
 	if fileIncludes:
 		fileIncludes = ensureArray(fileIncludes)
 	if folderIncludes:
@@ -711,8 +726,7 @@ def getFiles(path,
 		folderExcludes = ensureArray(folderExcludes)
 
 	allFiles = []
-	for root, dirs, files in os.walk(path):
-		dirs[:] = [d for d in dirs if shouldInclude(d, root, True)]
+	for root, dirs, files in walklevel(path, depth):
 		for f in files:
 			path = unixPath(os.path.join(root, f))
 			if shouldInclude(f, root, False):
