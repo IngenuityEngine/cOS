@@ -97,17 +97,20 @@ def getExtension(path):
 	'''
 	path = path.split('.')
 	if len(path) > 1:
-		return path.pop().lower()
+		return path.pop().lower().strip()
+
 	return ''
 
-def normalizeExtension(extension):
+def normalizeExtension(filepath):
 	'''
 	Returns file extension all lowercase with no whitespace
 	'''
-	extension = extension.lower().strip()
-	if extension[0] == '.':
-		return extension[1:]
-	return extension
+	filepath = unixPath(filepath)
+	extension = getExtension(filepath)
+	filePieces = filepath.split('.')
+	filePieces[-1] = extension
+
+	return '.'.join(filePieces)
 
 def removeExtension(filename):
 	'''
@@ -122,7 +125,10 @@ def ensureExtension(filename, extension):
 	Checks that a given file has the given extension.
 	If not, appends the extension.
 	'''
-	extension = normalizeExtension(extension)
+	extension = extension.lower().strip()
+	if extension[0] == '.':
+		extension = extension[1:]
+
 	if (getExtension(filename) != extension):
 		return filename + '.' + extension
 	return filename
@@ -227,7 +233,7 @@ def getPathInfo(path, options={}):
 	pathParts = pathInfo['path'].split('/')
 	pathInfo['dirname'] = '/'.join(pathParts[:-1]) + '/'
 	pathInfo['basename'] = pathParts[-1]
-	pathInfo['extension'] = normalizeExtension(pathParts[-1].split('.')[-1].strip().lower())
+	pathInfo['extension'] = pathParts[-1].split('.')[-1].strip().lower()
 	pathInfo['name'] = pathInfo['basename'].replace('.' + pathInfo['extension'], '')
 	pathInfo['filebase'] = pathInfo['path'].replace('.' + pathInfo['extension'], '')
 

@@ -73,13 +73,13 @@ class test(tryout.TestSuite):
 		options = {'root': 'test'}
 		info = cOS.getPathInfo('test/test-cOS/four.js', options)
 
-		self.assertEqual(info['basename'], 'four.js',)
-		self.assertEqual(info['extension'], 'js',)
-		self.assertEqual(info['name'], 'four',)
-		self.assertEqual(info['dirname'], 'test/test-cOS/',)
-		self.assertEqual(info['path'], 'test/test-cOS/four.js',)
-		self.assertEqual(info['root'], 'test/',)
-		self.assertEqual(info['relativeDirname'], './test-cOS/',)
+		self.assertEqual(info['basename'], 'four.js')
+		self.assertEqual(info['extension'], 'js')
+		self.assertEqual(info['name'], 'four')
+		self.assertEqual(info['dirname'], 'test/test-cOS/')
+		self.assertEqual(info['path'], 'test/test-cOS/four.js')
+		self.assertEqual(info['root'], 'test/')
+		self.assertEqual(info['relativeDirname'], './test-cOS/')
 		self.assertEqual(info['relativePath'], './test-cOS/four.js')
 		self.assertEqual(info['filebase'], 'test/test-cOS/four')
 
@@ -127,10 +127,12 @@ class test(tryout.TestSuite):
 		self.assertEqual(res, '/path/to/file/')
 
 	def normalizeExtension(self):
-		norm = cOS.normalizeExtension('Mb')
-		self.assertEqual(norm, 'mb')
-		norm = cOS.normalizeExtension('.mb')
-		self.assertEqual(norm, 'mb')
+		norm = cOS.normalizeExtension('some/path.ABC')
+		self.assertEqual(norm, 'some/path.abc')
+		norm = cOS.normalizeExtension('some/path.abc')
+		self.assertEqual(norm, 'some/path.abc')
+		norm = cOS.normalizeExtension('Some/Path with/spaces.ABC')
+		self.assertEqual(norm, 'Some/Path with/spaces.abc')
 
 	def upADir(self):
 		parent = cOS.upADir('path/to/a/file/')
