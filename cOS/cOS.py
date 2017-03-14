@@ -757,6 +757,7 @@ def runCommand(processArgs,env=None):
 # returns the output (STDOUT + STDERR) of a given command
 def getCommandOutput(command, cwd=None, shell=True, **kwargs):
 	try:
+		print 'command:\n', command
 		output = subprocess.check_output(
 			command,
 			cwd=cwd,
