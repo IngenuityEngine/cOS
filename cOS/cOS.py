@@ -334,6 +334,12 @@ def getFrameRangeText(filename):
 		(frameRange['min'], frameRange['max'])
 
 def getFileFromFrameRangeText(fileText):
+	'''
+	Supports 3 methods of import for imageSequences		 +	# Gets frame: 1001 of imageSequence
+ 	Uses cOS getFrameRange to find all images in matching sequence
+ 	Requires filename in format '../image.%04d.png' etc,
+ 	with %04d or other type of specification included in string
+ 	'''
 	filepath = normalizePath(fileText)
 	filePieces = filepath.split(' ')
 
