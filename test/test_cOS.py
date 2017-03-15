@@ -118,6 +118,20 @@ class test(tryout.TestSuite):
 		self.assertEqual(info['min'], 1510)
 		self.assertEqual(info['max'], 1519)
 
+	def validateFrameFile(self):
+		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.%04d.exr 1510-1519')
+		self.assertEqual(frameText, 'sandbox/seq/frame.1510.exr')
+
+		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.%04d.exr')
+		self.assertEqual(frameText, 'sandbox/seq/frame.1510.exr')
+
+		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.1510.exr')
+		self.assertEqual(frameText, 'sandbox/seq/frame.1510.exr')
+
+		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.exr')
+		self.assertEqual(frameText, False)
+
+
 	def removeStartingSlash(self):
 		res = cOS.removeStartingSlash('/path/to/file')
 		self.assertEqual(res, 'path/to/file')
