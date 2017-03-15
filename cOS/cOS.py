@@ -333,6 +333,28 @@ def getFrameRangeText(filename):
 	return filename + ' %d-%d' % \
 		(frameRange['min'], frameRange['max'])
 
+def getFileFromFrameRangeText(fileText):
+	filepath = normalizePath(fileText)
+	filePieces = filepath.split(' ')
+
+	# extracting filename from selection
+	if len(filePieces) == 2 and filePieces[1].split('-')[0].isnumeric():
+		filepath = filePieces[0].replace('%04d', filePieces[1].split('-')[0])
+
+	elif '%04d' in filePieces[0]:
+		frameRangeDict = getFrameRange(fileText)
+		filepath = frameRangeDict['base'].replace('%04d', str(frameRangeDict['min'])) + frameRangeDict['ext']
+
+	elif filePieces[1].split('-')[0].isnumeric():
+		filepath = filePieces[0]
+
+	else:
+		print 'Invalid image sequence!'
+		return
+
+	return filepath
+
+
 # System Operations
 ##################################################
 
@@ -761,7 +783,7 @@ def runCommand(processArgs,env=None):
 	os.system(command)
 
 # returns the output (STDOUT + STDERR) of a given command
-def getCommandOutput(command, cwd=None, shell=True, **kwargs):
+def getCommandOutput(command, cwd=None, shell=True, env=None, **kwargs):
 	try:
 		print 'command:\n', command
 		output = subprocess.check_output(
@@ -769,6 +791,7 @@ def getCommandOutput(command, cwd=None, shell=True, **kwargs):
 			cwd=cwd,
 			stderr=subprocess.STDOUT,
 			shell=shell,
+			env=env,
 			**kwargs)
 		if output and \
 			len(output) > 0 and \
