@@ -238,7 +238,6 @@ class test(tryout.TestSuite):
 		os.system('rm -rf seq')
 		files = cOS.collectFiles('sandbox', 'mb', '')
 		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb']]))
-		#self.assertEqual(set(files), set([cOS.getPathInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb', 'sandbox/testdir1/file1', 'sandbox/testdir1/file2', 'sandbox/testdir1/file3', 'sandbox/testdir2/file1']]))
 		files = cOS.collectFiles('sandbox', 'mb', 'sandbox/file_v001.mb')
 		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/file.mb']]))
 

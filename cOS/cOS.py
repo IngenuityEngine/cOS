@@ -335,7 +335,8 @@ def getFrameRangeText(filename):
 
 def getFileFromFrameRangeText(fileText):
 	'''
-	Supports 3 methods of import for imageSequences		 +	# Gets frame: 1001 of imageSequence
+	Supports 3 methods of import for imageSequences
+	Gets frame: 1001 of imageSequence
  	Uses cOS getFrameRange to find all images in matching sequence
  	Requires filename in format '../image.%0[1-9]d.png' etc,
  	with %0[1-9]d or other type of specification included in string
