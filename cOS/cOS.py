@@ -358,8 +358,8 @@ def getFileFromFrameRangeText(fileText):
 
 		padding = filePieces[0].split('.')[-2]
 		frameRangeDict = getFrameRange(fileText)
-		print str(frameRangeDict)
-		filepath = frameRangeDict['base'].replace(padding, str(frameRangeDict['min'])) + frameRangeDict['ext']
+		frame = padding % int(frameRangeDict['min'])
+		filepath = frameRangeDict['base'].replace(padding, frame) + frameRangeDict['ext']
 
 	elif len(filePieces) == 1 and \
 		unicode(filePieces[0].split('.')[-2]).isnumeric():
