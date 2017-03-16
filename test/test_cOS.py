@@ -14,21 +14,23 @@ class test(tryout.TestSuite):
 
 	def setUp(self):
 		os.system('rm -rf sandbox')
-		os.system('mkdir sandbox')
-		os.system('touch sandbox/file_v001.mb')
-		os.system('touch sandbox/file.mb')
+		os.mkdir('sandbox')
+		open('sandbox/file_v001.mb', 'w')
+		open('sandbox/file.mb', 'w')
 		os.mkdir('sandbox/sandboxSubdir')
-		os.system('touch sandbox/sandboxSubdir/file1.txt')
+		open('sandbox/sandboxSubdir/file1.txt', 'w')
 		os.mkdir('sandbox/testdir1')
 		os.mkdir('sandbox/testdir2')
-		os.system('touch sandbox/testdir1/file1')
-		os.system('touch sandbox/testdir1/file2')
-		os.system('touch sandbox/testdir1/file3')
-		os.system('touch sandbox/testdir2/file1')
+		open('sandbox/testdir1/file1', 'w')
+		open('sandbox/testdir1/file2', 'w')
+		open('sandbox/testdir1/file3', 'w')
+		open('sandbox/testdir2/file1', 'w')
 		os.mkdir('sandbox/seq')
 		os.mkdir('sandbox/emptyDir')
 		for i in range(10):
-			os.system('touch sandbox/seq/frame.%04d.exr' % (i + 1510))
+			open('sandbox/seq/frame.%04d.exr' % (i + 1510), 'w')
+
+		open('sandbox/seq/newFrame.0001.exr', 'w')
 
 	def tearDown(self):
 		os.system('rm -rf sandbox')
@@ -117,6 +119,20 @@ class test(tryout.TestSuite):
 		info = cOS.getFrameRange('sandbox/seq/frame.%04d.exr')
 		self.assertEqual(info['min'], 1510)
 		self.assertEqual(info['max'], 1519)
+
+	def validateFrameFile(self):
+		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.%04d.exr 1510-1519')
+		self.assertEqual(frameText, 'sandbox/seq/frame.1510.exr')
+
+		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/newFrame.%04d.exr')
+		self.assertEqual(frameText, 'sandbox/seq/newFrame.0001.exr')
+
+		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.1510.exr')
+		self.assertEqual(frameText, 'sandbox/seq/frame.1510.exr')
+
+		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.exr')
+		self.assertEqual(frameText, False)
+
 
 	def removeStartingSlash(self):
 		res = cOS.removeStartingSlash('/path/to/file')
@@ -222,7 +238,6 @@ class test(tryout.TestSuite):
 		os.system('rm -rf seq')
 		files = cOS.collectFiles('sandbox', 'mb', '')
 		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb']]))
-		#self.assertEqual(set(files), set([cOS.getPathInfo(f) for f in ['sandbox/file_v001.mb', 'sandbox/file.mb', 'sandbox/testdir1/file1', 'sandbox/testdir1/file2', 'sandbox/testdir1/file3', 'sandbox/testdir2/file1']]))
 		files = cOS.collectFiles('sandbox', 'mb', 'sandbox/file_v001.mb')
 		self.assertEqual(sorted(files), sorted([cOS.getPathInfo(f) for f in ['sandbox/file.mb']]))
 

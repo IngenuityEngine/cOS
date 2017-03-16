@@ -333,6 +333,47 @@ def getFrameRangeText(filename):
 	return filename + ' %d-%d' % \
 		(frameRange['min'], frameRange['max'])
 
+def getFileFromFrameRangeText(fileText):
+	'''
+	Supports 3 methods of import for imageSequences
+	Gets frame: 1001 of imageSequence
+ 	Uses cOS getFrameRange to find all images in matching sequence
+ 	Requires filename in format '../image.%0[1-9]d.png' etc,
+ 	with %0[1-9]d or other type of specification included in string
+ 	'''
+	filepath = normalizePath(fileText)
+	filePieces = filepath.split(' ')
+
+	paddingRegEx = re.compile('%0[1-9]d')
+
+	if len(filePieces) == 2 and \
+		paddingRegEx.search(filePieces[0]) and \
+		unicode(filePieces[1].split('-')[0]).isnumeric():
+
+		padding = filePieces[0].split('.')[-2]
+		frame = padding % int(filePieces[1].split('-')[0])
+		filepath = filePieces[0].replace(padding, frame)
+
+	elif len(filePieces) == 1 and \
+		paddingRegEx.search(filePieces[0]):
+
+		padding = filePieces[0].split('.')[-2]
+		frameRangeDict = getFrameRange(fileText)
+		frame = padding % int(frameRangeDict['min'])
+		filepath = frameRangeDict['base'].replace(padding, frame) + frameRangeDict['ext']
+
+	elif len(filePieces) == 1 and \
+		unicode(filePieces[0].split('.')[-2]).isnumeric():
+
+		filepath = filePieces[0]
+
+	else:
+		print 'Invalid image sequence!'
+		return False
+
+	return filepath
+
+
 # System Operations
 ##################################################
 
@@ -761,7 +802,7 @@ def runCommand(processArgs,env=None):
 	os.system(command)
 
 # returns the output (STDOUT + STDERR) of a given command
-def getCommandOutput(command, cwd=None, shell=True, **kwargs):
+def getCommandOutput(command, cwd=None, shell=True, env=None, **kwargs):
 	try:
 		print 'command:\n', command
 		output = subprocess.check_output(
@@ -769,6 +810,7 @@ def getCommandOutput(command, cwd=None, shell=True, **kwargs):
 			cwd=cwd,
 			stderr=subprocess.STDOUT,
 			shell=shell,
+			env=env,
 			**kwargs)
 		if output and \
 			len(output) > 0 and \
