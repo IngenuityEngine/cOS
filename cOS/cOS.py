@@ -699,7 +699,7 @@ def getFiles(path,
 		fileExcludes=[],
 		folderExcludes=[],
 		includeAfterExclude=False,
-		depth=0,
+		depth=-1,
 		fullPath=True):
 	'''
 	if the folder or file include/exclude lists have an *
