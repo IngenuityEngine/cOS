@@ -709,6 +709,11 @@ def getFiles(path,
 
 	'''
 
+	fileIncludes = ensureArray(fileIncludes)
+	folderIncludes = ensureArray(folderIncludes)
+	fileExcludes = ensureArray(fileExcludes)
+	folderExcludes = ensureArray(folderExcludes)
+
 	def shouldInclude(path, root, isDir=False):
 		fullPath = unixPath(os.path.join(root, path))
 
