@@ -699,7 +699,8 @@ def getFiles(path,
 		fileExcludes=[],
 		folderExcludes=[],
 		includeAfterExclude=False,
-		depth = -1):
+		depth=0,
+		fullPath=True):
 	'''
 	if the folder or file include/exclude lists have an *
 	getFiles() will use wildcard matching, otherwise it will
@@ -709,10 +710,14 @@ def getFiles(path,
 
 	'''
 
-	fileIncludes = ensureArray(fileIncludes)
-	folderIncludes = ensureArray(folderIncludes)
-	fileExcludes = ensureArray(fileExcludes)
-	folderExcludes = ensureArray(folderExcludes)
+	if fileIncludes:
+		fileIncludes = ensureArray(fileIncludes)
+	if folderIncludes:
+		folderIncludes = ensureArray(folderIncludes)
+	if fileExcludes:
+		fileExcludes = ensureArray(fileExcludes)
+	if folderExcludes:
+		folderExcludes = ensureArray(folderExcludes)
 
 	def shouldInclude(path, root, isDir=False):
 		fullPath = unixPath(os.path.join(root, path))
@@ -756,16 +761,16 @@ def getFiles(path,
 
 # custom walk method with depth
 # link for reference: http://stackoverflow.com/questions/229186/os-walk-without-digging-into-directories-below
-	def walklevel(some_dir, depth=-1):
-		some_dir = some_dir.rstrip(os.path.sep)
-		assert os.path.isdir(some_dir)
-		num_sep = some_dir.count(os.path.sep)
-		for root, dirs, files in os.walk(some_dir):
+	def walkLevel(directory, depth=-1):
+		directory = directory.rstrip(os.path.sep)
+		assert os.path.isdir(directory)
+		numSeperators = directory.count(os.path.sep)
+		for root, dirs, files in os.walk(directory):
 			dirs[:] = [d for d in dirs if shouldInclude(d, root, True)]
 			yield root, dirs, files
-			num_sep_this = root.count(os.path.sep)
+			currentSeperators = root.count(os.path.sep)
 			if depth > -1:
-				if num_sep + depth <= num_sep_this:
+				if numSeperators + depth <= currentSeperators:
 					del dirs[:]
 
 	if fileIncludes:
@@ -777,14 +782,29 @@ def getFiles(path,
 	if folderExcludes:
 		folderExcludes = ensureArray(folderExcludes)
 
-	allFiles = []
-	for root, dirs, files in walklevel(path, depth):
-		for f in files:
-			path = unixPath(os.path.join(root, f))
-			if shouldInclude(f, root, False):
-				allFiles.append(path)
+	try:
+		allFiles = []
+		for root, dirs, files in walkLevel(path, depth):
+			for d in dirs:
+				filepath = unixPath(os.path.join(root, d))
+				if shouldInclude(d, root, True):
+					if fullPath:
+						allFiles.append(filepath)
+					else:
+						allFiles.append(filepath.replace(path, ''))
 
-	return allFiles
+			for f in files:
+				filepath = unixPath(os.path.join(root, f))
+				if shouldInclude(f, root, False):
+					if fullPath:
+						allFiles.append(filepath)
+					else:
+						allFiles.append(filepath.replace(path, ''))
+
+		return allFiles
+	except:
+		print 'folder not found:', path
+		return []
 
 # Processes
 ##################################################
@@ -1176,7 +1196,7 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	pass
+	print getFiles('R:/868_Lorimer/Workspaces')
 	# filename = 'r:/Blackish_s03/Final_Renders/BLA_308/EXR_Linear/BLA_308_018_020_v0007/BLA_308_018_020_v0007.%04.exr 1000-1048'
 	# print isFrameRangeText(filename)
 	# basePath = 'C:/Program Files/Chaos Group/V-Ray/Maya 2016 for x64/vray_netinstall_client_setup.bat'
