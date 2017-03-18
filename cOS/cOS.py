@@ -564,7 +564,7 @@ def copyTree(src, dst, symlinks=False, ignore=None):
 	'''
 	dir_util.copy_tree(src, dst)
 
-def copyImageSequence(src, dst, rangeInfo=False):
+def copyFileSequence(src, dst, rangeInfo=False, echo=False):
 	if '%' not in src:
 		print 'No frame padding in:', src
 		return False
@@ -574,9 +574,19 @@ def copyImageSequence(src, dst, rangeInfo=False):
 
 	if not rangeInfo:
 		rangeInfo = getFrameRange(src)
-	for i in range(rangeInfo['min'], rangeInfo['max'])
-		pass
+	result = True
+	for i in range(rangeInfo['min'], rangeInfo['max'] + 1):
+		sourcePath = src % i
+		destPath = dst % i
+		if echo:
+			print sourcePath, '  >  ', destPath
+		try:
+			shutil.copyfile(sourcePath, destPath)
+		except:
+			print 'Could not copy:', sourcePath, destPath
+			result = False
 
+	return result
 
 def rename (oldPath, newPath, callback):
 	oldPath = normalizePath(oldPath)
