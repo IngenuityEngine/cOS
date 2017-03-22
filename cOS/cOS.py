@@ -333,7 +333,7 @@ def getFrameRangeText(filename):
 	return filename + ' %d-%d' % \
 		(frameRange['min'], frameRange['max'])
 
-def get1stFileFromFrameRangeText(fileText):
+def getFirstFileFromFrameRangeText(fileText):
 	'''
 	Supports 3 methods of import for imageSequences
 	Gets frame: 1001 of imageSequence
