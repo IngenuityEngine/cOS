@@ -358,7 +358,7 @@ def getFrameRangeText(filename):
 	return filename + ' %d-%d' % \
 		(frameRange['min'], frameRange['max'])
 
-def getFileFromFrameRangeText(fileText):
+def getFirstFileFromFrameRangeText(fileText):
 	'''
 	Supports 3 methods of import for imageSequences
 	Gets frame: 1001 of imageSequence
@@ -694,7 +694,7 @@ def collectAllFiles(searchDir):
 					filesToReturn.append(getPathInfo(name))
 	return filesToReturn
 
-def collapseFiles(fileList):
+def collapseFiles(fileList, imageSequencesOnly=False):
 	fileList.sort()
 	collapsedList = []
 
@@ -703,7 +703,8 @@ def collapseFiles(fileList):
 	while i < len(fileList):
 		filePieces = fileList[i].split('.')
 		if len(filePieces) <= 2:
-			collapsedList.append(fileList[i])
+			if not imageSequencesOnly:
+				collapsedList.append(fileList[i])
 			i += 1
 		else:
 			try:
