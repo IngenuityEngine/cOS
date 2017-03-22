@@ -121,16 +121,16 @@ class test(tryout.TestSuite):
 		self.assertEqual(info['max'], 1519)
 
 	def validateFrameFile(self):
-		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.%04d.exr 1510-1519')
+		frameText = cOS.getFirstFileFromFrameRangeText('sandbox/seq/frame.%04d.exr 1510-1519')
 		self.assertEqual(frameText, 'sandbox/seq/frame.1510.exr')
 
-		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/newFrame.%04d.exr')
+		frameText = cOS.getFirstFileFromFrameRangeText('sandbox/seq/newFrame.%04d.exr')
 		self.assertEqual(frameText, 'sandbox/seq/newFrame.0001.exr')
 
-		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.1510.exr')
+		frameText = cOS.getFirstFileFromFrameRangeText('sandbox/seq/frame.1510.exr')
 		self.assertEqual(frameText, 'sandbox/seq/frame.1510.exr')
 
-		frameText = cOS.getFileFromFrameRangeText('sandbox/seq/frame.exr')
+		frameText = cOS.getFirstFileFromFrameRangeText('sandbox/seq/frame.exr')
 		self.assertEqual(frameText, False)
 
 
