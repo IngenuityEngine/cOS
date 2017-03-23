@@ -750,6 +750,7 @@ def getFiles(path,
 		folderExcludes=[],
 		includeAfterExclude=False,
 		depth=-1,
+		filesOnly=False,
 		fullPath=True):
 	'''
 	if the folder or file include/exclude lists have an *
@@ -837,7 +838,7 @@ def getFiles(path,
 		for root, dirs, files in walkLevel(path, depth):
 			for d in dirs:
 				filepath = unixPath(os.path.join(root, d))
-				if shouldInclude(d, root, True):
+				if not filesOnly and shouldInclude(d, root, True):
 					if fullPath:
 						allFiles.append(filepath)
 					else:
