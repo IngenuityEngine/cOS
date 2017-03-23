@@ -177,6 +177,10 @@ def getHighestVersionFilePath(root, extension=''):
 	highestVersion = -99999999
 	path = False
 	for f in glob.iglob(root + '*' + extension):
+		# keeps .nk~ etc from showing up
+		if not f.endswith(extension):
+			continue
+
 		fileVersion = getVersion(f)
 		if fileVersion > highestVersion:
 			path = unixPath(f)
@@ -258,6 +262,23 @@ def getFrameRange(path):
 	Parameters:
 		path - Generic file in sequence. Ex. text/frame.%04d.exr
 	'''
+
+	# handle paths padded with image.####.exr instead of image.%04d.exr
+	# (nuke if people have bad settings)
+	if '#' in path:
+		initPos = i = path.index('#')
+		while path[i] == '#':
+			i += 1
+		padding = i - initPos
+		path = path.replace('#' * padding, '%0' + str(padding) + 'd')
+
+	# handle paths padded with image.$F4.exr instead of image.%04d.exr
+	# (houdini)
+	if '$F' in path:
+		initPos = i = path.index('$F')
+		padding = path[initPos + 1]
+		path = path.replace('$F' + padding, '%0' + padding + 'd')
+
 	baseInFile, ext = os.path.splitext(path)
 	# fix: this is done terribly, should be far more generic
 	percentLoc = baseInFile.find('%')
@@ -297,8 +318,12 @@ def getFrameRange(path):
 			'max': maxFrame,
 			'duration': duration,
 			'base': baseInFile,
+			'baseUnpadded': baseInFile[:percentLoc],
 			'ext': ext,
 			'complete': duration == count,
+			'path': path,
+			'padding': padding,
+			'paddingString': '%0' + str(padding) + 'd',
 		}
 
 def getSequenceBaseName(filename):
@@ -538,6 +563,30 @@ def copyTree(src, dst, symlinks=False, ignore=None):
 	Copies the src directory tree to the destination.
 	'''
 	dir_util.copy_tree(src, dst)
+
+def copyFileSequence(src, dst, rangeInfo=False, echo=False):
+	if '%' not in src:
+		print 'No frame padding in:', src
+		return False
+	if '%' not in dst:
+		print 'No frame padding in:', dst
+		return False
+
+	if not rangeInfo:
+		rangeInfo = getFrameRange(src)
+	result = True
+	for i in range(rangeInfo['min'], rangeInfo['max'] + 1):
+		sourcePath = src % i
+		destPath = dst % i
+		if echo:
+			print sourcePath, '  >  ', destPath
+		try:
+			shutil.copyfile(sourcePath, destPath)
+		except:
+			print 'Could not copy:', sourcePath, destPath
+			result = False
+
+	return result
 
 def rename (oldPath, newPath, callback):
 	oldPath = normalizePath(oldPath)
@@ -869,6 +918,14 @@ def waitOnProcess(process,
 	if not loggingFunc:
 		def loggingFunc(*args):
 			print ' '.join([str(arg) for arg in args])
+
+	if not checkInFunc:
+		def checkInFunc(*args):
+			return True
+
+	if not checkErrorFunc:
+		def checkErrorFunc(*args):
+			return True
 
 	def queueOutput(out, outQueue):
 		if out:
