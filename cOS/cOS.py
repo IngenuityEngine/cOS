@@ -709,7 +709,7 @@ def collapseFiles(fileList, imageSequencesOnly=False):
 		else:
 			try:
 				int(filePieces[-2])
-				fileSections = fileList[i].partition(filePieces[-2])
+				fileSections = fileList[i].split('.')
 				leftFileSection = fileSections[0]
 				rightFileSection = fileSections[2]
 				j = i
@@ -718,15 +718,14 @@ def collapseFiles(fileList, imageSequencesOnly=False):
 					rightFileSection == fileSections[2]:
 					j+=1
 					try:
-						filePiece = fileList[j].split('.')[-2]
-						newFileSections = fileList[j].partition(filePiece)
-						leftFileSection = newFileSections[0]
-						rightFileSection = newFileSections[2]
+						newFilePieces = fileList[j].split('.')
+						leftFileSection = newFilePieces[0]
+						rightFileSection = newFilePieces[2]
 					except IndexError:
 						pass
 
 				collapsedList.append(fileSections[0] +
-									'%0' + str(len(fileSections[1])) + 'd' +
+									'.%0' + str(len(fileSections[1])) + 'd.' +
 									fileSections[2] + ' ' +
 									str(int(filePieces[-2])) + '-' +
 									str(int(filePieces[-2]) + j - i - 1))
@@ -1255,7 +1254,8 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	print getFiles('R:/868_Lorimer/Workspaces')
+	allFiles = getFiles('R:/Geostorm/Deliverables/Movie/2017_03_28')
+	print '\n'.join(collapseFiles(allFiles))
 	# filename = 'r:/Blackish_s03/Final_Renders/BLA_308/EXR_Linear/BLA_308_018_020_v0007/BLA_308_018_020_v0007.%04.exr 1000-1048'
 	# print isFrameRangeText(filename)
 	# basePath = 'C:/Program Files/Chaos Group/V-Ray/Maya 2016 for x64/vray_netinstall_client_setup.bat'
