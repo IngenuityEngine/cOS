@@ -588,7 +588,7 @@ def copyFileSequence(src, dst, rangeInfo=False, echo=False):
 
 	return result
 
-def rename (oldPath, newPath, callback):
+def rename(oldPath, newPath):
 	oldPath = normalizePath(oldPath)
 	newPath = normalizePath(newPath)
 	os.rename(oldPath, newPath)
