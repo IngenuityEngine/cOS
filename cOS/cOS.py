@@ -9,6 +9,7 @@ import re
 import fnmatch
 import Queue
 import threading
+import getpass
 
 try:
 	import psutil
@@ -599,6 +600,9 @@ def cwd():
 	'''
 	return normalizeDir(os.getcwd())
 
+def getOSUsername():
+	return getpass.getuser()
+
 def getUserHome():
 	userHome = os.environ.get('HOME') or os.environ.get('HOMEPATH') or os.environ.get('USERPROFILE')
 	return normalizeDir(userHome)
@@ -963,7 +967,7 @@ def waitOnProcess(process,
 	def getQueueContents(queue, printContents=True):
 		contents = ''
 		lines = 0
-		maxLines = 200
+		maxLines = 500
 		while not queue.empty() and lines < maxLines:
 			line = queue.get_nowait()
 			contents += line
