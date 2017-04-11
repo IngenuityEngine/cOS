@@ -1140,13 +1140,13 @@ def isWindows():
 
 def isLinux():
 	'''
-	Returns whether or not the machine running the command is Windows.
+	Returns whether or not the machine running the command is Linux.
 	'''
 	return sys.platform.startswith('linux')
 
 def isMac():
 	'''
-	Returns whether or not the machine running the command is Windows.
+	Returns whether or not the machine running the command is Mac.
 	'''
 	return sys.platform.startswith('darwin')
 
