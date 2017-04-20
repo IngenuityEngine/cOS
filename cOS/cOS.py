@@ -10,6 +10,7 @@ import fnmatch
 import Queue
 import threading
 import getpass
+import platform
 
 try:
 	import psutil
@@ -605,6 +606,20 @@ def getOSUsername():
 		return os.getenv('USER')
 	else:
 		return getpass.getuser()
+
+def getComputerName():
+	return platform.node()
+
+def setComputerName(computerName):
+	currentName = platform.node()
+	if isWindows():
+		getCommandOutput('wmic computersystem where caption="'+ currentName + '" rename' + computerName)
+
+	elif isLinux():
+		getCommandOutput('hostnamectl set-hostname "' + computerName + '"')
+
+	else:
+		raise Exception('Invalid OS')
 
 def getUserHome():
 	userHome = os.environ.get('HOME') or os.environ.get('HOMEPATH') or os.environ.get('USERPROFILE')
