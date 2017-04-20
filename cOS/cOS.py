@@ -613,7 +613,7 @@ def getComputerName():
 def setComputerName(computerName):
 	currentName = platform.node()
 	if isWindows():
-		getCommandOutput('wmic computersystem where caption="'+ currentName + '" rename' + computerName)
+		getCommandOutput('wmic computersystem where caption="'+ currentName + '" rename ' + computerName)
 
 	elif isLinux():
 		getCommandOutput('hostnamectl set-hostname "' + computerName + '"')
