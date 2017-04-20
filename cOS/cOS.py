@@ -10,6 +10,7 @@ import fnmatch
 import Queue
 import threading
 import getpass
+import platform
 
 try:
 	import psutil
@@ -589,7 +590,7 @@ def copyFileSequence(src, dst, rangeInfo=False, echo=False):
 
 	return result
 
-def rename (oldPath, newPath, callback):
+def rename(oldPath, newPath):
 	oldPath = normalizePath(oldPath)
 	newPath = normalizePath(newPath)
 	os.rename(oldPath, newPath)
@@ -605,6 +606,20 @@ def getOSUsername():
 		return os.getenv('USER')
 	else:
 		return getpass.getuser()
+
+def getComputerName():
+	return platform.node()
+
+def setComputerName(computerName):
+	currentName = platform.node()
+	if isWindows():
+		getCommandOutput('wmic computersystem where caption="'+ currentName + '" rename ' + computerName)
+
+	elif isLinux():
+		getCommandOutput('hostnamectl set-hostname "' + computerName + '"')
+
+	else:
+		raise Exception('Invalid OS')
 
 def getUserHome():
 	userHome = os.environ.get('HOME') or os.environ.get('HOMEPATH') or os.environ.get('USERPROFILE')
@@ -1143,13 +1158,13 @@ def isWindows():
 
 def isLinux():
 	'''
-	Returns whether or not the machine running the command is Windows.
+	Returns whether or not the machine running the command is Linux.
 	'''
 	return sys.platform.startswith('linux')
 
 def isMac():
 	'''
-	Returns whether or not the machine running the command is Windows.
+	Returns whether or not the machine running the command is Mac.
 	'''
 	return sys.platform.startswith('darwin')
 
