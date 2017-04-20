@@ -601,7 +601,10 @@ def cwd():
 	return normalizeDir(os.getcwd())
 
 def getOSUsername():
-	return getpass.getuser()
+	if isLinux():
+		return os.getenv('USER')
+	else:
+		return getpass.getuser()
 
 def getUserHome():
 	userHome = os.environ.get('HOME') or os.environ.get('HOMEPATH') or os.environ.get('USERPROFILE')
