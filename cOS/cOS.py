@@ -11,6 +11,7 @@ import Queue
 import threading
 import getpass
 import platform
+import multiprocessing
 
 try:
 	import psutil
@@ -1231,6 +1232,9 @@ def getTotalRam():
 		return float(stat.ullTotalPhys) / 1024000000
 	else:
 		return 0
+
+def numberOfProcesses():
+	return multiprocessing.cpu_count()
 
 def findCaseInsensitiveFilename(path, mustExist=False):
 	'''
