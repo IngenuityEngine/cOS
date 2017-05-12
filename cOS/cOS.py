@@ -13,6 +13,7 @@ import getpass
 import platform
 import multiprocessing
 
+# import psutil
 try:
 	import psutil
 except:
@@ -748,10 +749,10 @@ def collapseFiles(fileList, imageSequencesOnly=False):
 				j = i
 
 				# keep incrementing second loop till left and right sections are the same
-				while j<len(fileList) and \
-					leftFileSection==fileSections[0] and \
+				while j < len(fileList) and \
+					leftFileSection == fileSections[0] and \
 					rightFileSection == fileSections[2]:
-					j+=1
+					j += 1
 					try:
 						# [abc_xyz][1002][png]
 						newFilePieces = fileList[j].split('.')
@@ -774,7 +775,7 @@ def collapseFiles(fileList, imageSequencesOnly=False):
 
 			except ValueError:
 				collapsedList.append(fileList[i])
-				i+=1
+				i += 1
 
 	return collapsedList
 
