@@ -402,6 +402,19 @@ def getFirstFileFromFrameRangeText(fileText):
 
 	return filepath
 
+def openFolderInBrowser(path):
+	if os.path.isfile(path):
+		path = path.rpartition('/')[0]
+
+	if isWindows():
+		os.startfile(path)
+
+	if isLinux():
+		subprocess.check_call(['xdg-open', '--', path])
+
+	if isMac():
+		subprocess.check_call(['open', '--', path])
+
 
 # System Operations
 ##################################################
@@ -1299,8 +1312,9 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	allFiles = getFiles('R:/Geostorm/Deliverables/Movie/2017_03_28', fileExcludes = ['.*'])
-	print '\n'.join(collapseFiles(allFiles))
+	openFolderInBrowser('C:/Hub.xml')
+	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
+	# print '\n'.join(collapseFiles(allFiles))
 	# filename = 'r:/Blackish_s03/Final_Renders/BLA_308/EXR_Linear/BLA_308_018_020_v0007/BLA_308_018_020_v0007.%04.exr 1000-1048'
 	# print isFrameRangeText(filename)
 	# basePath = 'C:/Program Files/Chaos Group/V-Ray/Maya 2016 for x64/vray_netinstall_client_setup.bat'
