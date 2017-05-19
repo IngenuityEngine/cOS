@@ -402,7 +402,7 @@ def getFirstFileFromFrameRangeText(fileText):
 
 	return filepath
 
-def openFolderInBrowser(path):
+def openFileBrowser(path):
 	if os.path.isfile(path):
 		path = path.rpartition('/')[0]
 
@@ -1312,7 +1312,7 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	openFolderInBrowser('C:/Hub.xml')
+	openFileBrowser('C:/trash/replaceFileText.py')
 	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
 	# print '\n'.join(collapseFiles(allFiles))
 	# filename = 'r:/Blackish_s03/Final_Renders/BLA_308/EXR_Linear/BLA_308_018_020_v0007/BLA_308_018_020_v0007.%04.exr 1000-1048'
