@@ -48,9 +48,6 @@ def removeStartingSlash(path):
 	Removes backslashes and forward slashes from the
 	beginning of directory names.
 	'''
-	if not path:
-		return
-
 	if (path[0] == '\\' or path[0] == '/'):
 		path = path[1:]
 	return path
@@ -60,9 +57,6 @@ def normalizeDir(path):
 	Dirs always use forward slashses and have a trailing slash.
 	'''
 	# lower case drive leters
-	if not path:
-		return
-
 	if path[1] == ':':
 		path = path[0].lower() + path[1:]
 
@@ -84,9 +78,6 @@ def unixPath(path):
 	removes successive slashes, ex \\ or \/
 	'''
 	# lower case drive leters
-	if not path:
-		return
-
 	if len(path) > 1 and path[1] == ':':
 		path = path[0].lower() + path[1:]
 
