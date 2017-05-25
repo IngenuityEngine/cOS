@@ -167,11 +167,14 @@ class test(tryout.TestSuite):
 				os.path.dirname(os.path.realpath(__file__)),
 				'../')
 			)
+		print root
 
 		print 'test one:'
 		files = cOS.getFiles(root,
 			fileIncludes='*.py',
-			folderExcludes=['.git','node_modules']
+			folderExcludes=['.git','node_modules'],
+			filesOnly=True
+
 		)
 		print '\n'.join(files)
 		self.assertTrue(len(files) > 4)
@@ -181,6 +184,7 @@ class test(tryout.TestSuite):
 		files = cOS.getFiles(root,
 			fileIncludes=['__init__.py'],
 			fileExcludes=['*'],
+			filesOnly=True,
 		)
 		print '\n'.join(files)
 		self.assertTrue(len(files) == 4)
@@ -189,6 +193,7 @@ class test(tryout.TestSuite):
 		files = cOS.getFiles(root,
 			fileExcludes=['.*'],
 			folderExcludes=['.*', 'node_modules'],
+			filesOnly=True,
 		)
 		print '\n'.join(files)
 		self.assertTrue(len(files) > 4)
@@ -203,6 +208,7 @@ class test(tryout.TestSuite):
 			fileExcludes=['*.py', '.git*'],
 			folderExcludes=['.git','node_modules'],
 			includeAfterExclude=True,
+			filesOnly=True,
 		)
 		print '\n'.join(files)
 		self.assertTrue(len(files) > 4)
