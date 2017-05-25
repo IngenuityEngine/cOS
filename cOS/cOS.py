@@ -78,8 +78,6 @@ def unixPath(path):
 	removes successive slashes, ex \\ or \/
 	'''
 	# lower case drive leters
-	if not path:
-		return ''
 	if len(path) > 1 and path[1] == ':':
 		path = path[0].lower() + path[1:]
 
@@ -267,21 +265,7 @@ def getFrameRange(path):
 		path - Generic file in sequence. Ex. text/frame.%04d.exr
 	'''
 
-	# handle paths padded with image.####.exr instead of image.%04d.exr
-	# (nuke if people have bad settings)
-	if '#' in path:
-		initPos = i = path.index('#')
-		while path[i] == '#':
-			i += 1
-		padding = i - initPos
-		path = path.replace('#' * padding, '%0' + str(padding) + 'd')
-
-	# handle paths padded with image.$F4.exr instead of image.%04d.exr
-	# (houdini)
-	if '$F' in path:
-		initPos = i = path.index('$F')
-		padding = path[initPos + 1]
-		path = path.replace('$F' + padding, '%0' + padding + 'd')
+	path = normalizeFramePadding(path)
 
 	baseInFile, ext = os.path.splitext(path)
 	# fix: this is done terribly, should be far more generic
@@ -329,6 +313,26 @@ def getFrameRange(path):
 			'padding': padding,
 			'paddingString': '%0' + str(padding) + 'd',
 		}
+
+def normalizeFramePadding(filepath):
+	fileInfo = getPathInfo(filepath)
+
+	if len(fileInfo['basename'].split('.')) >= 3:
+		framePadding = fileInfo['basename'].split('.')[-2]
+		hashReg = re.compile('#+')
+		dollarReg = re.compile('\$F[1-9]')
+		if hashReg.match(framePadding):
+			padding = framePadding.count('#')
+
+		elif dollarReg.match(framePadding):
+			padding = framePadding[-1]
+
+		else:
+			return filepath
+
+		newPadding = '%0' + str(padding) + 'd'
+		return filepath.replace(framePadding, newPadding)
+
 
 def getSequenceBaseName(filename):
 	regex_baseName = re.compile('(.+)[_\.][0-9]+\.[a-z0-9]+$')
@@ -1312,7 +1316,8 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	openFileBrowser('C:/trash/replaceFileText.py')
+	pass
+	# openFileBrowser('C:/trash/replaceFileText.py')
 	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
 	# print '\n'.join(collapseFiles(allFiles))
 	# filename = 'r:/Blackish_s03/Final_Renders/BLA_308/EXR_Linear/BLA_308_018_020_v0007/BLA_308_018_020_v0007.%04.exr 1000-1048'
