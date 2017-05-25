@@ -1316,11 +1316,8 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
+	pass
 	# openFileBrowser('C:/trash/replaceFileText.py')
-	print normalizeFramePadding('C:/Trash/abc.####.png')
-	print normalizeFramePadding('C:/Trash/abc.$F6.png')
-	print normalizeFramePadding('C:/Trash/abc.%04d.png')
-	print normalizeFramePadding('C:/Trash/abc.p3q0#$93bhn.png')
 	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
 	# print '\n'.join(collapseFiles(allFiles))
 	# filename = 'r:/Blackish_s03/Final_Renders/BLA_308/EXR_Linear/BLA_308_018_020_v0007/BLA_308_018_020_v0007.%04.exr 1000-1048'
