@@ -269,7 +269,9 @@ class test(tryout.TestSuite):
 
 	def normalizeFramePadding(self):
 		self.assertEqual(cOS.normalizeFramePadding('C:/Trash/abc.####.png'), 'C:/Trash/abc.%04d.png')
+		self.assertEqual(cOS.normalizeFramePadding('C:/Trash/abc_####.png'), 'C:/Trash/abc_%04d.png')
 		self.assertEqual(cOS.normalizeFramePadding('C:/Trash/abc.$F6.png'), 'C:/Trash/abc.%06d.png')
+		self.assertEqual(cOS.normalizeFramePadding('C:/Trash/abc_$F6.png'), 'C:/Trash/abc_%06d.png')
 		self.assertEqual(cOS.normalizeFramePadding('C:/Trash/abc.%04d.png'), 'C:/Trash/abc.%04d.png')
 		self.assertEqual(cOS.normalizeFramePadding('C:/Trash/abc.p3q0#$93bhn.png'), 'C:/Trash/abc.p3q0#$93bhn.png')
 		self.assertEqual(cOS.normalizeFramePadding('C:/Trash/abc.png'), 'C:/Trash/abc.png')

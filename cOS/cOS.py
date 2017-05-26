@@ -316,13 +316,20 @@ def getFrameRange(path):
 
 def normalizeFramePadding(filepath):
 	fileInfo = getPathInfo(filepath)
-
-	if not len(fileInfo['basename'].split('.')) >= 3:
-		return filepath
-
-	framePadding = fileInfo['basename'].split('.')[-2]
 	hashReg = re.compile('#+')
 	dollarReg = re.compile('\$F[1-9]')
+
+	if not hashReg.findall(fileInfo['basename']) and \
+		not dollarReg.findall(fileInfo['basename']):
+		return filepath
+
+	if '.' in fileInfo['name']:
+		framePadding = fileInfo['name'].split('.')[-1]
+	elif '_' in fileInfo['name']:
+		framePadding = fileInfo['name'].split('_')[-1]
+	else:
+		return filepath
+
 	if hashReg.match(framePadding):
 		padding = framePadding.count('#')
 
