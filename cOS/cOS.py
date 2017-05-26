@@ -316,32 +316,23 @@ def getFrameRange(path):
 
 def normalizeFramePadding(filepath):
 	fileInfo = getPathInfo(filepath)
-	hashReg = re.compile('#+')
+	hashReg = re.compile('##+')
 	dollarReg = re.compile('\$F[1-9]')
 
 	if not hashReg.findall(fileInfo['basename']) and \
 		not dollarReg.findall(fileInfo['basename']):
 		return filepath
 
-	if '.' in fileInfo['name']:
-		framePadding = fileInfo['name'].split('.')[-1]
-	elif '_' in fileInfo['name']:
-		framePadding = fileInfo['name'].split('_')[-1]
-	else:
-		return filepath
-
-	if hashReg.match(framePadding):
+	if hashReg.search(filepath):
+		framePadding = hashReg.search(filepath).group()
 		padding = framePadding.count('#')
 
-	elif dollarReg.match(framePadding):
+	elif dollarReg.search(filepath):
+		framePadding = dollarReg.search(filepath).group()
 		padding = framePadding[-1]
-
-	else:
-		return filepath
 
 	newPadding = '%0' + str(padding) + 'd'
 	return filepath.replace(framePadding, newPadding)
-
 
 def getSequenceBaseName(filename):
 	regex_baseName = re.compile('(.+)[_\.][0-9]+\.[a-z0-9]+$')
