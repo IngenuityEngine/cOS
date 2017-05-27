@@ -654,7 +654,7 @@ collectFiles: function(searchPaths, extensions, options, callback)
 						if (err && !options.skipSearchPathsOK)
 						{
 							done(new Error('cOS.collectFiles -> Search path not found: ' +
-								cOS.cwd() + searchPath + err.stack))
+								searchPath + err.stack))
 						}
 						else
 						{
