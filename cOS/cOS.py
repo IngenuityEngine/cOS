@@ -1332,11 +1332,15 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	filenames = [
-		'R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.1016.exr',
-		'R:/Cadaver/Workspaces/CAD/CAD_055_010/render/v017/CAD_055_010_fly.1009.exr',
-		'C:/ie/shepherd/test/renders/v001/vray.0001.exr',
-	]
+	root = 'R:/Cadaver/Workspaces/CAD/CAD_055_010/render/v017/'
+	files = os.listdir(root)
+	files.sort()
+	filenames = [root + f for f in files]
+	# filenames = [
+	# 	'R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.1016.exr',
+	# 	'R:/Cadaver/Workspaces/CAD/CAD_055_010/render/v017/CAD_055_010_fly.1009.exr',
+	# 	'C:/ie/shepherd/test/renders/v001/vray.0001.exr',
+	# ]
 	for filename in filenames:
 		print filename
 		print isValidEXR(filename)
