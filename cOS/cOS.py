@@ -195,7 +195,14 @@ def createVersionedFilename(filename, version, padding=4, extension=''):
 	'''
 	Returns filename with version and extension
 	'''
-	return filename + '_v' + str(version).zfill(padding) + '.' + extension
+	padding = padNumber(version, padding)
+	return filename + '_v' + padding + '.' + extension
+
+def padNumber(number, padding=4):
+	'''
+	Returns padded number
+	'''
+	return str(number).zfill(padding)
 
 # Information
 ##################################################
