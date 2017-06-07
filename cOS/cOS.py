@@ -424,6 +424,37 @@ def openFileBrowser(path):
 	if isMac():
 		subprocess.check_call(['open', '--', path])
 
+def isValidEXR(filename, silent=False):
+	import OpenImageIO
+	image = OpenImageIO.ImageInput.open(filename)
+	if not image:
+		if not silent:
+			print 'Invalid EXR, not found:', filename
+		return False
+	try:
+		spec = image.spec()
+		if spec.tile_width == 0:
+			for y in range(spec.y, spec.y + spec.height):
+				pixels = image.read_scanline (y, spec.z, OpenImageIO.UNKNOWN)
+				if pixels == None:
+					if not silent:
+						print 'ERROR: EXR broken at scanline', y
+					return False
+		return True
+	except Exception as err:
+		if not silent:
+			print err
+		return False
+
+def isValidEXRSequence(paddedFilename, silent=False):
+	frameRange = getFrameRange(paddedFilename)
+	if not frameRange or not frameRange['complete']:
+		return False
+	for f in range(frameRange['min'], frameRange['max'] + 1):
+		if not isValidEXR(frameRange['path'] % f):
+			return False
+	return True
+
 
 # System Operations
 ##################################################
@@ -1321,7 +1352,21 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
-	pass
+	# root = 'R:/Cadaver/Workspaces/CAD/CAD_055_010/render/v017/'
+	# files = os.listdir(root)
+	# files.sort()
+	# filenames = [root + f for f in files]
+	# # filenames = [
+	# # 	'R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.1016.exr',
+	# # 	'R:/Cadaver/Workspaces/CAD/CAD_055_010/render/v017/CAD_055_010_fly.1009.exr',
+	# # 	'C:/ie/shepherd/test/renders/v001/vray.0001.exr',
+	# # ]
+	# for filename in filenames:
+	# 	print filename
+	# 	print isValidEXR(filename)
+
+	print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
+	# pass
 	# openFileBrowser('C:/trash/replaceFileText.py')
 	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
 	# print '\n'.join(collapseFiles(allFiles))
