@@ -488,7 +488,7 @@ def setEnvironmentVariable(key, val, permanent=True):
 		while i < len(lines):
 			if lines[i].startswith(key + '='):
 				# if we've already set the variable
-				# just remove the line
+				# just remove the linereg
 				if found:
 					del lines[i]
 				# otherwise ensure the line is set
@@ -508,6 +508,56 @@ def setEnvironmentVariable(key, val, permanent=True):
 		with open(environmentFile, 'w') as f:
 			for line in lines:
 				f.write(line.replace(' ',''))
+
+def removeEnvironmentVariable(key):
+	'''
+	Deletes environment variable
+	Parameters:
+		key - environment variable
+	'''
+
+	if isWindows():
+		if key in os.environ:
+			os.system('REG delete HKCU\Environment /F /V ' + key)
+
+	# unset variables in the /etc/environment file
+	# on mac and linux
+	# WORK IN PROGRESS
+	# elif isLinux():
+	# 	os.system('export %s=%s' % (key))
+	# 	environmentFile = '/etc/environment'
+	# 	unsetString = key + '\n'
+
+	# 	# read all the lines in
+	# 	with open(environmentFile) as f:
+	# 		lines = f.readlines()
+
+	# 	found = False
+	# 	i = 0
+	# 	while i < len(lines):
+	# 		if lines[i].startswith(key):
+	# 			# if we've already unset the variable
+	# 			# just remove the linereg
+	# 			if found:
+	# 				del lines[i]
+	# 			# otherwise ensure the line is set
+	# 			# to the correct value
+	# 			else:
+	# 				lines[i] = unsetString
+	# 			found = True
+	# 		i += 1
+
+	# 	# if we never found the variable
+	# 	# append a line to set it
+	# 	if not found:
+	# 		lines.append(unsetString)
+
+	# 	# then write all the lines back to the
+	# 	# environmentFile
+	# 	with open(environmentFile, 'w') as f:
+	# 		for line in lines:
+	# 			f.write(line.replace(' ',''))
+
 
 def makeDir(dirname):
 	'''
@@ -1358,7 +1408,8 @@ def main():
 	# 	print filename
 	# 	print isValidEXR(filename)
 
-	print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
+	# print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
+	removeEnvironmentVariable('HOUDINI_VER_MAJOR')
 	# pass
 	# openFileBrowser('C:/trash/replaceFileText.py')
 	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
