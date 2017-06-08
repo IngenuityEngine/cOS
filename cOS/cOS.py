@@ -488,7 +488,7 @@ def setEnvironmentVariable(key, val, permanent=True):
 		while i < len(lines):
 			if lines[i].startswith(key + '='):
 				# if we've already set the variable
-				# just remove the linereg
+				# just remove the line
 				if found:
 					del lines[i]
 				# otherwise ensure the line is set
