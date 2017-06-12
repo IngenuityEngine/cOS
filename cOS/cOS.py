@@ -509,6 +509,56 @@ def setEnvironmentVariable(key, val, permanent=True):
 			for line in lines:
 				f.write(line.replace(' ',''))
 
+def removeEnvironmentVariable(key):
+	'''
+	Deletes environment variable
+	Parameters:
+		key - environment variable
+	'''
+
+	if isWindows():
+		if key in os.environ:
+			os.system('REG delete HKCU\Environment /F /V ' + key)
+
+	# unset variables in the /etc/environment file
+	# on mac and linux
+	# WORK IN PROGRESS
+	# elif isLinux():
+	# 	os.system('export %s=%s' % (key))
+	# 	environmentFile = '/etc/environment'
+	# 	unsetString = key + '\n'
+
+	# 	# read all the lines in
+	# 	with open(environmentFile) as f:
+	# 		lines = f.readlines()
+
+	# 	found = False
+	# 	i = 0
+	# 	while i < len(lines):
+	# 		if lines[i].startswith(key):
+	# 			# if we've already unset the variable
+	# 			# just remove the linereg
+	# 			if found:
+	# 				del lines[i]
+	# 			# otherwise ensure the line is set
+	# 			# to the correct value
+	# 			else:
+	# 				lines[i] = unsetString
+	# 			found = True
+	# 		i += 1
+
+	# 	# if we never found the variable
+	# 	# append a line to set it
+	# 	if not found:
+	# 		lines.append(unsetString)
+
+	# 	# then write all the lines back to the
+	# 	# environmentFile
+	# 	with open(environmentFile, 'w') as f:
+	# 		for line in lines:
+	# 			f.write(line.replace(' ',''))
+
+
 def makeDir(dirname):
 	'''
 	Wrapper for os.makeDir.
