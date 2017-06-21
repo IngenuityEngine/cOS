@@ -210,7 +210,7 @@ def upADir(path):
 	'''
 	Returns the path, up a single directory.
 	'''
-	path = unixPath(path)
+	path = getDirName(path)
 	parts = path.split('/')
 	if (len(parts) < 3):
 		return path
@@ -1408,7 +1408,13 @@ def main():
 	# 	print filename
 	# 	print isValidEXR(filename)
 
-	print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
+	# print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
+	path = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/AER_Airplane_020_v004.%04d.exr'
+	print path
+	print upADir(path)
+	print upADir(upADir(path))
+	print upADir(upADir(upADir(path)))
+
 	# pass
 	# openFileBrowser('C:/trash/replaceFileText.py')
 	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
