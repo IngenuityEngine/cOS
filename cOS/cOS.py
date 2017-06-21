@@ -1407,8 +1407,8 @@ def main():
 	# for filename in filenames:
 	# 	print filename
 	# 	print isValidEXR(filename)
-
-	print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
+	print 'cOS!'
+	# print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
 	# pass
 	# openFileBrowser('C:/trash/replaceFileText.py')
 	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
