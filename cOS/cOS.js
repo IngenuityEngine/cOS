@@ -247,8 +247,6 @@ If being called on a directory, be sure the directory is normalized before calli
 upADir: function(path)
 {
 	path = cOS.getDirName(path)
-	console.log('dir:', path)
-
 	var parts = path.split('/')
 	if (parts.length < 3)
 		return path
