@@ -246,7 +246,6 @@ If being called on a directory, be sure the directory is normalized before calli
 */
 upADir: function(path)
 {
-	path = cOS.getDirName(path)
 	var parts = path.split('/')
 	if (parts.length < 3)
 		return path
@@ -931,4 +930,15 @@ if (!module.parent)
 	console.log(cOS.upADir(cOS.upADir(filename)))
 	console.log(cOS.upADir(cOS.upADir(cOS.upADir(filename))))
 
+	var filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/'
+	console.log(filename)
+	console.log(cOS.upADir(filename))
+	console.log(cOS.upADir(cOS.upADir(filename)))
+	console.log(cOS.upADir(cOS.upADir(cOS.upADir(filename))))
+
+	var filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004'
+	console.log(filename)
+	console.log(cOS.upADir(filename))
+	console.log(cOS.upADir(cOS.upADir(filename)))
+	console.log(cOS.upADir(cOS.upADir(cOS.upADir(filename))))
 }
