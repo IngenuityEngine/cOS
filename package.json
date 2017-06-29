@@ -1,7 +1,7 @@
 {
   "name": "commonos",
   "description": "CommonOS, a unified file library for nodeJS and Python",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "author": {
     "name": "Grant Miller",
     "email": "blented@gmail.com"
