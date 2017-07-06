@@ -246,7 +246,6 @@ If being called on a directory, be sure the directory is normalized before calli
 */
 upADir: function(path)
 {
-	path = cOS.normalizeDir(path)
 	var parts = path.split('/')
 	if (parts.length < 3)
 		return path
@@ -920,4 +919,26 @@ getGlobalModulesDir: function(callback)
 },
 
 // end of module
+}
+
+
+if (!module.parent)
+{
+	var filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/AER_Airplane_020_v004.%04d.exr'
+	console.log(filename)
+	console.log(cOS.upADir(filename))
+	console.log(cOS.upADir(cOS.upADir(filename)))
+	console.log(cOS.upADir(cOS.upADir(cOS.upADir(filename))))
+
+	var filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/'
+	console.log(filename)
+	console.log(cOS.upADir(filename))
+	console.log(cOS.upADir(cOS.upADir(filename)))
+	console.log(cOS.upADir(cOS.upADir(cOS.upADir(filename))))
+
+	var filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004'
+	console.log(filename)
+	console.log(cOS.upADir(filename))
+	console.log(cOS.upADir(cOS.upADir(filename)))
+	console.log(cOS.upADir(cOS.upADir(cOS.upADir(filename))))
 }
