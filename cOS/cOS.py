@@ -1219,10 +1219,11 @@ def startSubprocess(processArgs, env=None, shell=False):
 	command = ''
 	if type(processArgs) == list:
 		# wrap program w/ quotes if it has spaces
-		for i in range(len(processArgs)):	
-			if ' ' in processArgs[i]:
-				if '"' in processArgs[i]:
-					arg = processArgs[i].replace('"', '\\"')
+		for i in range(len(processArgs)):
+			if ' ' in str(processArgs[i]) and \
+			('"' != str(processArgs[i])[0] or '"' != str(processArgs[i])[-1]):
+				if '"' in str(processArgs[i]):
+					arg = str(processArgs[i]).replace('"', '\\"')
 				else:
 					arg = processArgs[i]
 				command += '"' + arg + '" '
@@ -1234,7 +1235,9 @@ def startSubprocess(processArgs, env=None, shell=False):
 	else:
 		print 'command:\n', processArgs
 
-	print processArgs
+	print command
+	if isLinux():
+		command = processArgs
 
 	return psutil.Popen(
 		processArgs,
@@ -1435,4 +1438,13 @@ def main():
 	# print 'total ram:', getTotalRam()
 
 if __name__ == '__main__':
-	main()
+	pass
+	# startSubprocess([
+	# 		'C:/Program Files/Nuke10.0v4/Nuke10.0.exe',
+	# 		 '-V',
+	# 		 '2',
+	# 		 '-t',
+	# 		 'c:/ie/ark/programs/nuke/python/imageConverter.py',
+	# 		 '-options',
+	# 		 '"{\'versionName\': \'prores_4444_Rec709\', \'inputs\': [{\'file\': \'r:/Helix/Final_Renders/HLX_CHE/EXR_Linear/HLX_CHE_0060_v0007/HLX_CHE_0060_v0007.%04d.exr\'}], \'finalOutput\': \'r:/Helix/Final_Renders/HLX_CHE/prores_4444_Rec709/HLX_CHE_0060_v0007/HLX_CHE_0060_v0007.%04d.dpx\', \'assetType\': \'55d3dc66d0b6be24ccbf8a09\', \'outputColorspace\': \'rec709\', \'slateMaskOpacity\': 0.5, \'handles\': 0, \'codec\': \'prores_4444\', \'resize\': \'1\', \'fps\': 23.976, \'slateVersion\': 7, \'asset\': \'596819e55ce5b54513718224\', \'project\': \'5966b2580ecf6625885d2471\', \'updated\': 1499902828, \'applyCDL\': false, \'resizeType\': \'width\', \'applyLUT\': false, \'inputColorspace\': \'linear\', \'slateProject\': \'Helix\', \'versionNumber\': 7, \'createdBy\': \'57a8b002b71ffc7a5b30fed2\', \'updatedBy\': \'57a8b002b71ffc7a5b30fed2\', \'startFrame\': 1000, \'slateBurnIn\': false, \'resizeFilter\': \'Cubic\', \'addContrast\': false, \'name\': \'prores_4444_Rc709\', \'created\': 1499902828, \'enabled\': true, \'deliverable\': true, \'output\': \'c:/temp/HLX_CHE_0060_v0007/HLX_CHE_0060_v0007.%04d.dpx\', \'_id\': \'5966b36c6ba2a020d7d6b9f3\', \'colorTransform\': \'None\', \'conversionType\': \'5966b36c6ba2a020d7d6b9f3\'}"'
+	# 		 ])
