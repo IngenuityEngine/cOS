@@ -448,7 +448,6 @@ def isValidEXRSequence(paddedFilename, silent=False):
 			return False
 	return True
 
-
 # System Operations
 ##################################################
 
@@ -1220,17 +1219,22 @@ def startSubprocess(processArgs, env=None, shell=False):
 	command = ''
 	if type(processArgs) == list:
 		# wrap program w/ quotes if it has spaces
-		if ' ' in processArgs[0]:
-			command = '"' + processArgs[0] + '" '
-		else:
-			command = processArgs[0] + ' '
+		for i in range(len(processArgs)):	
+			if ' ' in processArgs[i]:
+				if '"' in processArgs[i]:
+					arg = processArgs[i].replace('"', '\\"')
+				else:
+					arg = processArgs[i]
+				command += '"' + arg + '" '
+			else:
+				processArgs[i] = str(processArgs[i])
+				command += str(processArgs[i]) + ' '
 
-		for i in range(1, len(processArgs)):
-			processArgs[i] = str(processArgs[i])
-			command += str(processArgs[i]) + ' '
 		print 'command:\n', command
 	else:
 		print 'command:\n', processArgs
+
+	print processArgs
 
 	return psutil.Popen(
 		processArgs,
