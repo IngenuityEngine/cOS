@@ -1217,32 +1217,25 @@ def startSubprocess(processArgs, env=None, shell=False):
 		subprocess_flags = 0
 
 	command = ''
-	if type(processArgs) == list:
+	if type(processArgs) == list and isWindows():
 		for i in range(len(processArgs)):
 		# wrap program w/ quotes if it has spaces unless its already wrapped in quotes
-			if ' ' not in str(processArgs[i]):
-				processArgs[i] = str(processArgs[i])
-				command += str(processArgs[i]) + ' '
+			if ' ' not in str(processArgs[i]) or \
+				(str(processArgs[i]).startswith('"') and str(processArgs[i]).endswith('"')):
+				arg = str(processArgs[i])
 
 			else:
-				if '"' in str(processArgs[i]) and \
-					'"' != str(processArgs[i])[0] and '"' != str(processArgs[i])[-1]:
+				if '"' in str(processArgs[i]):
 					arg = str(processArgs[i]).replace('"', '\\"')
 
-				elif '"' == str(processArgs[i])[0] and '"' == str(processArgs[i])[-1]:
-					arg = str(processArgs[i]) + ' '
+				arg = '"' + str(processArgs[i]) + '"'
 
-				else:
-					arg = '"' + str(processArgs[i]) + '" '
+			command += arg + ' '
 
-				command += arg + ' '
-
-		print 'command:\n', command
 	else:
-		print 'command:\n', processArgs
-
-	if isLinux():
 		command = processArgs
+
+	print 'command:\n', command
 
 	return psutil.Popen(
 		command,
