@@ -1244,9 +1244,8 @@ def startSubprocess(processArgs, env=None, shell=False):
 	if isLinux():
 		command = processArgs
 
-
 	return psutil.Popen(
-		processArgs,
+		command,
 		stdout=subprocess.PIPE,
 		stderr=subprocess.PIPE,
 		env=env,
