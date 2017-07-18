@@ -1237,7 +1237,7 @@ def startSubprocess(processArgs, env=None, shell=False):
 	else:
 		print 'command:\n', processArgs
 		
-	if cOS.isLinux():
+	if isLinux():
 		command = processArgs
 
 	return psutil.Popen(
