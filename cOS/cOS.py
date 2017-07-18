@@ -210,7 +210,7 @@ def upADir(path):
 	'''
 	Returns the path, up a single directory.
 	'''
-	path = unixPath(path)
+	path = getDirName(path)
 	parts = path.split('/')
 	if (len(parts) < 3):
 		return path
