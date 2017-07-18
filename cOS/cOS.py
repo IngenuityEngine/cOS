@@ -1216,8 +1216,8 @@ def startSubprocess(processArgs, env=None, shell=False):
 	else:
 		subprocess_flags = 0
 
-	command = ''
 	if type(processArgs) == list and isWindows():
+		command = ''
 		for i in range(len(processArgs)):
 		# wrap program w/ quotes if it has spaces unless its already wrapped in quotes
 			if ' ' not in str(processArgs[i]) or \
