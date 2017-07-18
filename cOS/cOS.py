@@ -1216,7 +1216,7 @@ def startSubprocess(processArgs, env=None, shell=False):
 	else:
 		subprocess_flags = 0
 
-	if type(processArgs) == list and isWindows():
+	if type(processArgs) == list:
 		command = ''
 		for i in range(len(processArgs)):
 		# wrap program w/ quotes if it has spaces unless its already wrapped in quotes
@@ -1232,10 +1232,13 @@ def startSubprocess(processArgs, env=None, shell=False):
 
 			command += arg + ' '
 
+		print 'command:\n', command
+	
 	else:
+		print 'command:\n', processArgs
+		
+	if cOS.isLinux():
 		command = processArgs
-
-	print 'command:\n', command
 
 	return psutil.Popen(
 		command,
