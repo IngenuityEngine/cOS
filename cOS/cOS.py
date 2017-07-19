@@ -1226,9 +1226,10 @@ def startSubprocess(processArgs, env=None, shell=False):
 
 			else:
 				if '"' in str(processArgs[i]):
-					arg = str(processArgs[i]).replace('"', '\\"')
+					arg = '"' + str(processArgs[i]).replace('"', '\\"') + '"'
 
-				arg = '"' + str(processArgs[i]) + '"'
+				else:
+					arg = '"' + str(processArgs[i]) + '"'
 
 			command += arg + ' '
 
@@ -1238,7 +1239,13 @@ def startSubprocess(processArgs, env=None, shell=False):
 		print 'command:\n', processArgs
 		
 	if isLinux():
-		command = processArgs
+		if type(processArgs) == list:
+			strProcessArgs = []
+			for i in range(len(processArgs)):
+				strProcessArgs.append(str(processArgs[i]))
+			command = strProcessArgs
+		else:
+			command = processArgs
 
 	return psutil.Popen(
 		command,
@@ -1440,12 +1447,4 @@ def main():
 
 if __name__ == '__main__':
 	pass
-	# startSubprocess([
-	# 		'C:/Program Files/Nuke10.0v4/Nuke10.0.exe',
-	# 		 '-V',
-	# 		 '2',
-	# 		 '-t',
-	# 		 'c:/ie/ark/programs/nuke/python/image Converter.py',
-	# 		 '-options',
-	# 		 '"{\'versionName\': \'prores_4444_Rec709\', \'inputs\': [{\'file\': \'r:/Helix/Final_Renders/HLX_CHE/EXR_Linear/HLX_CHE_0060_v0007/HLX_CHE_0060_v0007.%04d.exr\'}], \'finalOutput\': \'r:/Helix/Final_Renders/HLX_CHE/prores_4444_Rec709/HLX_CHE_0060_v0007/HLX_CHE_0060_v0007.%04d.dpx\', \'assetType\': \'55d3dc66d0b6be24ccbf8a09\', \'outputColorspace\': \'rec709\', \'slateMaskOpacity\': 0.5, \'handles\': 0, \'codec\': \'prores_4444\', \'resize\': \'1\', \'fps\': 23.976, \'slateVersion\': 7, \'asset\': \'596819e55ce5b54513718224\', \'project\': \'5966b2580ecf6625885d2471\', \'updated\': 1499902828, \'applyCDL\': false, \'resizeType\': \'width\', \'applyLUT\': false, \'inputColorspace\': \'linear\', \'slateProject\': \'Helix\', \'versionNumber\': 7, \'createdBy\': \'57a8b002b71ffc7a5b30fed2\', \'updatedBy\': \'57a8b002b71ffc7a5b30fed2\', \'startFrame\': 1000, \'slateBurnIn\': false, \'resizeFilter\': \'Cubic\', \'addContrast\': false, \'name\': \'prores_4444_Rc709\', \'created\': 1499902828, \'enabled\': true, \'deliverable\': true, \'output\': \'c:/temp/HLX_CHE_0060_v0007/HLX_CHE_0060_v0007.%04d.dpx\', \'_id\': \'5966b36c6ba2a020d7d6b9f3\', \'colorTransform\': \'None\', \'conversionType\': \'5966b36c6ba2a020d7d6b9f3\'}"'
-	# 		 ])
+	# startSubprocess(['source "/ie/shepherd/shepherd/jobTypes/maya/preRenderLinux.mel";'])
