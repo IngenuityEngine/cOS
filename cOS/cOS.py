@@ -1233,11 +1233,11 @@ def startSubprocess(processArgs, env=None, shell=False):
 
 			command += arg + ' '
 
-		print 'command:\n', command
-	
 	else:
-		print 'command:\n', processArgs
-		
+		command = processArgs
+
+	print 'command:\n', command
+
 	if isLinux():
 		if type(processArgs) == list:
 			strProcessArgs = []
