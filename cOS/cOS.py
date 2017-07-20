@@ -448,7 +448,6 @@ def isValidEXRSequence(paddedFilename, silent=False):
 			return False
 	return True
 
-
 # System Operations
 ##################################################
 
@@ -1217,23 +1216,39 @@ def startSubprocess(processArgs, env=None, shell=False):
 	else:
 		subprocess_flags = 0
 
-	command = ''
 	if type(processArgs) == list:
-		# wrap program w/ quotes if it has spaces
-		if ' ' in processArgs[0]:
-			command = '"' + processArgs[0] + '" '
-		else:
-			command = processArgs[0] + ' '
+		command = ''
+		for i in range(len(processArgs)):
+		# wrap program w/ quotes if it has spaces unless its already wrapped in quotes
+			if ' ' not in str(processArgs[i]) or \
+				(str(processArgs[i]).startswith('"') and str(processArgs[i]).endswith('"')):
+				arg = str(processArgs[i])
 
-		for i in range(1, len(processArgs)):
-			processArgs[i] = str(processArgs[i])
-			command += str(processArgs[i]) + ' '
-		print 'command:\n', command
+			else:
+				if '"' in str(processArgs[i]):
+					arg = '"' + str(processArgs[i]).replace('"', '\\"') + '"'
+
+				else:
+					arg = '"' + str(processArgs[i]) + '"'
+
+			command += arg + ' '
+
 	else:
-		print 'command:\n', processArgs
+		command = processArgs
+
+	print 'command:\n', command
+
+	if isLinux():
+		if type(processArgs) == list:
+			strProcessArgs = []
+			for i in range(len(processArgs)):
+				strProcessArgs.append(str(processArgs[i]))
+			command = strProcessArgs
+		else:
+			command = processArgs
 
 	return psutil.Popen(
-		processArgs,
+		command,
 		stdout=subprocess.PIPE,
 		stderr=subprocess.PIPE,
 		env=env,
@@ -1408,13 +1423,7 @@ def main():
 	# 	print filename
 	# 	print isValidEXR(filename)
 
-	# print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
-	path = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/AER_Airplane_020_v004.%04d.exr'
-	print path
-	print upADir(path)
-	print upADir(upADir(path))
-	print upADir(upADir(upADir(path)))
-
+	print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
 	# pass
 	# openFileBrowser('C:/trash/replaceFileText.py')
 	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
@@ -1437,4 +1446,5 @@ def main():
 	# print 'total ram:', getTotalRam()
 
 if __name__ == '__main__':
-	main()
+	pass
+	# startSubprocess(['source "/ie/shepherd/shepherd/jobTypes/maya/preRenderLinux.mel";'])
