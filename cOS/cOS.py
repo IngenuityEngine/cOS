@@ -222,7 +222,7 @@ def getPathInfo(path, options={}):
 	With options, can also return root, relative dirname, and relative path, and
 	make all fields lowercase.
 	'''
-	if len(path) == 0:
+	if not path or len(path) == 0:
 		return {
 			'path': '',
 			'dirname': '',
