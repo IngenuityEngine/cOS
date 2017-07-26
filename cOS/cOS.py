@@ -476,7 +476,6 @@ def setEnvironmentVariable(key, val, permanent=True):
 	elif isMac() or isLinux():
 		os.system('export %s=%s' % (key, val))
 		environmentFile = '/etc/environment'
-		print key, val
 		setString = key + '=' + val + '\n'
 
 		# read all the lines in
