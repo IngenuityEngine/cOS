@@ -222,7 +222,7 @@ def getPathInfo(path, options={}):
 	With options, can also return root, relative dirname, and relative path, and
 	make all fields lowercase.
 	'''
-	if len(path) == 0:
+	if not path or len(path) == 0:
 		return {
 			'path': '',
 			'dirname': '',
@@ -1014,9 +1014,10 @@ def runCommand(processArgs,env=None):
 	os.system(command)
 
 # returns the output (STDOUT + STDERR) of a given command
-def getCommandOutput(command, cwd=None, shell=True, env=None, **kwargs):
+def getCommandOutput(command, quiet=False, cwd=None, shell=True, env=None, **kwargs):
 	try:
-		print 'command:\n', command
+		if not quiet:
+			print 'command:\n', command
 		output = subprocess.check_output(
 			command,
 			cwd=cwd,
