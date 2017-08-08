@@ -315,9 +315,9 @@ def getFrameRange(path):
 		}
 
 def normalizeFramePadding(filepath):
-	hashReg = re.compile('.##+.')
-	dollarReg = re.compile('.\$F[1-9].')
-	frameReg = re.compile('.[0-9]{4}.')
+	hashReg = re.compile('\.##+\.')
+	dollarReg = re.compile('\.\$F[1-9]\.')
+	frameReg = re.compile('\.[0-9]{4}\.')
 
 	if hashReg.search(filepath):
 		framePadding = hashReg.search(filepath).group()
