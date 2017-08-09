@@ -222,7 +222,7 @@ def getPathInfo(path, options={}):
 	With options, can also return root, relative dirname, and relative path, and
 	make all fields lowercase.
 	'''
-	if len(path) == 0:
+	if not path or len(path) == 0:
 		return {
 			'path': '',
 			'dirname': '',
@@ -315,8 +315,9 @@ def getFrameRange(path):
 		}
 
 def normalizeFramePadding(filepath):
-	hashReg = re.compile('##+')
-	dollarReg = re.compile('\$F[1-9]')
+	hashReg = re.compile('\.##+\.')
+	dollarReg = re.compile('\.\$F[1-9]\.')
+	frameReg = re.compile('\.[0-9]{4}\.')
 
 	if hashReg.search(filepath):
 		framePadding = hashReg.search(filepath).group()
@@ -324,12 +325,16 @@ def normalizeFramePadding(filepath):
 
 	elif dollarReg.search(filepath):
 		framePadding = dollarReg.search(filepath).group()
-		padding = framePadding[-1]
+		padding = framePadding[-2]
+
+	elif frameReg.search(filepath):
+		framePadding = frameReg.search(filepath).group()
+		padding = len(framePadding) - 2
 
 	else:
 		return filepath
 
-	newPadding = '%0' + str(padding) + 'd'
+	newPadding = '.%0' + str(padding) + 'd.'
 	return filepath.replace(framePadding, newPadding)
 
 def getSequenceBaseName(filename):
@@ -1411,6 +1416,7 @@ def followFile(fileObject, waitTime=2):
 
 
 def main():
+	pass
 	# root = 'R:/Cadaver/Workspaces/CAD/CAD_055_010/render/v017/'
 	# files = os.listdir(root)
 	# files.sort()
@@ -1423,8 +1429,11 @@ def main():
 	# for filename in filenames:
 	# 	print filename
 	# 	print isValidEXR(filename)
+	# print normalizeFramePadding('C:/ACB/DEF/test.0001.exr')
+	# print normalizeFramePadding('C:/ACB/DEF/test.$F1.exr')
+	# print normalizeFramePadding('C:/ACB/DEF/test.#########.exr')
 
-	print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
+	# print isValidEXRSequence('R:/Cadaver/Final_Renders/CAD/EXR_Linear/CAD_055_002_v0003/CAD_055_002_v0003.%04d.exr')
 	# pass
 	# openFileBrowser('C:/trash/replaceFileText.py')
 	# allFiles = getFiles('R:/Assets', fileExcludes = ['.*'])
@@ -1447,5 +1456,5 @@ def main():
 	# print 'total ram:', getTotalRam()
 
 if __name__ == '__main__':
-	pass
+	main()
 	# startSubprocess(['source "/ie/shepherd/shepherd/jobTypes/maya/preRenderLinux.mel";'])
