@@ -337,6 +337,20 @@ def normalizeFramePadding(filepath):
 	newPadding = '.%0' + str(padding) + 'd.'
 	return filepath.replace(framePadding, newPadding)
 
+def isValidSequence(filepath):
+	hashReg = re.compile('##+')
+	dollarReg = re.compile('\$F[1-9]')
+	frameReg = re.compile('%[0-9]{1,2}d')
+	frameNumberReg = re.compile('\.[0-9]+\.')
+
+	if not hashReg.search(filepath) and not \
+		dollarReg.search(filepath) and not \
+		frameReg.search(filepath) and not \
+		frameNumberReg.search(filepath):
+		return False
+
+	return True
+
 def getSequenceBaseName(filename):
 	regex_baseName = re.compile('(.+)[_\.][0-9]+\.[a-z0-9]+$')
 	try:
