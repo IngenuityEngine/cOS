@@ -322,24 +322,60 @@ def getFrameRange(path):
 			'paddingString': '%0' + str(padding) + 'd',
 		}
 
-def normalizeFramePadding(filepath):
-	hashReg = re.compile('\.##+\.')
-	dollarReg = re.compile('\.\$F[1-9]?\.')
+def getPadding(filepath):
+	pathInfo = getPathInfo(filepath)
+	fName = pathInfo['name']
+
+	hashReg = re.compile('##+')
+	dollarReg = re.compile('\$F[1-9]?')
+	frameReg = re.compile('%[0-9]{1,2}d')
 	frameNumberReg = re.compile('\.[0-9]+\.')
 
-	if hashReg.search(filepath):
-		framePadding = hashReg.search(filepath).group()
+	framePadding = fName.split('.')[-1]
+
+	if hashReg.match(framePadding):
 		padding = framePadding.count('#')
 
-	elif dollarReg.search(filepath):
-		framePadding = dollarReg.search(filepath).group()
-		padding = framePadding[-2]
+	elif dollarReg.match(framePadding):
+		padding = framePadding[-1]
+		if padding == 'F':
+			return 0
+
+	elif frameReg.match(framePadding):
+		paddingReg = re.compile('[0-9]{1,2}')
+		padding = paddingReg.search(framePadding).group()
+
+	elif frameNumberReg.match(framePadding):
+		padding = len(framePadding) - 2
+		if padding <= 2:
+			return 0
+
+	else:
+		print 'Does not contain valid frame text'
+		return 0
+
+	return int(padding)
+
+def normalizeFramePadding(filepath):
+	pathInfo = getPathInfo(filepath)
+	fName = pathInfo['name']
+
+	hashReg = re.compile('##+')
+	dollarReg = re.compile('\$F[1-9]?')
+	frameNumberReg = re.compile('[0-9]+')
+
+	framePadding = fName.split('.')[-1]
+
+	if hashReg.match(framePadding):
+		padding = framePadding.count('#')
+
+	elif dollarReg.match(framePadding):
+		padding = framePadding[-1]
 		if padding == 'F':
 			padding = 0
 
-	elif frameNumberReg.search(filepath):
-		framePadding = frameNumberReg.search(filepath).group()
-		padding = len(framePadding) - 2
+	elif frameNumberReg.match(framePadding):
+		padding = len(framePadding)
 		if padding <= 2:
 			padding = 0
 
@@ -350,15 +386,20 @@ def normalizeFramePadding(filepath):
 	return filepath.replace(framePadding, newPadding)
 
 def isValidSequence(filepath):
+	pathInfo = getPathInfo(filepath)
+	fName = pathInfo['name']
+
+	framePadding = fName.split('.')[-1]
+
 	hashReg = re.compile('\.##+\.')
 	dollarReg = re.compile('\.\$F[1-9]?\.')
 	frameReg = re.compile('\.%[0-9]{1,2}d\.')
 	frameNumberReg = re.compile('\.[0-9]+\.')
 
-	if not hashReg.search(filepath) and not \
-		dollarReg.search(filepath) and not \
-		frameReg.search(filepath) and not \
-		frameNumberReg.search(filepath):
+	if not hashReg.match(fName) and not \
+		dollarReg.match(fName) and not \
+		frameReg.match(fName) and not \
+		frameNumberReg.match(fName):
 		return False
 
 	return True
