@@ -400,10 +400,10 @@ def isValidSequence(filepath):
 	frameReg = re.compile('%[0-9]{1,2}d')
 	frameNumberReg = re.compile('[0-9]+')
 
-	if not hashReg.match(fName) and not \
-		dollarReg.match(fName) and not \
-		frameReg.match(fName) and not \
-		frameNumberReg.match(fName):
+	if not hashReg.match(framePadding) and not \
+		dollarReg.match(framePadding) and not \
+		frameReg.match(framePadding) and not \
+		frameNumberReg.match(framePadding):
 		return False
 
 	return True
