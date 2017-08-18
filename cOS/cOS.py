@@ -240,6 +240,8 @@ def getPathInfo(path, options={}):
 	pathInfo['dirname'] = '/'.join(pathParts[:-1]) + '/'
 	pathInfo['basename'] = pathParts[-1]
 	pathInfo['extension'] = pathParts[-1].split('.')[-1].strip().lower()
+	if pathInfo['extension'] == 'sc':
+		pathInfo['extension'] = '.'.join(pathParts[-1].split('.')[-2:]).strip().lower()
 	pathInfo['name'] = pathInfo['basename'].replace('.' + pathInfo['extension'], '')
 	pathInfo['filebase'] = pathInfo['path'].replace('.' + pathInfo['extension'], '')
 
@@ -248,6 +250,12 @@ def getPathInfo(path, options={}):
 		pathInfo['root'] = normalizeDir(options['root'])
 		pathInfo['relativeDirname'] = './' + removeStartingSlash(normalizeDir(pathInfo['dirname'].replace(pathInfo['root'], '')))
 		pathInfo['relativePath'] = './' + removeStartingSlash(normalizePath(pathInfo['path'].replace(pathInfo['root'], '')))
+
+	else:
+		if path[0] == '/':
+			pathInfo['root'] = pathParts[1]
+		else:
+			pathInfo['root'] = pathParts[0]
 
 	if options.get('lowercaseNames'):
 		# uncomment in Sublime 3
@@ -1281,6 +1289,16 @@ def readFile(path):
 	with open(path) as fileHandle:
 		return fileHandle.readlines()
 
+def getOS():
+	if isWindows():
+		return 'windows'
+
+	if isLinux():
+		return 'linux'
+
+	if isMac():
+		return 'mac'
+
 # OS
 ##################################################
 def isWindows():
@@ -1468,6 +1486,8 @@ def main():
 	# print findCaseInsensitiveFilename(casePath, mustExist=True)
 
 	# print 'total ram:', getTotalRam()
+	print normalizeFramePadding('A:/B/C.$F.test')
+	print getPathInfo('/A:/B/C/')['root']
 
 if __name__ == '__main__':
 	main()
