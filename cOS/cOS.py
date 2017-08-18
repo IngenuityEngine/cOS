@@ -322,6 +322,7 @@ def getFrameRange(path):
 			'paddingString': '%0' + str(padding) + 'd',
 		}
 
+# To Do: use this in place of arkUtil getPadding soon!
 def getPadding(filepath):
 	pathInfo = getPathInfo(filepath)
 	fName = pathInfo['name']
@@ -329,7 +330,7 @@ def getPadding(filepath):
 	hashReg = re.compile('##+')
 	dollarReg = re.compile('\$F[1-9]?')
 	frameReg = re.compile('%[0-9]{1,2}d')
-	frameNumberReg = re.compile('\.[0-9]+\.')
+	frameNumberReg = re.compile('[0-9]+')
 
 	framePadding = fName.split('.')[-1]
 
@@ -346,7 +347,7 @@ def getPadding(filepath):
 		padding = paddingReg.search(framePadding).group()
 
 	elif frameNumberReg.match(framePadding):
-		padding = len(framePadding) - 2
+		padding = len(framePadding)
 		if padding <= 2:
 			return 0
 
@@ -372,17 +373,20 @@ def normalizeFramePadding(filepath):
 	elif dollarReg.match(framePadding):
 		padding = framePadding[-1]
 		if padding == 'F':
-			padding = 0
+			padding = None
 
 	elif frameNumberReg.match(framePadding):
 		padding = len(framePadding)
 		if padding <= 2:
-			padding = 0
+			padding = None
 
 	else:
 		return filepath
 
-	newPadding = '.%0' + str(padding) + 'd.'
+	newPadding = '%0' + str(padding) + 'd'
+	if not padding:
+		newPadding = '%d'
+
 	return filepath.replace(framePadding, newPadding)
 
 def isValidSequence(filepath):
@@ -1531,8 +1535,10 @@ def main():
 	# print findCaseInsensitiveFilename(casePath, mustExist=True)
 
 	# print 'total ram:', getTotalRam()
-	print normalizeFramePadding('A:/B/C.$F.test')
-	print getPathInfo('/A:/B/C/')['root']
+	print normalizeFramePadding('A/B/C.D/e.35.exr')
+	print normalizeFramePadding('A/B/C.D/e.5.testing.exr')
+	print getPadding('A/B/C.D/e.35.exr')
+	print getPadding('A/B/C.D/e.5.testing.exr')
 
 if __name__ == '__main__':
 	main()
