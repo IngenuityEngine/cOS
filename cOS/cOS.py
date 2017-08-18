@@ -253,9 +253,9 @@ def getPathInfo(path, options={}):
 
 	else:
 		if path[0] == '/':
-			pathInfo['root'] = pathParts[1]
+			pathInfo['root'] = ensureEndingSlash(pathParts[1])
 		else:
-			pathInfo['root'] = pathParts[0]
+			pathInfo['root'] = ensureEndingSlash(pathParts[0])
 
 	if options.get('lowercaseNames'):
 		# uncomment in Sublime 3
@@ -324,8 +324,8 @@ def getFrameRange(path):
 
 def normalizeFramePadding(filepath):
 	hashReg = re.compile('\.##+\.')
-	dollarReg = re.compile('\.\$F[1-9]\.')
-	frameReg = re.compile('\.[0-9]{4}\.')
+	dollarReg = re.compile('\.\$F[1-9]?\.')
+	frameNumberReg = re.compile('\.[0-9]+\.')
 
 	if hashReg.search(filepath):
 		framePadding = hashReg.search(filepath).group()
@@ -334,10 +334,14 @@ def normalizeFramePadding(filepath):
 	elif dollarReg.search(filepath):
 		framePadding = dollarReg.search(filepath).group()
 		padding = framePadding[-2]
+		if padding == 'F':
+			padding = 0
 
-	elif frameReg.search(filepath):
-		framePadding = frameReg.search(filepath).group()
+	elif frameNumberReg.search(filepath):
+		framePadding = frameNumberReg.search(filepath).group()
 		padding = len(framePadding) - 2
+		if padding <= 2:
+			padding = 0
 
 	else:
 		return filepath
