@@ -346,9 +346,9 @@ def normalizeFramePadding(filepath):
 	return filepath.replace(framePadding, newPadding)
 
 def isValidSequence(filepath):
-	hashReg = re.compile('##+')
-	dollarReg = re.compile('\$F[1-9]')
-	frameReg = re.compile('%[0-9]{1,2}d')
+	hashReg = re.compile('\.##+\.')
+	dollarReg = re.compile('\.\$F[1-9]?\.')
+	frameReg = re.compile('\.%[0-9]{1,2}d\.')
 	frameNumberReg = re.compile('\.[0-9]+\.')
 
 	if not hashReg.search(filepath) and not \
