@@ -190,7 +190,7 @@ def getHighestVersionFilePath(root, name=None, extension=''):
 				highestVersion = fileVersion
 
 	else:
-		# regex for checking and getting user info and version info
+		# regex for checking and getting user info if it exists and version info
 		versionUserRegEx = re.compile('_v[0-9]{4}(_[a-z]{3})?')
 		versionUser = ''
 		if versionUserRegEx.search(name):
