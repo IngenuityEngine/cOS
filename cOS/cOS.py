@@ -166,7 +166,7 @@ def incrementVersion(filename):
 	version = getVersion(filename) + 1
 	return re.sub('[vV][0-9]+', 'v%04d' % version, filename)
 
-def getHighestVersionFilePath(root, extension=''):
+def getHighestVersionFilePath(root, name=None, extension=''):
 	'''
 	Returns highest version from a given root, matching a given extension.
 	'''
@@ -178,15 +178,31 @@ def getHighestVersionFilePath(root, extension=''):
 	root = normalizeDir(root)
 	highestVersion = -99999999
 	path = False
-	for f in glob.iglob(root + '*' + extension):
-		# keeps .nk~ etc from showing up
-		if not f.endswith(extension):
-			continue
+	if not name:
+		for f in glob.iglob(root + '*' + extension):
+			# keeps .nk~ etc from showing up
+			if not f.endswith(extension):
+				continue
 
-		fileVersion = getVersion(f)
-		if fileVersion > highestVersion:
-			path = unixPath(f)
-			highestVersion = fileVersion
+			fileVersion = getVersion(f)
+			if fileVersion > highestVersion:
+				path = unixPath(f)
+				highestVersion = fileVersion
+
+	else:
+		nameParts = name.split('_')
+		userInitials = nameParts[-1]
+		version = nameParts[-2]
+		onlyName = name.replace(version + '_' + userInitials, '')
+		for f in glob.iglob(root + onlyName + 'v*' + extension):
+			# keeps .nk~ etc from showing up
+			if not f.endswith(extension):
+				continue
+
+			fileVersion = getVersion(f)
+			if fileVersion > highestVersion:
+				path = unixPath(f)
+				highestVersion = fileVersion
 
 	return path
 
@@ -1546,11 +1562,12 @@ def main():
 	# print findCaseInsensitiveFilename(casePath, mustExist=True)
 
 	# print 'total ram:', getTotalRam()
-	print normalizeFramePadding('A/B/C.D/e.35.exr')
-	print normalizeFramePadding('A/B/C.D/e.5.testing.exr')
-	print getPadding('A/B/C.D/e.35.exr')
-	print getPadding('A/B/C.D/e.5.testing.exr')
-	print getPathInfo('test.1.exo.sc')['extension']
+	# print normalizeFramePadding('A/B/C.D/e.35.exr')
+	# print normalizeFramePadding('A/B/C.D/e.5.testing.exr')
+	# print getPadding('A/B/C.D/e.35.exr')
+	# print getPadding('A/B/C.D/e.5.testing.exr')
+	# print getPathInfo('test.1.exo.sc')['extension']
+	print getHighestVersionFilePath('R:/Test_Project/Workspaces/publish/pathTest/cg', 'pathTest_v0010_sak', 'mb')
 
 if __name__ == '__main__':
 	main()
