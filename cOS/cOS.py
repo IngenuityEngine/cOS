@@ -190,11 +190,14 @@ def getHighestVersionFilePath(root, name=None, extension=''):
 				highestVersion = fileVersion
 
 	else:
-		nameParts = name.split('_')
-		userInitials = nameParts[-1]
-		version = nameParts[-2]
-		onlyName = name.replace(version + '_' + userInitials, '')
-		for f in glob.iglob(root + onlyName + 'v*' + extension):
+		# regex for checking and getting user info and version info
+		versionUserRegEx = re.compile('_v[0-9]{4}(_[a-z]{3})?')
+		versionUser = ''
+		if versionUserRegEx.search(name):
+			versionUser = versionUserRegEx.search(name).group()
+
+		onlyName = name.replace(versionUser, '')
+		for f in glob.iglob(root + onlyName + '_v*' + extension):
 			# keeps .nk~ etc from showing up
 			if not f.endswith(extension):
 				continue
@@ -1567,7 +1570,7 @@ def main():
 	# print getPadding('A/B/C.D/e.35.exr')
 	# print getPadding('A/B/C.D/e.5.testing.exr')
 	# print getPathInfo('test.1.exo.sc')['extension']
-	print getHighestVersionFilePath('R:/Test_Project/Workspaces/publish/pathTest/cg', 'pathTest_v0010_sak', 'mb')
+	print getHighestVersionFilePath('R:/Test_Project/Workspaces/publish/TPT_0010/3D', 'playblastTest_v0007', 'mb')
 
 if __name__ == '__main__':
 	main()
