@@ -322,6 +322,8 @@ def getFrameRange(path):
 			'paddingString': '%0' + str(padding) + 'd',
 		}
 
+# copy of arkUtil's get padding, it does not throw an error,
+# but returns 0 if padding is 0
 # To Do: use this in place of arkUtil getPadding soon!
 def getPadding(filepath):
 	pathInfo = getPathInfo(filepath)
@@ -365,6 +367,7 @@ def normalizeFramePadding(filepath):
 	dollarReg = re.compile('\$F[1-9]?')
 	frameNumberReg = re.compile('[0-9]+')
 
+	# gets position of frame padding
 	framePadding = fName.split('.')[-1]
 
 	if hashReg.match(framePadding):
@@ -372,17 +375,21 @@ def normalizeFramePadding(filepath):
 
 	elif dollarReg.match(framePadding):
 		padding = framePadding[-1]
+		# if no number exists after $F then padding is None
 		if padding == 'F':
 			padding = None
 
 	elif frameNumberReg.match(framePadding):
 		padding = len(framePadding)
+		# if total number of digits is less than 2 then assume padding is None
 		if padding <= 2:
 			padding = None
 
 	else:
 		return filepath
 
+	# if padding is None(A.B.1.abc), then padded file name will be (A.B.%d.abc)
+	# if there is no padding(A.B.abc), then padded file will still be A.B.abc
 	newPadding = '%0' + str(padding) + 'd'
 	if not padding:
 		newPadding = '%d'
@@ -393,6 +400,7 @@ def isValidSequence(filepath):
 	pathInfo = getPathInfo(filepath)
 	fName = pathInfo['name']
 
+	# gets position of frame padding
 	framePadding = fName.split('.')[-1]
 
 	hashReg = re.compile('##+')
@@ -400,6 +408,8 @@ def isValidSequence(filepath):
 	frameReg = re.compile('%[0-9]{1,2}d')
 	frameNumberReg = re.compile('[0-9]+')
 
+	# if padding text match with any padding regex
+	# return True
 	if not hashReg.match(framePadding) and not \
 		dollarReg.match(framePadding) and not \
 		frameReg.match(framePadding) and not \
@@ -1539,6 +1549,7 @@ def main():
 	print normalizeFramePadding('A/B/C.D/e.5.testing.exr')
 	print getPadding('A/B/C.D/e.35.exr')
 	print getPadding('A/B/C.D/e.5.testing.exr')
+	print getPathInfo('test.1.exo.sc')['extension']
 
 if __name__ == '__main__':
 	main()
