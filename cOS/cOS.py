@@ -334,6 +334,7 @@ def getPadding(filepath):
 	frameReg = re.compile('%[0-9]{1,2}d')
 	frameNumberReg = re.compile('[0-9]+')
 
+	# gets position of frame padding
 	framePadding = fName.split('.')[-1]
 
 	if hashReg.match(framePadding):
