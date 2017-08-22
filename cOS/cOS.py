@@ -496,13 +496,17 @@ def getFirstFileFromFrameRangeText(fileText):
 
 		padding = filePieces[0].split('.')[-2]
 		frameRangeDict = getFrameRange(fileText)
+		if not frameRangeDict:
+			return False
 		frame = padding % int(frameRangeDict['min'])
 		filepath = frameRangeDict['base'].replace(padding, frame) + frameRangeDict['ext']
 
-	elif len(filePieces) == 1 and \
-		unicode(filePieces[0].split('.')[-2]).isnumeric():
-
-		filepath = filePieces[0]
+	elif len(filePieces) == 1:
+		try:
+			if unicode(filePieces[0].split('.')[-2]).isnumeric():
+				filepath = filePieces[0]
+		except:
+			return False
 
 	else:
 		print 'Invalid image sequence!'
@@ -1570,7 +1574,8 @@ def main():
 	# print getPadding('A/B/C.D/e.35.exr')
 	# print getPadding('A/B/C.D/e.5.testing.exr')
 	# print getPathInfo('test.1.exo.sc')['extension']
-	print getHighestVersionFilePath('R:/Test_Project/Workspaces/publish/TPT_0010/3D', 'playblastTest_v0007', 'mb')
+	# print getHighestVersionFilePath('R:/Test_Project/Workspaces/publish/TPT_0010/3D', 'playblastTest_v0007', 'mb')
+	print getFirstFileFromFrameRangeText("N:/my_cache/ramburglar/Helix/Workspaces/HLX_PLN/HLX_PLN_4010/Plates/Offline/HLX_PLN_4010_Offline.%04d.jpg")
 
 if __name__ == '__main__':
 	main()
