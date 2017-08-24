@@ -481,6 +481,8 @@ def getFirstFileFromFrameRangeText(fileText):
 	filepath = normalizePath(fileText)
 	filePieces = filepath.split(' ')
 
+	filePieces[0] = normalizeFramePadding(filePieces[0])
+
 	paddingRegEx = re.compile('%0[1-9]d')
 
 	if len(filePieces) == 2 and \
@@ -1575,7 +1577,7 @@ def main():
 	# print getPadding('A/B/C.D/e.5.testing.exr')
 	# print getPathInfo('test.1.exo.sc')['extension']
 	# print getHighestVersionFilePath('R:/Test_Project/Workspaces/publish/TPT_0010/3D', 'playblastTest_v0007', 'mb')
-	print getFirstFileFromFrameRangeText("N:/my_cache/ramburglar/Helix/Workspaces/HLX_PLN/HLX_PLN_4010/Plates/Offline/HLX_PLN_4010_Offline.%04d.jpg")
+	print getFirstFileFromFrameRangeText("N:/my_cache/ramburglar/Helix/Workspaces/HLX_PLN/HLX_PLN_4010/Plates/Offline/HLX_PLN_4010_Offline.####.jpg")
 
 if __name__ == '__main__':
 	main()
