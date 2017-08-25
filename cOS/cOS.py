@@ -425,7 +425,7 @@ def isValidSequence(filepath):
 
 	hashReg = re.compile('##+')
 	dollarReg = re.compile('\$F[1-9]?')
-	frameReg = re.compile('%[0-9]{1,2}d')
+	frameReg = re.compile('%[0-9]{0,2}d')
 	frameNumberReg = re.compile('[0-9]+')
 
 	# if padding text match with any padding regex
