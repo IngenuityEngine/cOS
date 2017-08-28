@@ -291,40 +291,39 @@ def getFrameRange(path):
 	Parameters:
 		path - Generic file in sequence. Ex. text/frame.%04d.exr
 	'''
+	if not isValidSequence(path):
+		print 'Not a valid sequence'
+		return None
 
 	path = normalizeFramePadding(path)
 
-	baseInFile, ext = os.path.splitext(path)
-	# fix: this is done terribly, should be far more generic
-	percentLoc = baseInFile.find('%')
-	extension = getExtension(path)
+	padding = getPadding(path)
 
-	if percentLoc == -1:
-		print 'Frame padding not found in: ' + path
-		return False
+	pathInfo = getPathInfo(path)
+	extension = pathInfo['extension']
+	seqDir = pathInfo['dirname']
+	seqName = '.'.join(pathInfo['name'].split('.')[:-1])
+	files = getFiles(seqDir,
+				fileIncludes = [seqName + '*.' + extension], depth=0, filesOnly=True)
+	if not len(files):
+		print 'No Frames found at location:'
+		return None
 
-	# second character after the %
-	# ex: %04d returns 4
-	padding = re.findall(r'%([0-9]+)d', path)
-	if len(padding):
-		padding = int(padding[0])
+	files.sort()
+	firstFileInfo =getPathInfo(files[0])
+
+	try:
+		minFrame = int(firstFileInfo['name'].split('.')[-1])
+		maxFrame = int(getPathInfo(files[-1])['name'].split('.')[-1])
+
+	except:
+		return None
+
+	if padding=='0':
+		paddingString = '%d'
+
 	else:
-		print 'Invalid padding:', path
-		return False
-
-	minFrame = 9999999
-	maxFrame = -9999999
-	files = list(glob.iglob(baseInFile[0:percentLoc] + '*.' + extension))
-	for f in files:
-		frame = f[percentLoc:(percentLoc + padding)]
-		if frame.isdigit():
-			frame = int(frame)
-			maxFrame = max(maxFrame,frame)
-			minFrame = min(minFrame,frame)
-
-	if minFrame == 9999999 or maxFrame == -9999999:
-		print 'No frames found:', path
-		return False
+		paddingString = '%0' + str(padding) + 'd'
 
 	duration = maxFrame - minFrame + 1
 	count = len(files)
@@ -332,13 +331,13 @@ def getFrameRange(path):
 			'min': minFrame,
 			'max': maxFrame,
 			'duration': duration,
-			'base': baseInFile,
-			'baseUnpadded': baseInFile[:percentLoc],
-			'ext': ext,
+			'base': firstFileInfo['dirname'] + firstFileInfo['name'],
+			'baseUnpadded': seqName,
+			'ext': extension,
 			'complete': duration == count,
 			'path': path,
 			'padding': padding,
-			'paddingString': '%0' + str(padding) + 'd',
+			'paddingString': paddingString,
 		}
 
 # copy of arkUtil's get padding, it does not throw an error,
@@ -350,7 +349,7 @@ def getPadding(filepath):
 
 	hashReg = re.compile('##+')
 	dollarReg = re.compile('\$F[1-9]?')
-	frameReg = re.compile('%[0-9]{1,2}d')
+	frameReg = re.compile('%[0-9]{0,2}d')
 	frameNumberReg = re.compile('[0-9]+')
 
 	# gets position of frame padding
@@ -366,7 +365,12 @@ def getPadding(filepath):
 
 	elif frameReg.match(framePadding):
 		paddingReg = re.compile('[0-9]{1,2}')
-		padding = paddingReg.search(framePadding).group()
+		if paddingReg.search(framePadding):
+			padding = paddingReg.search(framePadding).group()
+
+		else:
+			return 0
+
 
 	elif frameNumberReg.match(framePadding):
 		padding = len(framePadding)
@@ -474,39 +478,43 @@ def getFirstFileFromFrameRangeText(fileText):
 	'''
 	Supports 3 methods of import for imageSequences
 	Gets frame: 1001 of imageSequence
- 	Uses cOS getFrameRange to find all images in matching sequence
+ 	Uses getFrameRange to find all images in matching sequence
  	Requires filename in format '../image.%0[1-9]d.png' etc,
  	with %0[1-9]d or other type of specification included in string
  	'''
 	filepath = normalizePath(fileText)
 	filePieces = filepath.split(' ')
-
 	filePieces[0] = normalizeFramePadding(filePieces[0])
+	fileInfo = getPathInfo(filePieces[0])
 
-	paddingRegEx = re.compile('%0[1-9]d')
+	paddingRegEx = re.compile('%[0-9]{0,2}d')
 
 	if len(filePieces) == 2 and \
 		paddingRegEx.search(filePieces[0]) and \
 		unicode(filePieces[1].split('-')[0]).isnumeric():
 
-		padding = filePieces[0].split('.')[-2]
+		padding = fileInfo['name'].split('.')[-1]
 		frame = padding % int(filePieces[1].split('-')[0])
 		filepath = filePieces[0].replace(padding, frame)
 
 	elif len(filePieces) == 1 and \
 		paddingRegEx.search(filePieces[0]):
-
-		padding = filePieces[0].split('.')[-2]
+		padding = fileInfo['name'].split('.')[-1]
 		frameRangeDict = getFrameRange(fileText)
 		if not frameRangeDict:
 			return False
+
 		frame = padding % int(frameRangeDict['min'])
-		filepath = frameRangeDict['base'].replace(padding, frame) + frameRangeDict['ext']
+		filepath = frameRangeDict['base'].replace(padding, frame) + '.' + frameRangeDict['ext']
 
 	elif len(filePieces) == 1:
+		print 'case3'
+		pathInfo = getPathInfo(filePieces[0])
 		try:
-			if unicode(filePieces[0].split('.')[-2]).isnumeric():
+			if unicode(pathInfo['name'].split('.')[-1]).isnumeric():
 				filepath = filePieces[0]
+			else:
+				return False
 		except:
 			return False
 
@@ -1573,11 +1581,11 @@ def main():
 	# print 'total ram:', getTotalRam()
 	# print normalizeFramePadding('A/B/C.D/e.35.exr')
 	# print normalizeFramePadding('A/B/C.D/e.5.testing.exr')
-	# print getPadding('A/B/C.D/e.35.exr')
+	print isValidSequence('sandbox/seq/frame.%04d.exr')
 	# print getPadding('A/B/C.D/e.5.testing.exr')
 	# print getPathInfo('test.1.exo.sc')['extension']
 	# print getHighestVersionFilePath('R:/Test_Project/Workspaces/publish/TPT_0010/3D', 'playblastTest_v0007', 'mb')
-	print getFirstFileFromFrameRangeText("N:/my_cache/ramburglar/Helix/Workspaces/HLX_PLN/HLX_PLN_4010/Plates/Offline/HLX_PLN_4010_Offline.####.jpg")
+	print getFirstFileFromFrameRangeText("n:/my_cache/ramburglar/Aeroplane/Project_Assets/crash/fx/geo/center_secondary_debris_v0045/center_secondary_debris_v0045.1.bgeo.sc")
 
 if __name__ == '__main__':
 	main()
