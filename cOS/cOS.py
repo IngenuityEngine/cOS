@@ -271,10 +271,12 @@ def getPathInfo(path, options={}):
 		pathInfo['relativePath'] = './' + removeStartingSlash(normalizePath(pathInfo['path'].replace(pathInfo['root'], '')))
 
 	else:
-		if path[0] == '/':
-			pathInfo['root'] = ensureEndingSlash(pathParts[1])
+		# for linux
+		if pathParts[0] == '':
+			pathInfo['root'] = '/' + pathParts[1] + '/'
+		# for windows
 		else:
-			pathInfo['root'] = ensureEndingSlash(pathParts[0])
+			pathInfo['root'] = pathParts[0] + '/'
 
 	if options.get('lowercaseNames'):
 		# uncomment in Sublime 3
