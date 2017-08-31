@@ -100,8 +100,8 @@ def getExtension(path):
 	pathParts = path.split('.')
 	if len(pathParts) > 1:
 		if pathParts[-1].lower() == 'sc':
-			return '.'.join([pathParts[-1], pathParts[-2]]).lower()
-		return pathParts[-1].lower()
+			return '.'.join([pathParts[-1], pathParts[-2]]).lower().strip()
+		return pathParts[-1].lower().strip()
 
 	return ''
 
