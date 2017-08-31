@@ -97,9 +97,11 @@ def getExtension(path):
 	'''
 	Returns file extension all lowercase with no whitespace
 	'''
-	path = path.split('.')
-	if len(path) > 1:
-		return path.pop().lower().strip()
+	pathParts = path.split('.')
+	if len(pathParts) > 1:
+		if pathParts[-1].lower() == 'sc':
+			return '.'.join([pathParts[-1], pathParts[-2]]).lower()
+		return pathParts[-1].lower()
 
 	return ''
 
@@ -1591,7 +1593,8 @@ def main():
 	print normalizeFramePadding("N:/my_cache/ramburglar/Test_Project/Workspaces/houdini_alembic/cache/pieces/v002/pieces.0001.abc")
 	print getFrameRange('n:/my_cache/ramburglar/Aeroplane/Project_Assets/crash/fx/geo/center_secondary_debris_v0045/center_secondary_debris_v0045.%d.bgeo.sc')
 	print getFrameRange('N:/my_cache/ramburglar/Test_Project/Workspaces/houdini_alembic/cache/pieces/v002/pieces.%04d.abc')
-
+	print getExtension('A/B/C.abc')
+	print getExtension('A/B/C.bgeo.sc')
 
 if __name__ == '__main__':
 	main()
