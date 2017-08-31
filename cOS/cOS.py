@@ -321,7 +321,7 @@ def getFrameRange(path):
 	except:
 		return None
 
-	if padding=='0':
+	if padding==0:
 		paddingString = '%d'
 
 	else:
@@ -1583,11 +1583,15 @@ def main():
 	# print 'total ram:', getTotalRam()
 	# print normalizeFramePadding('A/B/C.D/e.35.exr')
 	# print normalizeFramePadding('A/B/C.D/e.5.testing.exr')
-	print isValidSequence('sandbox/seq/frame.%04d.exr')
+	# print isValidSequence('sandbox/seq/frame.%04d.exr')
 	# print getPadding('A/B/C.D/e.5.testing.exr')
 	# print getPathInfo('test.1.exo.sc')['extension']
 	# print getHighestVersionFilePath('R:/Test_Project/Workspaces/publish/TPT_0010/3D', 'playblastTest_v0007', 'mb')
-	print getFirstFileFromFrameRangeText("n:/my_cache/ramburglar/Aeroplane/Project_Assets/crash/fx/geo/center_secondary_debris_v0045/center_secondary_debris_v0045.1.bgeo.sc")
+	# print getFirstFileFromFrameRangeText("n:/my_cache/ramburglar/Aeroplane/Project_Assets/crash/fx/geo/center_secondary_debris_v0045/center_secondary_debris_v0045.1.bgeo.sc")
+	print normalizeFramePadding("N:/my_cache/ramburglar/Test_Project/Workspaces/houdini_alembic/cache/pieces/v002/pieces.0001.abc")
+	print getFrameRange('n:/my_cache/ramburglar/Aeroplane/Project_Assets/crash/fx/geo/center_secondary_debris_v0045/center_secondary_debris_v0045.%d.bgeo.sc')
+	print getFrameRange('N:/my_cache/ramburglar/Test_Project/Workspaces/houdini_alembic/cache/pieces/v002/pieces.%04d.abc')
+
 
 if __name__ == '__main__':
 	main()
