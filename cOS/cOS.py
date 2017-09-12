@@ -174,7 +174,7 @@ def getHighestVersionFilePath(root, name=None, extension=''):
 	'''
 	# fix: should have normalize extension
 	# ensure dot on extension
-	if extension[0] != '.':
+	if not len(extension) or extension[0] != '.':
 		extension = '.' + extension
 
 	root = normalizeDir(root)
