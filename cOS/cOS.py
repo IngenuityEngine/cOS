@@ -356,6 +356,11 @@ def getPadding(filepath):
 	frameReg = re.compile('%[0-9]{0,2}d')
 	frameNumberReg = re.compile('[0-9]+')
 
+	# if the name is only numbers or only frame padding
+	nameParts = fName.split('.')
+	if len(nameParts) < 2:
+		return filepath
+
 	# gets position of frame padding
 	framePadding = fName.split('.')[-1]
 
@@ -382,7 +387,6 @@ def getPadding(filepath):
 			return 0
 
 	else:
-		print 'Does not contain valid frame text'
 		return 0
 
 	return int(padding)
@@ -394,6 +398,11 @@ def normalizeFramePadding(filepath):
 	hashReg = re.compile('##+')
 	dollarReg = re.compile('\$F[1-9]?')
 	frameNumberReg = re.compile('[0-9]+')
+
+	# if the name is only numbers or only frame padding
+	nameParts = fName.split('.')
+	if len(nameParts) < 2:
+		return filepath
 
 	# gets position of frame padding
 	framePadding = fName.split('.')[-1]
@@ -427,6 +436,11 @@ def normalizeFramePadding(filepath):
 def isValidSequence(filepath):
 	pathInfo = getPathInfo(filepath)
 	fName = pathInfo['name']
+
+	# if the name is only numbers or only frame padding
+	nameParts = fName.split('.')
+	if len(nameParts) < 2:
+		return filepath
 
 	# gets position of frame padding
 	framePadding = fName.split('.')[-1]
