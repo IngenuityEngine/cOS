@@ -310,7 +310,6 @@ def getFrameRange(path):
 	files = getFiles(seqDir,
 				fileIncludes = [seqName + '*.' + extension], depth=0, filesOnly=True)
 	if not len(files):
-		print 'No Frames found at location:'
 		return None
 
 	files.sort()
