@@ -358,7 +358,7 @@ def getPadding(filepath):
 	# if the name is only numbers or only frame padding
 	nameParts = fName.split('.')
 	if len(nameParts) < 2:
-		return filepath
+		return 0
 
 	# gets position of frame padding
 	framePadding = fName.split('.')[-1]
@@ -439,7 +439,7 @@ def isValidSequence(filepath):
 	# if the name is only numbers or only frame padding
 	nameParts = fName.split('.')
 	if len(nameParts) < 2:
-		return filepath
+		return False
 
 	# gets position of frame padding
 	framePadding = fName.split('.')[-1]
