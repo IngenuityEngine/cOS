@@ -130,6 +130,16 @@ describe('cOS', function() {
 		expect(upDir).to.be('c:/')
 		upDir = cOS.upADir('etc/')
 		expect(upDir).to.be('etc/')
+
+		var filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/AER_Airplane_020_v004.%04d.exr'
+		expect(cOS.upADir(cOS.upADir(cOS.upADir(filename)))).to.be('r:/Aeroplane/Final_Renders/')
+
+		filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/'
+		expect(cOS.upADir(cOS.upADir(cOS.upADir(filename)))).to.be('r:/Aeroplane/Final_Renders/')
+
+		filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004'
+		expect(cOS.upADir(cOS.upADir(cOS.upADir(filename)))).to.be('r:/Aeroplane/')
+
 	})
 
 	it('should collectFilesSync', function(done) {
