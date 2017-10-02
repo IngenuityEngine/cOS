@@ -287,6 +287,12 @@ def getPathInfo(path, options={}):
 
 	return pathInfo
 
+# fix:
+# this:
+# text/frame.%04d.exr
+# will match
+# text/frame.tacos.bananas.%04d.exr
+# cuz getFiles needs to take a regex
 def getFrameRange(path):
 	'''
 	Returns a dictionary with min, max, duration,
@@ -307,13 +313,14 @@ def getFrameRange(path):
 	extension = pathInfo['extension']
 	seqDir = pathInfo['dirname']
 	seqName = '.'.join(pathInfo['name'].split('.')[:-1])
+
 	files = getFiles(seqDir,
-				fileIncludes = [seqName + '*.' + extension], depth=0, filesOnly=True)
+				fileIncludes=[seqName + '.*.' + extension], depth=0, filesOnly=True)
 	if not len(files):
 		return None
 
 	files.sort()
-	firstFileInfo =getPathInfo(files[0])
+	firstFileInfo = getPathInfo(files[0])
 
 	try:
 		minFrame = int(firstFileInfo['name'].split('.')[-1])
@@ -322,7 +329,7 @@ def getFrameRange(path):
 	except:
 		return None
 
-	if padding==0:
+	if padding == 0:
 		paddingString = '%d'
 
 	else:
@@ -509,6 +516,7 @@ def getFirstFileFromFrameRangeText(fileText):
 	if len(filePieces) == 2 and \
 		paddingRegEx.search(filePieces[0]) and \
 		unicode(filePieces[1].split('-')[0]).isnumeric():
+		# print 'case1'
 
 		padding = fileInfo['name'].split('.')[-1]
 		frame = padding % int(filePieces[1].split('-')[0])
@@ -516,6 +524,7 @@ def getFirstFileFromFrameRangeText(fileText):
 
 	elif len(filePieces) == 1 and \
 		paddingRegEx.search(filePieces[0]):
+		# print 'case2'
 		padding = fileInfo['name'].split('.')[-1]
 		frameRangeDict = getFrameRange(fileText)
 		if not frameRangeDict:
@@ -525,7 +534,7 @@ def getFirstFileFromFrameRangeText(fileText):
 		filepath = frameRangeDict['base'].replace(padding, frame) + '.' + frameRangeDict['ext']
 
 	elif len(filePieces) == 1:
-		print 'case3'
+		# print 'case3'
 		pathInfo = getPathInfo(filePieces[0])
 		try:
 			if unicode(pathInfo['name'].split('.')[-1]).isnumeric():
@@ -1252,26 +1261,24 @@ def waitOnProcess(process,
 	errProcessThread.daemon = True
 	errProcessThread.start()
 
-	re_whitespace = re.compile('^[\n\r\s]+$')
-
 	while checkProcess(process):
 		newOut = getQueueContents(outQueue, printContents=False)
 		newErr = getQueueContents(errQueue, printContents=False)
 		out += newOut
 		err += newErr
 
+		# remove starting and trailing whitespace
+		newErr = newErr.strip()
+
 		if newOut:
 			loggingFunc(newOut[:-1])
 		if newErr:
-			notOnlyWhitespace = re_whitespace.match(newErr)
-			# only care about non-white space errors
-			if notOnlyWhitespace:
-				if checkErrorFunc:
-					checkErrorFunc(newErr[:-1])
-				else:
-					loggingFunc('\n\nError:')
-					loggingFunc(newErr[:-1])
-					loggingFunc('\n')
+			if checkErrorFunc:
+				checkErrorFunc(newErr)
+			else:
+				loggingFunc('\n\nError:')
+				loggingFunc(newErr)
+				loggingFunc('\n')
 
 		# check in to see how we're doing
 		if time.time() > lastUpdate + checkInInterval:
