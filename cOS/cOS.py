@@ -1261,26 +1261,24 @@ def waitOnProcess(process,
 	errProcessThread.daemon = True
 	errProcessThread.start()
 
-	re_whitespace = re.compile('^[\n\r\s]+$')
-
 	while checkProcess(process):
 		newOut = getQueueContents(outQueue, printContents=False)
 		newErr = getQueueContents(errQueue, printContents=False)
 		out += newOut
 		err += newErr
 
+		# remove starting and trailing whitespace
+		newErr = newErr.strip()
+
 		if newOut:
 			loggingFunc(newOut[:-1])
 		if newErr:
-			notOnlyWhitespace = re_whitespace.match(newErr)
-			# only care about non-white space errors
-			if notOnlyWhitespace:
-				if checkErrorFunc:
-					checkErrorFunc(newErr[:-1])
-				else:
-					loggingFunc('\n\nError:')
-					loggingFunc(newErr[:-1])
-					loggingFunc('\n')
+			if checkErrorFunc:
+				checkErrorFunc(newErr)
+			else:
+				loggingFunc('\n\nError:')
+				loggingFunc(newErr)
+				loggingFunc('\n')
 
 		# check in to see how we're doing
 		if time.time() > lastUpdate + checkInInterval:
