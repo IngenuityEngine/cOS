@@ -314,8 +314,9 @@ def getFrameRange(path):
 	seqDir = pathInfo['dirname']
 	seqName = '.'.join(pathInfo['name'].split('.')[:-1])
 
+	digitsPadding = '\.\d+\.'
 	files = getFiles(seqDir,
-				fileIncludes=[seqName + '.*.' + extension], depth=0, filesOnly=True)
+				fileIncludes=[seqName + digitsPadding + extension], depth=0, filesOnly=True, regex=True)
 	if not len(files):
 		return None
 
@@ -1033,7 +1034,8 @@ def getFiles(path,
 		includeAfterExclude=False,
 		depth=-1,
 		filesOnly=False,
-		fullPath=True):
+		fullPath=True,
+		regex=False):
 	'''
 	if the folder or file include/exclude lists have an *
 	getFiles() will use wildcard matching, otherwise it will
@@ -1052,42 +1054,40 @@ def getFiles(path,
 	if folderExcludes:
 		folderExcludes = ensureArray(folderExcludes)
 
+	def pathMatches(pattern, path, fullPath):
+		return (not regex and \
+					('*' in pattern and \
+						(fnmatch.fnmatch(fullPath, pattern) or \
+						fnmatch.fnmatch(path, pattern))) or \
+						pattern in fullPath) or \
+				(regex and \
+					(re.match(pattern, fullPath) or \
+					re.match(pattern, path)))
+
 	def shouldInclude(path, root, isDir=False):
 		fullPath = unixPath(os.path.join(root, path))
 
 		if fileIncludes and not isDir:
 			for pattern in fileIncludes:
-				if ('*' in pattern and \
-					(fnmatch.fnmatch(fullPath, pattern) or \
-					fnmatch.fnmatch(path, pattern))) or \
-					pattern in fullPath:
+				if pathMatches(pattern, path, fullPath):
 					return True
 			if not includeAfterExclude:
 				return False
 
 		if folderIncludes and isDir:
 			for pattern in folderIncludes:
-				if ('*' in pattern and \
-					(fnmatch.fnmatch(fullPath, pattern) or \
-					fnmatch.fnmatch(path, pattern))) or \
-					pattern in fullPath:
+				if pathMatches(pattern, path, fullPath):
 					return True
 			if not includeAfterExclude:
 				return False
 
 		if isDir:
 			for pattern in folderExcludes:
-				if ('*' in pattern and \
-					(fnmatch.fnmatch(fullPath, pattern) or \
-					fnmatch.fnmatch(path, pattern))) or \
-					pattern in fullPath:
+				if pathMatches(pattern, path, fullPath):
 					return False
 		else:
 			for pattern in fileExcludes:
-				if ('*' in pattern and \
-					(fnmatch.fnmatch(fullPath, pattern) or \
-					fnmatch.fnmatch(path, pattern))) or \
-					pattern in fullPath:
+				if pathMatches(pattern, path, fullPath):
 					return False
 
 		return True
