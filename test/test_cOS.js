@@ -123,7 +123,7 @@ describe('cOS', function() {
 		console.log(cOS.cwd())
 	})
 
-	it ('should upADir', function(){
+	it('should upADir', function() {
 		var upDir = cOS.upADir('c:/test/sub')
 		expect(upDir).to.be('c:/test/')
 		upDir = cOS.upADir('c:/')
@@ -131,14 +131,14 @@ describe('cOS', function() {
 		upDir = cOS.upADir('etc/')
 		expect(upDir).to.be('etc/')
 
-		var filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/AER_Airplane_020_v004.%04d.exr'
-		expect(cOS.upADir(cOS.upADir(cOS.upADir(filename)))).to.be('r:/Aeroplane/Final_Renders/')
+		// var test = 'r:/asdf/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/AER_Airplane_020_v004.%04d.exr'
+		// expect(cOS.upADir(cOS.upADir(cOS.upADir(test)))).to.be('r:/asdf/Final_Renders/')
 
-		filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/'
-		expect(cOS.upADir(cOS.upADir(cOS.upADir(filename)))).to.be('r:/Aeroplane/Final_Renders/')
+		// test = 'r:/asdf/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004/'
+		// expect(cOS.upADir(cOS.upADir(cOS.upADir(test)))).to.be('r:/asdf/Final_Renders/')
 
-		filename = 'r:/Aeroplane/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004'
-		expect(cOS.upADir(cOS.upADir(cOS.upADir(filename)))).to.be('r:/Aeroplane/')
+		// test = 'r:/asdf/Final_Renders/AER_Video/EXR_Linear/AER_Airplane_020_v004'
+		// expect(cOS.upADir(cOS.upADir(cOS.upADir(test)))).to.be('r:/asdf/')
 
 	})
 

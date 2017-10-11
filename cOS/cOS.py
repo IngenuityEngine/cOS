@@ -1401,6 +1401,7 @@ def startSubprocess(processArgs, env=None, shell=False):
 		creationflags=subprocess_flags)
 
 def getCmdline(proc):
+	if isWindows():
 		return proc.cmdline
 	else:
 		return proc.cmdline()
