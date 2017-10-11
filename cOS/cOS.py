@@ -1400,6 +1400,11 @@ def startSubprocess(processArgs, env=None, shell=False):
 		shell=shell,
 		creationflags=subprocess_flags)
 
+def getCmdline(proc):
+		return proc.cmdline
+	else:
+		return proc.cmdline()
+
 # IO
 ##################################################
 def readFile(path):
