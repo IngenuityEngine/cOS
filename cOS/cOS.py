@@ -467,8 +467,13 @@ def isValidSequence(filepath):
 
 	return True
 
-def getSequenceBaseName(filename):
-	regex_baseName = re.compile('(.+)[_\.][0-9]+\.[a-z0-9]+$')
+def getSequenceBaseName(filename, matchNumbersOnly=True):
+	if matchNumbersOnly:
+		regex_baseName = re.compile('(.+)[_\.][0-9]+\.[a-z0-9]+$')
+	else:
+		# name.%04d.ext
+		regex_baseName = re.compile('(.+)[_\.]%[0-9]+d\.[a-z0-9]+$')
+		filename = normalizeFramePadding(filename)
 	try:
 		baseName = regex_baseName.search(filename).group(1)
 		return baseName
