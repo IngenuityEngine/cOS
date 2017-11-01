@@ -1183,6 +1183,14 @@ def getCommandOutput(command, quiet=False, cwd=None, shell=True, env=None, **kwa
 	except Exception as err:
 		return (False, err)
 
+# wrapper of get command output, to fix OS issue
+# takes in list of strings, if linux joins command list with spaces
+def getCommandOutputParsed(command, quiet=False, cwd=None, shell=True, env=None, **kwargs):
+	parsed = command
+	if isLinux() and isinstance(parsed, list):
+		parsed = [' '.join(parsed)]
+	return getCommandOutput(parsed, quiet, cwd, shell, env, **kwargs)
+
 # fix: should use a better methodology for this
 # pretty sure python has some way of running a file
 def runPython(pythonFile):
