@@ -681,8 +681,6 @@ def removeEnvironmentVariable(key):
 				pass
 
 
-
-
 	# unset variables in the /etc/environment file
 	# on mac and linux
 	# WORK IN PROGRESS
