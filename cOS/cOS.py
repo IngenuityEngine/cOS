@@ -467,8 +467,13 @@ def isValidSequence(filepath):
 
 	return True
 
-def getSequenceBaseName(filename):
-	regex_baseName = re.compile('(.+)[_\.][0-9]+\.[a-z0-9]+$')
+def getSequenceBaseName(filename, matchNumbersOnly=True):
+	if matchNumbersOnly:
+		regex_baseName = re.compile('(.+)[_\.][0-9]+\.[a-z0-9]+$')
+	else:
+		# name.%04d.ext
+		regex_baseName = re.compile('(.+)[_\.]%[0-9]+d\.[a-z0-9]+$')
+		filename = normalizeFramePadding(filename)
 	try:
 		baseName = regex_baseName.search(filename).group(1)
 		return baseName
@@ -1183,6 +1188,14 @@ def getCommandOutput(command, quiet=False, cwd=None, shell=True, env=None, **kwa
 	except Exception as err:
 		return (False, err)
 
+# wrapper of get command output, to fix OS issue
+# takes in list of strings, if linux joins command list with spaces
+def getCommandOutputParsed(command, quiet=False, cwd=None, shell=True, env=None, **kwargs):
+	parsed = command
+	if isLinux() and isinstance(parsed, list):
+		parsed = [' '.join(parsed)]
+	return getCommandOutput(parsed, quiet, cwd, shell, env, **kwargs)
+
 # fix: should use a better methodology for this
 # pretty sure python has some way of running a file
 def runPython(pythonFile):
@@ -1399,6 +1412,12 @@ def startSubprocess(processArgs, env=None, shell=False):
 		env=env,
 		shell=shell,
 		creationflags=subprocess_flags)
+
+def getCmdline(proc):
+	if isWindows():
+		return proc.cmdline
+	else:
+		return proc.cmdline()
 
 # IO
 ##################################################
