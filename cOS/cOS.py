@@ -12,6 +12,8 @@ import threading
 import getpass
 import platform
 import multiprocessing
+import _winreg
+
 
 # import psutil
 try:
@@ -669,7 +671,17 @@ def removeEnvironmentVariable(key):
 
 	if isWindows():
 		if key in os.environ:
-			os.system('REG delete HKCU\Environment /F /V ' + key)
+			currentUserKeyReg = _winreg.ConnectRegistry(None, _winreg.HKEY_CURRENT_USER)
+			envKeyReg = _winreg.OpenKey(currentUserKeyReg, 'Environment', 0, _winreg.KEY_ALL_ACCESS)
+			try:
+				_winreg.DeleteValue(envKeyReg, key)
+
+			except WindowsError:
+				print 'Couldn\'t find ', key
+				pass
+
+
+
 
 	# unset variables in the /etc/environment file
 	# on mac and linux
