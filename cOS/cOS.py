@@ -13,6 +13,9 @@ import getpass
 import platform
 import multiprocessing
 
+if sys.platform.startswith('win'):
+	import _winreg
+
 # import psutil
 try:
 	import psutil
@@ -668,7 +671,6 @@ def removeEnvironmentVariable(key):
 	'''
 
 	if isWindows():
-		import _winreg
 		if key in os.environ:
 			currentUserKeyReg = _winreg.ConnectRegistry(None, _winreg.HKEY_CURRENT_USER)
 			envKeyReg = _winreg.OpenKey(currentUserKeyReg, 'Environment', 0, _winreg.KEY_ALL_ACCESS)
