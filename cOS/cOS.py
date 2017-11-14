@@ -12,8 +12,9 @@ import threading
 import getpass
 import platform
 import multiprocessing
-import _winreg
 
+if sys.platform.startswith('win'):
+	import _winreg
 
 # import psutil
 try:
