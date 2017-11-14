@@ -680,6 +680,10 @@ def removeEnvironmentVariable(key):
 				print 'Couldn\'t find ', key
 				pass
 
+			_winreg.CloseKey(envKeyReg)
+
+
+
 
 	# unset variables in the /etc/environment file
 	# on mac and linux
