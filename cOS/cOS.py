@@ -140,6 +140,16 @@ def ensureExtension(filename, extension):
 		return filename + '.' + extension
 	return filename
 
+# Initials
+##################################################
+
+def getInitials(filename):
+	versionUserRegEx = re.compile(r'_[vV][0-9]{3,4}_([a-z]{3})?')
+	versionUserSearch = versionUserRegEx.search(filename)
+	if versionUserSearch:
+		return versionUserSearch.group(1)
+	return None
+
 # Versioning
 ##################################################
 
@@ -164,12 +174,20 @@ def getVersion(filename):
 		return int(match[-1])
 	return 0
 
-def incrementVersion(filename):
+def incrementVersion(filename, initials=''):
 	'''
 	Increments a file's version number
 	'''
 	version = getVersion(filename) + 1
-	return re.sub('[vV][0-9]+', 'v%04d' % version, filename)
+	withInitials = r'[vV][0-9]+_[a-z]{3}'
+	withoutInitials = r'[vV][0-9]+'
+
+	if len(initials):
+		if not re.search(withInitials, filename):
+			raise Exception('Initials not found in filename')
+		return re.sub(withInitials, 'v%04d_%s' % (version, initials), filename)
+	else:
+		return re.sub(withoutInitials, 'v%04d' % version, filename)
 
 def getHighestVersionFilePath(root, name=None, extension=''):
 	'''
@@ -528,15 +546,12 @@ def getFirstFileFromFrameRangeText(fileText):
 	if len(filePieces) == 2 and \
 		paddingRegEx.search(filePieces[0]) and \
 		unicode(filePieces[1].split('-')[0]).isnumeric():
-		# print 'case1'
-
 		padding = fileInfo['name'].split('.')[-1]
 		frame = padding % int(filePieces[1].split('-')[0])
 		filepath = filePieces[0].replace(padding, frame)
 
 	elif len(filePieces) == 1 and \
 		paddingRegEx.search(filePieces[0]):
-		# print 'case2'
 		padding = fileInfo['name'].split('.')[-1]
 		frameRangeDict = getFrameRange(fileText)
 		if not frameRangeDict:
@@ -546,7 +561,6 @@ def getFirstFileFromFrameRangeText(fileText):
 		filepath = frameRangeDict['base'].replace(padding, frame) + '.' + frameRangeDict['extension']
 
 	elif len(filePieces) == 1:
-		# print 'case3'
 		pathInfo = getPathInfo(filePieces[0])
 		try:
 			if unicode(pathInfo['name'].split('.')[-1]).isnumeric():
