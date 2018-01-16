@@ -347,11 +347,13 @@ def getFrameRange(path):
 			'duration': duration,
 			'base': firstFileInfo['dirname'] + firstFileInfo['name'],
 			'baseUnpadded': seqName,
-			'ext': extension,
+			'extension': extension,
 			'complete': duration == count,
 			'path': path,
 			'padding': padding,
 			'paddingString': paddingString,
+			'paddedFilename': seqName + '.' + paddingString + '.' + extension,
+			'paddedPath': seqDir + seqName + '.' + paddingString + '.' + extension,
 		}
 
 # copy of arkUtil's get padding, it does not throw an error,
@@ -499,11 +501,12 @@ def isFrameRangeText(filename):
 	regex = re.compile('^[a-zA-Z0-9._/:%]+ [0-9]+-[0-9]+$')
 	return regex.match(filename) is not None
 
-def getFrameRangeText(filename):
-	frameRange = getFrameRange(filename)
+def getFrameRangeText(filename, frameRange=None):
+	if not frameRange:
+		frameRange = getFrameRange(filename)
+
 	if not frameRange:
 		raise Exception('Invalid filename: ' + filename)
-	print 'Frame Range:', frameRange
 	return filename + ' %d-%d' % \
 		(frameRange['min'], frameRange['max'])
 
@@ -540,7 +543,7 @@ def getFirstFileFromFrameRangeText(fileText):
 			return False
 
 		frame = padding % int(frameRangeDict['min'])
-		filepath = frameRangeDict['base'].replace(padding, frame) + '.' + frameRangeDict['ext']
+		filepath = frameRangeDict['base'].replace(padding, frame) + '.' + frameRangeDict['extension']
 
 	elif len(filePieces) == 1:
 		# print 'case3'
@@ -1644,11 +1647,13 @@ def main():
 	# print getPathInfo('test.1.exo.sc')['extension']
 	# print getHighestVersionFilePath('R:/Test_Project/Workspaces/publish/TPT_0010/3D', 'playblastTest_v0007', 'mb')
 	# print getFirstFileFromFrameRangeText("n:/my_cache/ramburglar/Aeroplane/Project_Assets/crash/fx/geo/center_secondary_debris_v0045/center_secondary_debris_v0045.1.bgeo.sc")
-	print normalizeFramePadding("N:/my_cache/ramburglar/Test_Project/Workspaces/houdini_alembic/cache/pieces/v002/pieces.0001.abc")
-	print getFrameRange('n:/my_cache/ramburglar/Aeroplane/Project_Assets/crash/fx/geo/center_secondary_debris_v0045/center_secondary_debris_v0045.%d.bgeo.sc')
-	print getFrameRange('N:/my_cache/ramburglar/Test_Project/Workspaces/houdini_alembic/cache/pieces/v002/pieces.%04d.abc')
-	print getExtension('A/B/C.abc')
-	print getExtension('A/B/C.bgeo.sc')
+	# print normalizeFramePadding("N:/my_cache/ramburglar/Test_Project/Workspaces/houdini_alembic/cache/pieces/v002/pieces.0001.abc")
+	# print getFrameRange('n:/my_cache/ramburglar/Aeroplane/Project_Assets/crash/fx/geo/center_secondary_debris_v0045/center_secondary_debris_v0045.%d.bgeo.sc')
+	# print getFrameRange('N:/my_cache/ramburglar/Test_Project/Workspaces/houdini_alembic/cache/pieces/v002/pieces.%04d.abc')
+	# print getExtension('A/B/C.abc')
+	# print getExtension('A/B/C.bgeo.sc')
+
+	print getPadding('r:/Detour_s03/Workspaces/TD_303/TD_303_002_020/Plates/A_AlexaLog_v02/TD_303_002_020_A_AlexaLog_v02.1005.dpx')
 
 if __name__ == '__main__':
 	main()
