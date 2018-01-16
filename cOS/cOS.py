@@ -16,6 +16,11 @@ import multiprocessing
 if sys.platform.startswith('win'):
 	import _winreg
 
+try:
+	from win32com.client import Dispatch
+except ImportError:
+	pass
+
 # import psutil
 try:
 	import psutil
