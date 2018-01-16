@@ -16,6 +16,11 @@ import multiprocessing
 if sys.platform.startswith('win'):
 	import _winreg
 
+try:
+	from win32com.client import Dispatch
+except ImportError:
+	pass
+
 # import psutil
 try:
 	import psutil
@@ -481,7 +486,6 @@ def isValidSequence(filepath):
 	frameNumberReg = re.compile('[0-9]+')
 
 	# if padding text match with any padding regex
-	# return True
 	if not hashReg.match(framePadding) and not \
 		dollarReg.match(framePadding) and not \
 		frameReg.match(framePadding) and not \
@@ -546,6 +550,7 @@ def getFirstFileFromFrameRangeText(fileText):
 	if len(filePieces) == 2 and \
 		paddingRegEx.search(filePieces[0]) and \
 		unicode(filePieces[1].split('-')[0]).isnumeric():
+
 		padding = fileInfo['name'].split('.')[-1]
 		frame = padding % int(filePieces[1].split('-')[0])
 		filepath = filePieces[0].replace(padding, frame)
@@ -740,6 +745,25 @@ def removeEnvironmentVariable(key):
 	# 	with open(environmentFile, 'w') as f:
 	# 		for line in lines:
 	# 			f.write(line.replace(' ',''))
+
+# windows shortcuts, from some blog mouse vs python
+def createShortcut(path, target='', wDir='', icon=''):
+	ext = path[-3:]
+	if ext == 'url':
+		shortcut = file(path, 'w')
+		shortcut.write('[InternetShortcut]\n')
+		shortcut.write('URL=%s' % target)
+		shortcut.close()
+	else:
+		shell = Dispatch('WScript.Shell')
+		shortcut = shell.CreateShortCut(path)
+		shortcut.Targetpath = target
+		shortcut.WorkingDirectory = wDir
+		if icon == '':
+			pass
+		else:
+			shortcut.IconLocation = icon
+		shortcut.save()
 
 
 def makeDir(dirname):
@@ -1667,7 +1691,7 @@ def main():
 	# print getExtension('A/B/C.abc')
 	# print getExtension('A/B/C.bgeo.sc')
 
-	print getPadding('r:/Detour_s03/Workspaces/TD_303/TD_303_002_020/Plates/A_AlexaLog_v02/TD_303_002_020_A_AlexaLog_v02.1005.dpx')
+	# print getPadding('r:/Detour_s03/Workspaces/TD_303/TD_303_002_020/Plates/A_AlexaLog_v02/TD_303_002_020_A_AlexaLog_v02.1005.dpx')
 
 if __name__ == '__main__':
 	main()
