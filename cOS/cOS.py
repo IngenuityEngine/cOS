@@ -468,7 +468,6 @@ def isValidSequence(filepath):
 	frameNumberReg = re.compile('[0-9]+')
 
 	# if padding text match with any padding regex
-	# return True
 	if not hashReg.match(framePadding) and not \
 		dollarReg.match(framePadding) and not \
 		frameReg.match(framePadding) and not \
@@ -533,7 +532,6 @@ def getFirstFileFromFrameRangeText(fileText):
 	if len(filePieces) == 2 and \
 		paddingRegEx.search(filePieces[0]) and \
 		unicode(filePieces[1].split('-')[0]).isnumeric():
-		# print 'case1'
 
 		padding = fileInfo['name'].split('.')[-1]
 		frame = padding % int(filePieces[1].split('-')[0])
@@ -541,7 +539,6 @@ def getFirstFileFromFrameRangeText(fileText):
 
 	elif len(filePieces) == 1 and \
 		paddingRegEx.search(filePieces[0]):
-		# print 'case2'
 		padding = fileInfo['name'].split('.')[-1]
 		frameRangeDict = getFrameRange(fileText)
 		if not frameRangeDict:
@@ -551,7 +548,6 @@ def getFirstFileFromFrameRangeText(fileText):
 		filepath = frameRangeDict['base'].replace(padding, frame) + '.' + frameRangeDict['extension']
 
 	elif len(filePieces) == 1:
-		# print 'case3'
 		pathInfo = getPathInfo(filePieces[0])
 		try:
 			if unicode(pathInfo['name'].split('.')[-1]).isnumeric():
@@ -1677,7 +1673,7 @@ def main():
 	# print getExtension('A/B/C.abc')
 	# print getExtension('A/B/C.bgeo.sc')
 
-	print getPadding('r:/Detour_s03/Workspaces/TD_303/TD_303_002_020/Plates/A_AlexaLog_v02/TD_303_002_020_A_AlexaLog_v02.1005.dpx')
+	# print getPadding('r:/Detour_s03/Workspaces/TD_303/TD_303_002_020/Plates/A_AlexaLog_v02/TD_303_002_020_A_AlexaLog_v02.1005.dpx')
 
 if __name__ == '__main__':
 	main()
