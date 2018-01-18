@@ -145,6 +145,16 @@ def ensureExtension(filename, extension):
 		return filename + '.' + extension
 	return filename
 
+# Initials
+##################################################
+
+def getInitials(filename):
+	versionUserRegEx = re.compile(r'_[vV][0-9]{3,4}_([a-z]{3})?')
+	versionUserSearch = versionUserRegEx.search(filename)
+	if versionUserSearch:
+		return versionUserSearch.group(1)
+	return None
+
 # Versioning
 ##################################################
 
@@ -169,12 +179,20 @@ def getVersion(filename):
 		return int(match[-1])
 	return 0
 
-def incrementVersion(filename):
+def incrementVersion(filename, initials=''):
 	'''
 	Increments a file's version number
 	'''
 	version = getVersion(filename) + 1
-	return re.sub('[vV][0-9]+', 'v%04d' % version, filename)
+	withInitials = r'[vV][0-9]+_[a-z]{3}'
+	withoutInitials = r'[vV][0-9]+'
+
+	if len(initials):
+		if not re.search(withInitials, filename):
+			raise Exception('Initials not found in filename')
+		return re.sub(withInitials, 'v%04d_%s' % (version, initials), filename)
+	else:
+		return re.sub(withoutInitials, 'v%04d' % version, filename)
 
 def getHighestVersionFilePath(root, name=None, extension=''):
 	'''
