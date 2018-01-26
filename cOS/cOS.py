@@ -80,6 +80,12 @@ def normalizePath(path):
 	'''
 	return unixPath(path)
 
+	'''
+	Joins paths, replacing backslashes with forward slashes.
+	'''
+def normalizeAndJoin(path, *paths):
+	return normalizePath(os.path.join(path, *paths))
+
 def unixPath(path):
 	'''
 	Changes backslashes to forward slashes and
@@ -184,15 +190,28 @@ def incrementVersion(filename, initials=''):
 	Increments a file's version number
 	'''
 	version = getVersion(filename) + 1
-	withInitials = r'[vV][0-9]+_[a-z]{3}'
-	withoutInitials = r'[vV][0-9]+'
+	# _v0001_abc.
+	withInitials = r'_[vV][0-9]+_[a-z]{3}\.'
+	# _v0001
+	withoutInitials = r'_[vV][0-9]+'
+	# _abc.ext
+	noVersion = r'_[a-z]{3}\.([a-z0-9]+)$'
 
 	if len(initials):
 		if not re.search(withInitials, filename):
-			raise Exception('Initials not found in filename')
-		return re.sub(withInitials, 'v%04d_%s' % (version, initials), filename)
+			m = re.search(noVersion, filename)
+			if not m:
+				raise Exception('Filename version and initials do not match expected format.')
+
+			# A_abc.ext -> A_v0001_xyz.ext
+			return re.sub(noVersion, '_v0001_%s.%s' % (initials, m.group(1)), filename)
+
+		# A_v0001_abc.ext -> A_v0002_xyz.ext
+		return re.sub(withInitials, '_v%04d_%s.' % (version, initials), filename)
+
 	else:
-		return re.sub(withoutInitials, 'v%04d' % version, filename)
+		# A_v0001_abc.ext -> A_v0002_abc.ext
+		return re.sub(withoutInitials, '_v%04d' % version, filename)
 
 def getHighestVersionFilePath(root, name=None, extension=''):
 	'''
