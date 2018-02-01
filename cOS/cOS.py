@@ -84,7 +84,7 @@ def normalizePath(path):
 	Joins paths, replacing backslashes with forward slashes.
 	'''
 def normalizeAndJoin(path, *paths):
-	return normalizePath(os.path.join(path, *paths))
+	return normalizePath(os.path.join(ensureEndingSlash(path), *paths))
 
 def unixPath(path):
 	'''
