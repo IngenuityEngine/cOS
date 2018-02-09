@@ -3,6 +3,7 @@ import time
 import sys
 import subprocess
 import glob
+import collections
 import shutil
 from distutils import dir_util
 import re
@@ -725,11 +726,28 @@ def removeEnvironmentVariable(key):
 
 def joinEnvironmentPaths(*args):
 	'''
-	Joins truthy paths, useful for setting paths in environment variables
+	Joins all unique non-None paths, useful for setting paths in environment variables
 	'''
-	return os.pathsep.join(filter(None, args))
+	return os.pathsep.join(filter(None, set(args)))
 
+def conformEnvironment(mapping):
+	'''Ensure all entries in *mapping* are strings.
+	Stolen from ftrack.
 
+	.. note::
+		The *mapping* is modified in place.
+	'''
+	if not isinstance(mapping, collections.MutableMapping):
+		return
+
+	for key, value in mapping.items():
+		if isinstance(value, collections.Mapping):
+			conformEnvironment(value)
+		else:
+			value = str(value)
+
+		del mapping[key]
+		mapping[str(key)] = value
 
 	# unset variables in the /etc/environment file
 	# on mac and linux
