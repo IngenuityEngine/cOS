@@ -80,10 +80,10 @@ def normalizePath(path):
 	'''
 	return unixPath(path)
 
+def normalizeAndJoin(path, *paths):
 	'''
 	Joins paths, replacing backslashes with forward slashes.
 	'''
-def normalizeAndJoin(path, *paths):
 	return normalizePath(os.path.join(ensureEndingSlash(path), *paths))
 
 def unixPath(path):
@@ -710,7 +710,6 @@ def removeEnvironmentVariable(key):
 	Parameters:
 		key - environment variable
 	'''
-
 	if isWindows():
 		if key in os.environ:
 			currentUserKeyReg = _winreg.ConnectRegistry(None, _winreg.HKEY_CURRENT_USER)
@@ -724,6 +723,11 @@ def removeEnvironmentVariable(key):
 
 			_winreg.CloseKey(envKeyReg)
 
+def joinEnvironmentPaths(*args):
+	'''
+	Joins truthy paths, useful for setting paths in environment variables
+	'''
+	return os.pathsep.join(filter(None, args))
 
 
 
