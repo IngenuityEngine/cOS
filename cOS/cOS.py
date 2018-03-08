@@ -184,7 +184,7 @@ def getVersion(filename):
 	match = re.findall('[vV]([0-9]+)', filename)
 	if (match):
 		return int(match[-1])
-	return 0
+	return None
 
 def incrementVersion(filename, initials=''):
 	'''
